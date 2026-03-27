@@ -1,0 +1,51 @@
+To run the server you need to have node.js
+In the cmd, type
+npm install
+npm run dev 
+
+To install in HEROKU:
+
+heroku login
+
+git init
+git add -A
+git status
+git commit -m "Initial Commit"
+
+heroku create ebaybaymo
+
+
+Creating ⬢ ebaybaymo... done
+https://ebaybaymo-baadc71f1e3f.herokuapp.com/ | https://git.heroku.com/ebaybaymo.git
+
+
+git remote add heroku https://git.heroku.com/lisaweb.git
+
+git push heroku master
+
+
+To check the status of the server:
+heroku logs --tail --app barmmhrsdashboard
+
+-- UPDATING --
+git add -A
+git status
+git commit -m "Update"
+git push heroku master
+
+heroku restart --app barmmhrsdashboard
+
+
+
+
+
+Before deploying, be sure it has build:
+npm run build
+
+then,
+npm install serve --save
+
+Deploy to heroku again:
+git add .
+git commit -m "Switch to production build"
+git push heroku master

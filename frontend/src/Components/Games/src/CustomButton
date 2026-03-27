@@ -1,0 +1,57 @@
+import React from "react";
+import styled from "styled-components";
+
+const CustomButton = ({ label, onClick }) => {
+  return (
+    <ButtonWrapper>
+      <ShadowLayer />
+      <MainButton onClick={onClick}>{label}</MainButton>
+    </ButtonWrapper>
+  );
+};
+
+export default CustomButton;
+
+// Wrapper to position the shadow and button together
+const ButtonWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+// Dark base layer (shadow-like bottom)
+const ShadowLayer = styled.div`
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 0;
+  bottom: 0;
+  background-color: #3b230d;
+  border-radius: 50px;
+  z-index: 0;
+`;
+
+// Main orange button
+const MainButton = styled.button`
+  position: relative;
+  z-index: 1;
+  background-color: #f4a01f;
+  border: 4px solid #522b10;
+  border-radius: 50px;
+  padding: 18px 60px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff3e7;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 4px 0 #522b10;
+
+  &:hover {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #522b10;
+  }
+
+  &:active {
+    transform: translateY(6px);
+    box-shadow: none;
+  }
+`;
