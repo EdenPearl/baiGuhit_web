@@ -29,12 +29,10 @@ const HeroSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScanOpen, setIsScanOpen] = useState(false);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
-  const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
   const toggleScan = () => setIsScanOpen(!isScanOpen);
   const toggleGameModal = () => setIsGameModalOpen(!isGameModalOpen);
-  const toggleMarketModal = () => setIsMarketModalOpen(!isMarketModalOpen);
 
   const baybayinImages = [
     { src: bay1, top: '10%', left: '10%' },
@@ -74,7 +72,6 @@ const HeroSection = () => {
             <Title>Reviving Tradition, Revolutionized by Innovation</Title>
             <ButtonContainer>
               <HeroButton onClick={toggleGameModal}>Play Game</HeroButton>
-              <HeroButton onClick={toggleMarketModal}>Explore Marketplace</HeroButton>
             </ButtonContainer>
           </LeftContent>
 
@@ -88,7 +85,6 @@ const HeroSection = () => {
 
         <LoginModal isOpen={isModalOpen} toggleModal={toggleModal} />
         {isGameModalOpen && <LoginGame isOpen={isGameModalOpen} toggleModal={toggleGameModal} />}
-        {isMarketModalOpen && <LoginModal isOpen={isMarketModalOpen} toggleModal={toggleMarketModal} />}
         {isScanOpen && <Translate isFloating={true} onClose={toggleScan} />}
       </HeroContainer>
     </>
@@ -208,21 +204,6 @@ const FadingImage = styled.img`
   will-change: transform, opacity;
 `;
 
-const float = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-`;
-
-const fadeInUp = keyframes`
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-`;
-
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
-
 const BrandTitle = styled.h2`
   margin-top: 1rem;
   font-size: 3rem;
@@ -245,39 +226,6 @@ const BrandTitle = styled.h2`
 `;
 
 
-const LogoOverlay = styled.img`
-  position: absolute; 
-  top: 6px; 
-  right: 30px;
-  bottom: 0; 
-  width: 455px; 
-  height: auto; 
-  z-index: 1; 
-  animation: ${float} 3s ease-in-out infinite, ${fadeIn} 0.8s ease-in-out;
-  pointer-events: none; /* So it doesn't block button clicks */ 
-  opacity: 0.95; ;
-
-  @media (max-width: 1024px) {
-    right: 40px;
-    top: 30px;
-    width: clamp(180px, 35vw, 380px);
-  }
-
-  @media (max-width: 768px) {
-    position: relative;
-    top: 0;
-    right: 0;
-    margin: 2rem auto 0;
-    display: block;
-    width: 65%;
-    max-width: 320px;
-  }
-
-  @media (max-width: 480px) {
-    width: 75%;
-    max-width: 280px;
-  }
-`;
 const RightContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -308,26 +256,6 @@ const LogoHero = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-`;
-
-
-const SlideContainer = styled.div`
-  position: absolute;
-  top: -80px;
-  right: 80px;
-
-  @media (max-width: 1024px) {
-    top: -60px;
-    right: 50px;
-  }
-
-  @media (max-width: 768px) {
-    position: relative;
-    top: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-  }
 `;
 
 
