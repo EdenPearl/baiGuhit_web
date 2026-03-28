@@ -35,6 +35,8 @@ const TUTORIAL_TRACE_PATHS = {
   ka: "M36 68 C84 26, 156 20, 220 44 C258 58, 286 62, 306 50 M160 34 C160 94, 160 120, 160 144 M36 176 C90 140, 162 132, 226 152 C262 164, 287 167, 306 156",
 };
 
+const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard"];
+
 const WriteModeV2 = () => {
   const GAME_DURATION_SECONDS = 120;
 
@@ -57,7 +59,7 @@ const WriteModeV2 = () => {
 
 
   const [isDrawing, setIsDrawing] = useState(false);
-  const [level] = useState("Easy");
+  const [level, setLevel] = useState("Easy");
 
   const [score, setScore] = useState(100);
   const [time, setTime] = useState(GAME_DURATION_SECONDS);
@@ -88,6 +90,12 @@ const WriteModeV2 = () => {
 
   const tutorialPhases = ["intro", "a_show", "a_trace", "ba_show", "ba_trace", "ka_show", "ka_trace"];
   const tutorialStepIndex = Math.max(0, tutorialPhases.indexOf(tutorialPhase));
+
+  const getNextLevel = (currentLevel) => {
+    const idx = LEVEL_SEQUENCE.indexOf(currentLevel);
+    if (idx === -1 || idx === LEVEL_SEQUENCE.length - 1) return null;
+    return LEVEL_SEQUENCE[idx + 1];
+  };
 
   const drawCanvasBase = ({ mode = "none" } = {}) => {
     const canvas = canvasRef.current;
@@ -535,6 +543,7 @@ const WriteModeV2 = () => {
 
       if (data.success) {
         const pred = data.prediction;
+        console.log('[UI] prediction payload:', pred);
         setPrediction(pred);
 
         if (pred.is_correct) {
@@ -602,11 +611,7 @@ const WriteModeV2 = () => {
     if (confirm) navigate("/homegame");
   };
 
-  const handleRestart = () => {
-    setGameOver(false);
-    setTime(GAME_DURATION_SECONDS);
-    setScore(0);
-
+  const resetRound = (levelToStart = level) => {
     if (nextRoundTimerRef.current) {
       clearTimeout(nextRoundTimerRef.current);
       nextRoundTimerRef.current = null;
@@ -620,7 +625,22 @@ const WriteModeV2 = () => {
     setPrediction("");
     handleClear();
 
-    getRandomCharacter(level);
+    setLevel(levelToStart);
+    setScore(0);
+    setTime(GAME_DURATION_SECONDS);
+    setGameOver(false);
+
+    getRandomCharacter(levelToStart);
+  };
+
+  const handleRestart = () => {
+    resetRound(level);
+  };
+
+  const handleNextRound = () => {
+    const nextLevel = getNextLevel(level);
+    if (!nextLevel) return;
+    resetRound(nextLevel);
   };
 
   const tutorialPrimaryButtonLabel =
@@ -631,6 +651,8 @@ const WriteModeV2 = () => {
         : "Next";
 
   const showTutorialActionButton = showTutorial && !isCountdownActive;
+
+  const nextLevel = getNextLevel(level);
 
   return (
     <>
@@ -753,7 +775,7 @@ const WriteModeV2 = () => {
             {prediction.retry_message ? (
               prediction.retry_message
             ) : (
-              <>ML Predicted: {prediction.predicted.toUpperCase()} ({prediction.confidence}%)</>
+              <>ML Predicted: {prediction.predicted.toUpperCase()} ({Math.round((prediction.confidence || 0) * 100)}%){prediction.model_used ? ` • Model: ${prediction.model_used}` : ""}</>
             )}
           </Result>
         )}
@@ -765,13 +787,30 @@ const WriteModeV2 = () => {
             <h2>⏳ Time's Up!</h2>
             <p>Difficulty: {level}</p>
             <p>Final Score: {score}</p>
-
-            <CustomButton
-              label="Restart"
-              onClick={handleRestart}
-              width="180px"
-              color="#ffb300"
-            />
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "center",
+                marginTop: "18px",
+                flexWrap: "wrap",
+              }}
+            >
+              <CustomButton
+                label="Restart"
+                onClick={handleRestart}
+                width="180px"
+                color="#ffb300"
+              />
+              <CustomButton
+                label={nextLevel ? `Next Round (${nextLevel})` : "Next Round"
+                }
+                onClick={handleNextRound}
+                width="200px"
+                color="#22c55e"
+                disabled={!nextLevel}
+              />
+            </div>
           </Modal>
         </Overlay>
       )}
@@ -1106,3 +1145,4 @@ const Result = styled.p`
   border-radius: 8px;
   border: 2px solid rgba(255, 255, 255, 0.08);
 `;
+  
