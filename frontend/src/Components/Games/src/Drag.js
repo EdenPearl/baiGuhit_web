@@ -1,3 +1,4 @@
+// src/Components/Drag.js
 import React, { useState, useEffect, useRef } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +8,7 @@ import green4 from '../../../Assests/green4.png';
 import home from '../../../Assests/backB.png';
 import confetti from "canvas-confetti";
 import dragMusic from '../../../Assests/Tap.mp3';
-import stoneClick from '../../../Assests/stone.mp3'; // <-- button click sound
+import stoneClick from '../../../Assests/stone.mp3';
 
 /* ---------------- ANIMATIONS ---------------- */
 const pulse = keyframes`0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); }`;
@@ -24,12 +25,33 @@ const shake = keyframes`
 `;
 
 /* ---------------- COMPONENT ---------------- */
-const Drag = ({ difficulty = "Medium", start = false }) => {
+const Drag = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   const navigate = useNavigate();
-  const audioRef = useRef(new Audio(dragMusic));      // background music
-  const clickRef = useRef(new Audio(stoneClick));     // button click sound
+  const audioRef = useRef(new Audio(dragMusic));
+  const clickRef = useRef(new Audio(stoneClick));
+  const scoreSaved = useRef(false);
+  const timerRef = useRef(null);
 
-  const playClick = () => {                           // play stone click
+  // ✅ Configuration based on difficulty
+  const getDifficultyConfig = (diff) => {
+    const normalizedDiff = diff?.toLowerCase() || "medium";
+    switch (normalizedDiff) {
+      case "easy":
+        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy" };
+      case "medium":
+        return { timeLimit: 40, pointsPerCorrect: 3, label: "Medium" };
+      case "hard":
+        return { timeLimit: 30, pointsPerCorrect: 2, label: "Hard" };
+      default:
+        return { timeLimit: 40, pointsPerCorrect: 3, label: "Medium" };
+    }
+  };
+
+  const config = getDifficultyConfig(difficulty);
+  const timeLimit = config.timeLimit;
+  const pointsPerCorrect = config.pointsPerCorrect;
+
+  const playClick = () => {
     clickRef.current.currentTime = 0;
     clickRef.current.play().catch(() => {});
   };
@@ -49,8 +71,9 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
-  const [showPlusOne, setShowPlusOne] = useState(false);
-  const [time, setTime] = useState(20);
+  const [showPlusPoints, setShowPlusPoints] = useState(false);
+  const [pointsGained, setPointsGained] = useState(0);
+  const [time, setTime] = useState(timeLimit);
   const [feedback, setFeedback] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);
@@ -62,6 +85,13 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
   const choicesRef = useRef(null);
   const dropZoneRef = useRef(null);
   const [dropHeight, setDropHeight] = useState(240);
+
+  useEffect(() => {
+    if (gameOver && onGameOver && !scoreSaved.current) {
+      scoreSaved.current = true;
+      onGameOver(score);
+    }
+  }, [gameOver, score, onGameOver]);
 
   /* ---------------- BACKGROUND MUSIC ---------------- */
   useEffect(() => {
@@ -77,6 +107,8 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
 
   /* ---------------- FETCH QUESTIONS ---------------- */
   useEffect(() => {
+    scoreSaved.current = false;
+    
     fetch("http://localhost:8000/game/questions/drag")
       .then((res) => res.json())
       .then((data) => {
@@ -90,26 +122,43 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
         setCurrentQuestion({ ...shuffled[0], options: shuffleArray(shuffled[0].options) });
 
         setScore(0);
-        setTime(20);
+        setTime(timeLimit);
         setSelected(null);
         setFeedback("");
         setGameOver(false);
         setSkipsLeft(3);
-        setShowPlusOne(false);
-        setIsPlaying(start);
+        setShowPlusPoints(false);
+        setIsPlaying(startGame);
         setIsAnswering(false);
       })
       .catch((err) => console.error("Failed to fetch drag questions:", err));
-  }, [difficulty, start]);
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [difficulty, startGame, timeLimit]);
 
   /* ---------------- TIMER ---------------- */
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || gameOver) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
 
-    const timer = setInterval(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    timerRef.current = setInterval(() => {
       setTime((t) => {
-        if (t <= 0) {
-          clearInterval(timer);
+        if (t <= 1) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
           setGameOver(true);
           setIsPlaying(false);
           return 0;
@@ -118,8 +167,12 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [isPlaying]);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isPlaying, gameOver]);
 
   /* ---------------- AUTO HEIGHT ---------------- */
   useEffect(() => {
@@ -160,14 +213,15 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
 
   /* ---------------- GAME LOGIC ---------------- */
   const handleCorrectAnswer = () => {
-    setScore((s) => s + 1);
-    setShowPlusOne(true);
+    setScore((s) => s + pointsPerCorrect);
+    setPointsGained(pointsPerCorrect);
+    setShowPlusPoints(true);
     setFeedback("✅ Correct!");
     setTime((t) => t + 1);
     confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
 
     setTimeout(() => {
-      setShowPlusOne(false);
+      setShowPlusPoints(false);
       setIsAnswering(false);
       nextQuestion();
     }, 1800);
@@ -206,10 +260,10 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
   };
 
   const handleSkip = () => {
-    playClick(); // <-- play click
+    playClick();
     if (skipsLeft > 0 && !gameOver && !isAnswering) {
       setSkipsLeft((s) => s - 1);
-      setFeedback("You skipped the question!");
+      setFeedback("⏭️ You skipped the question!");
       setIsAnswering(true);
       setTimeout(() => {
         setIsAnswering(false);
@@ -218,28 +272,28 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
     }
   };
 
- const handleRestart = () => {
-  playClick(); // button click sound
-
-  const reshuffled = shuffleArray(questions);
-  setShuffledQuestions(reshuffled);
-  setCurrentIndex(0);
-  setCurrentQuestion({ ...reshuffled[0], options: shuffleArray(reshuffled[0].options) });
-  setScore(0);
-  setTime(20);
-  setGameOver(false);
-  setSelected(null);
-  setIsPlaying(true);
-  setSkipsLeft(3);
-  setFeedback("");
-  setIsAnswering(false);
-  // no need to reset audioRef.current.currentTime
-};
+  const handleRestart = () => {
+    playClick();
+    scoreSaved.current = false;
+    
+    const reshuffled = shuffleArray(questions);
+    setShuffledQuestions(reshuffled);
+    setCurrentIndex(0);
+    setCurrentQuestion({ ...reshuffled[0], options: shuffleArray(reshuffled[0].options) });
+    setScore(0);
+    setTime(timeLimit);
+    setGameOver(false);
+    setSelected(null);
+    setIsPlaying(true);
+    setSkipsLeft(3);
+    setFeedback("");
+    setIsAnswering(false);
+  };
 
   const handleBackClick = () => { playClick(); setShowExitConfirm(true); };
-  const confirmExit = (confirm) => { playClick(); setShowExitConfirm(false); if (confirm) navigate("/translate"); };
+  const confirmExit = (confirm) => { playClick(); setShowExitConfirm(false); if (confirm) navigate("/HomeGame"); };
 
-  const timePercent = (time / 20) * 100;
+  const timePercent = (time / timeLimit) * 100;
 
   return (
     <Container>
@@ -254,12 +308,19 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
 
         <ScoreTimeBox>
           <Score>🏆 Score: {score}</Score>
-          {showPlusOne && <PlusOne>+1</PlusOne>}
+          {showPlusPoints && <PlusOne>+{pointsGained}</PlusOne>}
         </ScoreTimeBox>
+
+        <DifficultyBadge>
+          {config.label} Mode • {pointsPerCorrect} pts/correct • {timeLimit}s
+        </DifficultyBadge>
 
         {isPlaying && !gameOver && currentQuestion && (
           <>
-            <Question>{currentQuestion.question}</Question>
+            {/* ✅ ENHANCED QUESTION BOX - Auto-fits long text */}
+            <QuestionBox>
+              <QuestionText>{currentQuestion.question}</QuestionText>
+            </QuestionBox>
 
             <GamePanel>
               <ChoicesColumn ref={choicesRef}>
@@ -291,7 +352,7 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
 
             <ButtonRow>
               <CustomButton
-                label={` Skip (${skipsLeft})`}
+                label={`⏭️ Skip (${skipsLeft})`}
                 onClick={handleSkip}
                 width="180px"
                 disabled={skipsLeft === 0 || isAnswering}
@@ -303,28 +364,36 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
         <BackButton src={home} onClick={handleBackClick} />
       </GlassCard>
 
-      {/* GAME OVER MODAL */}
       {gameOver && (
         <Overlay>
           <Modal>
             <h2>⏳ Game Over!</h2>
             <p>Game Mode: <strong>Drag & Drop</strong></p>
-            <p>Difficulty: <strong>{difficulty}</strong></p>
-            <p>Final Score: {score}</p>
+            <p>Difficulty: <strong>{config.label}</strong></p>
+            <p>Final Score: <strong>{score}</strong></p>
+            <p style={{ fontSize: "0.9rem", color: "#666", marginTop: "5px" }}>
+              ({pointsPerCorrect} points per correct answer)
+            </p>
+
             <ButtonWrapper>
-              <CustomButton label=" Restart" onClick={handleRestart} width="160px" color="#ffb300" />
-              <CustomButton 
-          label="Exit" 
-          onClick={() => navigate("/translate")} // change "/" to your home route
-          width="160px" 
-          color="#ffb300" 
-        />
+              <CustomButton
+                label="Restart"
+                onClick={handleRestart}
+                width="160px"
+                color="#ffb300"
+              />
+
+              <CustomButton
+                label="Exit"
+                onClick={() => navigate("/HomeGame")}
+                width="160px"
+                color="#ffb300"
+              />
             </ButtonWrapper>
           </Modal>
         </Overlay>
       )}
 
-      {/* EXIT CONFIRM */}
       {showExitConfirm && (
         <Overlay>
           <Modal>
@@ -341,8 +410,6 @@ const Drag = ({ difficulty = "Medium", start = false }) => {
 };
 
 export default Drag;
-
-
 
 /* ---------------- STYLES ---------------- */
 const Container = styled.div`
@@ -397,14 +464,51 @@ const PlusOne = styled.div`
 `;
 const Score = styled.div``;
 
-const Question = styled.h2`
-  font-size: 5rem;      /* bigger question text */
-  font-weight: 700;     /* optional, makes it bolder */
-  margin: 20px 0 25px;  /* more space around the question */
-  text-align: center;   /* center align for emphasis */
-  line-height: 1.3;     /* improve readability for multi-line questions */
+const DifficultyBadge = styled.div`
+  background: rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  display: inline-block;
+  font-weight: 600;
 `;
 
+/* ✅ ENHANCED QUESTION STYLES - Box with auto-fit text */
+const QuestionBox = styled.div`
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin: 20px 0 25px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const QuestionText = styled.h2`
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
 
 const GamePanel = styled.div`
   display:flex; align-items:center; justify-content:space-between; margin:20px 0; gap:40px;

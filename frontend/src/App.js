@@ -24,11 +24,15 @@ import HomeGame from './Components/Games/src/HomeGame';
 // Game Modes
 import WriteMode from './Components/Games/src/WriteMode';
 import TapMode from './Components/Games/src/TapMode';
-import TranslationMode from './Components/Games/src/TranslationMode';
+
 import Multiple from './Components/Games/src/Multiple';
 import Typing from './Components/Games/src/Typing';
 import Drag from './Components/Games/src/Drag';
 import LeaderBoard from './Components/Games/src/LeaderBoard';
+
+import MultipleBoard from './Components/Games/src/MultipleBoard';
+import TypingBoard from './Components/Games/src/TypingBoard';
+import DragBoard from './Components/Games/src/DragBoard';
 
 // Difficulties
 import DifficultyTap from './Components/Games/src/DifficultyTap';
@@ -60,11 +64,15 @@ const App = () => {
           {/* ================= GAME MODES ================= */}
           <Route path="/write" element={<WriteMode />} />
           <Route path="/tapmode" element={<TapMode />} />
-          <Route path="/translate" element={<TranslationMode />} />
+         
           <Route path="/multiple" element={<Multiple />} />
           <Route path="/typing" element={<Typing />} />
           <Route path="/drag" element={<Drag />} />
           <Route path="/leaderboard" element={<LeaderBoard />} />
+          
+          <Route path="/multiple-board" element={<MultipleBoard />} />
+          <Route path="/typing-board" element={<TypingBoard />} />
+          <Route path="/drag-board" element={<DragBoard />} />
 
           {/* ================= DIFFICULTY ================= */}
           <Route path="/difficulty-tap" element={<DifficultyTap />} />

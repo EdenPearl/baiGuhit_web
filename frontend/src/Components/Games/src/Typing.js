@@ -6,10 +6,9 @@ import green1 from '../../../Assests/green1.png';
 import green4 from '../../../Assests/green4.png';
 import home from '../../../Assests/backB.png';
 import confetti from "canvas-confetti";
-import bgMusicFile from "../../../Assests/Tap.mp3"; // Background music
-import stoneClick from "../../../Assests/stone.mp3"; // Button click sound
+import bgMusicFile from "../../../Assests/Tap.mp3";
+import stoneClick from "../../../Assests/stone.mp3";
 
-/* ---------------- ANIMATIONS ---------------- */
 const pulse = keyframes`
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.18); }
@@ -35,7 +34,6 @@ const slideFromTop = keyframes`
   to { transform: translateY(0); opacity: 1; }
 `;
 
-/* ---------------- STYLED COMPONENTS ---------------- */
 const Container = styled.div`
   height: 100vh;
   display: flex;
@@ -119,6 +117,16 @@ const PlusOne = styled.div`
 
 const Score = styled.div``;
 
+const DifficultyBadge = styled.div`
+  background: rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  display: inline-block;
+  font-weight: 600;
+`;
+
 const Question = styled.h2`
   font-size: 1.2rem;
   margin: 14px 0 18px;
@@ -196,11 +204,31 @@ const BackButton = styled.img`
   &:hover { transform: scale(0.9); }
 `;
 
-/* ---------------- COMPONENT ---------------- */
-const Typing = ({ difficulty = "Medium", startGame = false }) => {
+// ==================== FIXED COMPONENT ====================
+const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   const navigate = useNavigate();
-  const audioRef = useRef(null); // Background music
-  const clickRef = useRef(new Audio(stoneClick)); // Button click sound
+  const audioRef = useRef(null);
+  const clickRef = useRef(new Audio(stoneClick));
+
+  // ✅ Configuration based on difficulty
+  const getDifficultyConfig = (diff) => {
+    const normalizedDiff = diff?.toLowerCase() || "medium";
+    switch (normalizedDiff) {
+      case "easy":
+        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy" };
+      case "medium":
+        return { timeLimit: 40, pointsPerCorrect: 3, label: "Medium" };
+      case "hard":
+        return { timeLimit: 30, pointsPerCorrect: 2, label: "Hard" };
+      default:
+        return { timeLimit: 40, pointsPerCorrect: 3, label: "Medium" };
+    }
+  };
+
+  // ✅ Calculate config based on current difficulty
+  const config = getDifficultyConfig(difficulty);
+  const timeLimit = config.timeLimit;
+  const pointsPerCorrect = config.pointsPerCorrect;
 
   const [questions, setQuestions] = useState([]);
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
@@ -208,15 +236,22 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
   const [input, setInput] = useState("");
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState(0);
-  const [time, setTime] = useState(20);
-  const [isPlaying, setIsPlaying] = useState(startGame); 
+  const [time, setTime] = useState(timeLimit);
+  const [isPlaying, setIsPlaying] = useState(startGame);
   const [gameOver, setGameOver] = useState(false);
   const [skipsLeft, setSkipsLeft] = useState(3);
-  const [showPlusOne, setShowPlusOne] = useState(false);
+  const [showPlusPoints, setShowPlusPoints] = useState(false);
+  const [pointsGained, setPointsGained] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [scoreSubmitted, setScoreSubmitted] = useState(false);
 
-  const timePercent = Math.max(0, (time / 20) * 100);
+  // ✅ Update time whenever difficulty changes
+  useEffect(() => {
+    setTime(timeLimit);
+  }, [difficulty, timeLimit]);
+
+  const timePercent = Math.max(0, (time / timeLimit) * 100);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -269,26 +304,61 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
     if (!currentQuestion || !isPlaying) return;
     const userAnswer = input.trim();
     if (userAnswer.toUpperCase() === currentQuestion.answer.toUpperCase()) {
-      setFeedback("✅ Correct!"); setScore(s => s + 1); setShowPlusOne(true);
-      setTimeout(() => setShowPlusOne(false), 800); handleCorrectAnimation();
-      setTime(t => Math.min(t + 1, 20)); setTimeout(() => nextQuestion(), 800);
-    } else { setFeedback("❌ Wrong!"); handleWrongAnimation(); setTimeout(() => nextQuestion(), 2000); }
+      setFeedback("✅ Correct!"); 
+      setScore(s => s + pointsPerCorrect); 
+      setPointsGained(pointsPerCorrect);
+      setShowPlusPoints(true);
+      setTimeout(() => setShowPlusPoints(false), 800); 
+      handleCorrectAnimation();
+      setTime(t => Math.min(t + 1, 999)); 
+      setTimeout(() => nextQuestion(), 800);
+    } else { 
+      setFeedback("❌ Wrong!"); 
+      handleWrongAnimation(); 
+      setTimeout(() => nextQuestion(), 2000); 
+    }
   };
 
   const handleSkip = () => {
     playClickSound();
-    if (skipsLeft > 0) { setSkipsLeft(s => s - 1); setFeedback("⏭️ Skipped!"); setTimeout(() => { setFeedback(""); nextQuestion(); }, 800); }
+    if (skipsLeft > 0) { 
+      setSkipsLeft(s => s - 1); 
+      setFeedback("⏭️ Skipped!"); 
+      setTimeout(() => { setFeedback(""); nextQuestion(); }, 800); 
+    }
   };
 
   const handleRestart = () => {
     playClickSound();
-    setScore(0); setTime(20); setGameOver(false); setIsPlaying(true); setInput(""); setFeedback(""); setSkipsLeft(3); setCurrentIndex(0);
+    setScore(0); 
+    setTime(timeLimit); 
+    setGameOver(false); 
+    setIsPlaying(true); 
+    setInput(""); 
+    setFeedback(""); 
+    setSkipsLeft(3); 
+    setCurrentIndex(0); 
+    setScoreSubmitted(false);
   };
 
   const handleBackClick = () => { playClickSound(); setShowExitConfirm(true); };
-  const confirmExit = (confirm) => { playClickSound(); setShowExitConfirm(false); if (confirm) navigate("/translate"); };
+  const confirmExit = (confirm) => { playClickSound(); setShowExitConfirm(false); if (confirm) navigate("/HomeGame"); };
 
-  useEffect(() => { if (startGame) setIsPlaying(true); fetchQuestions(); }, [difficulty, startGame]);
+  // ✅ Reset game state when difficulty changes
+  useEffect(() => { 
+    if (startGame) {
+      setIsPlaying(true);
+      setGameOver(false);
+      setScore(0);
+      setTime(timeLimit);
+      setSkipsLeft(3);
+      setScoreSubmitted(false);
+      setCurrentIndex(0);
+      setInput("");
+      setFeedback("");
+    }
+    fetchQuestions(); 
+  }, [difficulty, startGame, timeLimit]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -298,14 +368,30 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
     }
   }, [isPlaying, gameOver]);
 
+  // ==================== CRITICAL FIX: Game Over Timer ====================
   useEffect(() => {
     if (isPlaying && !gameOver) {
       const timer = setInterval(() => {
-        setTime(t => { if (t <= 1) { setGameOver(true); setIsPlaying(false); return 0; } return t - 1; });
+        setTime(t => { 
+          if (t <= 1) { 
+            setGameOver(true); 
+            setIsPlaying(false); 
+            return 0; 
+          } 
+          return t - 1; 
+        });
       }, 1000);
       return () => clearInterval(timer);
     }
   }, [isPlaying, gameOver]);
+
+  // ==================== CRITICAL FIX: Call onGameOver when game ends ====================
+  useEffect(() => {
+    if (gameOver && onGameOver && !scoreSubmitted) {
+      onGameOver(score);
+      setScoreSubmitted(true);
+    }
+  }, [gameOver, score, onGameOver, scoreSubmitted]);
 
   return (
     <Container>
@@ -319,8 +405,13 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
         </TimeBarContainer>
         <ScoreTimeBox>
           <Score>🏆 Score: {score}</Score>
-          {showPlusOne && <PlusOne>+1</PlusOne>}
+          {showPlusPoints && <PlusOne>+{pointsGained}</PlusOne>}
         </ScoreTimeBox>
+
+        <DifficultyBadge>
+          {config.label} Mode • {pointsPerCorrect} pts/correct • {timeLimit}s
+        </DifficultyBadge>
+
         {loading ? <p>Loading questions...</p> :
         <>
           {currentQuestion && isPlaying &&
@@ -330,7 +421,7 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
             <Input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type here..." onKeyDown={(e) => e.key === "Enter" && handleCheck()} />
             <ButtonRow>
               <CustomButton label="Check Answer" onClick={handleCheck} width="180px" />
-              <CustomButton label={`Skip (${skipsLeft})`} onClick={handleSkip} width="160px" disabled={skipsLeft === 0} />
+              <CustomButton label={`⏭️ Skip (${skipsLeft})`} onClick={handleSkip} width="160px" disabled={skipsLeft === 0} />
             </ButtonRow>
           </>}
           {feedback && <Feedback>{feedback}</Feedback>}
@@ -338,25 +429,32 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
         <BackButton src={home} alt="Back" onClick={handleBackClick} />
       </GlassCard>
 
-      {gameOver &&
+      {gameOver && (
         <Overlay>
           <Modal>
             <h2>⏳ Game Over!</h2>
-            <p>Game Mode: <strong>Typing</strong></p>
-            <p>Difficulty: <strong>{difficulty}</strong></p>
-            <p>Final Score: {score}</p>
+            <p>Difficulty: <strong>{config.label}</strong></p>
+            <p>Final Score: <strong>{score}</strong></p>
+            <p style={{ fontSize: "0.9rem", color: "#666", marginTop: "5px" }}>
+              ({pointsPerCorrect} points per correct answer)
+            </p>
             <ButtonRow>
-              <CustomButton label="Restart" onClick={handleRestart} width="160px" color="#ffb300" />
               <CustomButton 
-                        label="Exit" 
-                        onClick={() => navigate("/translate")} // change "/" to your home route
-                        width="160px" 
-                        color="#ffb300" 
-                      />
+                label="Restart" 
+                onClick={handleRestart} 
+                width="160px" 
+                color="#ffb300" 
+              />
+              <CustomButton 
+                label="Exit" 
+                onClick={() => navigate("/HomeGame")}
+                width="160px" 
+                color="#ffb300" 
+              />
             </ButtonRow>
           </Modal>
         </Overlay>
-      }
+      )}
 
       {showExitConfirm &&
         <Overlay>

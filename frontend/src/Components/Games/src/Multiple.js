@@ -44,27 +44,52 @@ const slideFromTop = keyframes`
 `;
 
 /* ---------------- MAIN COMPONENT ---------------- */
-const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple Choice",onGameOver,  }) => {
+const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple Choice", onGameOver }) => {
   const navigate = useNavigate();
   const audioRef = useRef(null); // Background music
   const clickRef = useRef(new Audio(stoneClick)); // Button click sound
 
+  // ✅ Configuration based on difficulty
+  const getDifficultyConfig = (diff) => {
+    const normalizedDiff = diff?.toLowerCase() || "easy";
+    switch (normalizedDiff) {
+      case "easy":
+        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy" };
+      case "medium":
+        return { timeLimit: 40, pointsPerCorrect: 3, label: "Medium" };
+      case "hard":
+        return { timeLimit: 30, pointsPerCorrect: 2, label: "Hard" };
+      default:
+        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy" };
+    }
+  };
+
+  const config = getDifficultyConfig(difficulty);
+  const timeLimit = config.timeLimit;
+  const pointsPerCorrect = config.pointsPerCorrect;
+
   const [questions, setQuestions] = useState([]);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // FIXED: Track question index
   const [shuffledOptions, setShuffledOptions] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [correctAnswerIndex, setCorrectAnswerIndex] = useState(null); // FIXED: Track where answer is
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState(0);
-  const [showPlusOne, setShowPlusOne] = useState(false);
-  const [time, setTime] = useState(20);
+  const [showPlusPoints, setShowPlusPoints] = useState(false);
+  const [time, setTime] = useState(timeLimit);
   const [isPlaying, setIsPlaying] = useState(startGame);
   const [gameOver, setGameOver] = useState(false);
   const [skipsLeft, setSkipsLeft] = useState(3);
   const [shakeOption, setShakeOption] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [pointsGained, setPointsGained] = useState(0);
+  const [usedQuestionIndices, setUsedQuestionIndices] = useState([]); // FIXED: Track used questions
 
   const choiceLabels = ["A", "B", "C", "D"];
-  const timePercent = (time / 20) * 100;
+  const timePercent = (time / timeLimit) * 100;
+
+  // Ref to prevent multiple score submissions
+  const hasSentScore = useRef(false);
 
   // ---------------- SHUFFLE ----------------
   const shuffleArray = (arr) => {
@@ -78,44 +103,74 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
 
   const [loggedUser, setLoggedUser] = useState(null);
 
-useEffect(() => {
-  const storedUser = localStorage.getItem("loginData");
+  useEffect(() => {
+    const storedUser = localStorage.getItem("loginData");
 
-  if (storedUser) {
-    const user = JSON.parse(storedUser);
-    setLoggedUser(user); // store user for later use
-    console.log("Logged-in User ID:", user.id);
-    console.log("Logged-in email:", user.email);
-  } else {
-    setLoggedUser(null);
-    console.log("No user found in localStorage.");
-  }
-}, []);
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setLoggedUser(user);
+      console.log("Logged-in User ID:", user.id);
+      console.log("Logged-in email:", user.email);
+    } else {
+      setLoggedUser(null);
+      console.log("No user found in localStorage.");
+    }
+  }, []);
+
+  // Reset hasSentScore when game starts/restarts
+  useEffect(() => {
+    hasSentScore.current = false;
+  }, [startGame]);
+
   // ---------------- FETCH QUESTIONS ----------------
   useEffect(() => {
     fetch("http://localhost:8000/game/questions/baybayin")
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter((q) => q.difficulty === difficulty);
-        const shuffled = shuffleArray(filtered);
-        setQuestions(shuffled);
-        setCurrentQuestion(shuffled[0]);
-        setShuffledOptions(shuffleArray(shuffled[0].options));
-        setSelected(null);
-        setScore(0);
-        setTime(20);
-        setSkipsLeft(3);
-        setGameOver(false);
-        setShowPlusOne(false);
-        setIsPlaying(startGame);
-        setFeedback("");
+        // FIXED: Shuffle questions so they come in random order
+        const shuffledQuestions = shuffleArray(filtered);
+        setQuestions(shuffledQuestions);
+        
+        if (shuffledQuestions.length > 0) {
+          // Start with first question (already random due to shuffle)
+          loadQuestion(shuffledQuestions[0]);
+          setCurrentQuestionIndex(0);
+          setUsedQuestionIndices([0]);
+        }
+        
+        resetGameState();
       })
       .catch((err) => console.error(err));
-  }, [difficulty, startGame]);
+  }, [difficulty, startGame, timeLimit]);
 
-  useEffect(() => {
-    if (currentQuestion) setShuffledOptions(shuffleArray(currentQuestion.options));
-  }, [currentQuestion]);
+  // FIXED: Helper to load a question with properly shuffled options
+  const loadQuestion = (question) => {
+    // Create options array with answer and wrong answers
+    const options = [...question.options];
+    
+    // Shuffle the options completely randomly
+    const shuffled = shuffleArray(options);
+    
+    // Find where the correct answer ended up after shuffling
+    const correctIdx = shuffled.indexOf(question.answer);
+    
+    setShuffledOptions(shuffled);
+    setCorrectAnswerIndex(correctIdx);
+    setSelectedIndex(null);
+  };
+
+  const resetGameState = () => {
+    setSelectedIndex(null);
+    setScore(0);
+    setTime(timeLimit);
+    setSkipsLeft(3);
+    setGameOver(false);
+    setShowPlusPoints(false);
+    setIsPlaying(startGame);
+    setFeedback("");
+    hasSentScore.current = false;
+  };
 
   // ---------------- TIMER ----------------
   useEffect(() => {
@@ -139,7 +194,7 @@ useEffect(() => {
   useEffect(() => {
     if (!audioRef.current) return;
     const audio = audioRef.current;
-    audio.loop = true; // Loop music
+    audio.loop = true;
     if (isPlaying && !gameOver) {
       audio.play().catch((err) => console.log("Audio play error:", err));
     } else {
@@ -170,33 +225,64 @@ useEffect(() => {
   };
 
   // ---------------- QUESTION HANDLERS ----------------
+  // FIXED: Get next random question that hasn't been used recently
   const nextQuestion = () => {
-    if (!questions.length) return;
-    const nextQ = questions[Math.floor(Math.random() * questions.length)];
-    setCurrentQuestion({ ...nextQ, options: shuffleArray(nextQ.options) });
-    setSelected(null);
-    setFeedback("");
+    if (questions.length === 0) return;
+
+    // Get available indices (questions not recently used)
+    const availableIndices = questions.map((_, idx) => idx).filter(
+      idx => !usedQuestionIndices.includes(idx)
+    );
+
+    let nextIndex;
+    
+    if (availableIndices.length === 0) {
+      // All questions used, reset and pick random
+      const randomIdx = Math.floor(Math.random() * questions.length);
+      nextIndex = randomIdx;
+      setUsedQuestionIndices([randomIdx]);
+    } else {
+      // Pick random from available
+      nextIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+      setUsedQuestionIndices(prev => [...prev, nextIndex]);
+    }
+
+    setCurrentQuestionIndex(nextIndex);
+    loadQuestion(questions[nextIndex]);
   };
 
+  // FIXED: Added proper dependencies and logging
   useEffect(() => {
-  if (gameOver && typeof onGameOver === "function") {
-    onGameOver(score); // ✅ sends final score to Difficulty.js
-  }
-}, [gameOver, score, onGameOver]);
-  
+    if (gameOver && !hasSentScore.current) {
+      hasSentScore.current = true;
+      console.log("Game Over! Final score to save:", score);
+      
+      if (typeof onGameOver === "function") {
+        console.log("Calling onGameOver callback with score:", score);
+        onGameOver(score);
+      } else {
+        console.error("onGameOver is not a function:", onGameOver);
+      }
+    }
+  }, [gameOver, score, onGameOver]);
 
   const handleCheck = () => {
     playClickSound();
-    if (!selected) return;
-    if (selected === currentQuestion.answer) {
+    if (selectedIndex === null) return;
+
+    // FIXED: Check against the tracked correct answer index
+    if (selectedIndex === correctAnswerIndex) {
       setFeedback("✅ Correct!");
-      setScore((s) => s + 1);
-      setShowPlusOne(true);
+      setScore((s) => s + pointsPerCorrect);
+      setPointsGained(pointsPerCorrect);
+      setShowPlusPoints(true);
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       setTime((t) => Math.min(t + 1, 999));
-      setTimeout(() => setShowPlusOne(false), 800);
+      setTimeout(() => setShowPlusPoints(false), 800);
       setTimeout(() => nextQuestion(), 1500);
-    } else handleWrongAnswer();
+    } else {
+      handleWrongAnswer();
+    }
   };
 
   const handleWrongAnswer = () => {
@@ -211,25 +297,35 @@ useEffect(() => {
 
   const handleRestart = () => {
     playClickSound();
-    const reshuffled = shuffleArray(questions);
+    hasSentScore.current = false;
+    
+    // Reshuffle questions for new game
+    const reshuffled = shuffleArray([...questions]);
     setQuestions(reshuffled);
-    setCurrentQuestion({ ...reshuffled[0], options: shuffleArray(reshuffled[0].options) });
-    setShuffledOptions(shuffleArray(reshuffled[0].options));
+    
+    // Pick random starting question
+    const startIdx = Math.floor(Math.random() * reshuffled.length);
+    setCurrentQuestionIndex(startIdx);
+    setUsedQuestionIndices([startIdx]);
+    
+    if (reshuffled.length > 0) {
+      loadQuestion(reshuffled[startIdx]);
+    }
+    
     setScore(0);
-    setTime(20);
+    setTime(timeLimit);
     setGameOver(false);
     setIsPlaying(true);
     setFeedback("");
-    setSelected(null);
     setSkipsLeft(3);
-    setShowPlusOne(false);
+    setShowPlusPoints(false);
   };
 
   const handleSkip = () => {
     playClickSound();
     if (skipsLeft > 0 && !gameOver) {
       setSkipsLeft((s) => s - 1);
-      setFeedback(" You skipped the question!");
+      setFeedback("⏭️ You skipped the question!");
       setTimeout(() => nextQuestion(), 800);
     }
   };
@@ -242,8 +338,11 @@ useEffect(() => {
   const confirmExit = (confirm) => {
     playClickSound();
     setShowExitConfirm(false);
-    if (confirm) navigate("/translate");
+    if (confirm) navigate("/HomeGame");
   };
+
+  // Get current question
+  const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <Container>
@@ -261,8 +360,12 @@ useEffect(() => {
 
         <ScoreTimeBox>
           <Score>🏆 Score: {score}</Score>
-          {showPlusOne && <PlusOne>+1</PlusOne>}
+          {showPlusPoints && <PlusOne>+{pointsGained}</PlusOne>}
         </ScoreTimeBox>
+
+        <DifficultyBadge>
+          {config.label} Mode • {pointsPerCorrect} pts/correct • {timeLimit}s
+        </DifficultyBadge>
 
         {isPlaying && !gameOver && currentQuestion && (
           <>
@@ -274,11 +377,11 @@ useEffect(() => {
                   <OptionLabel>{choiceLabels[i]}.</OptionLabel>
                   <OptionButton
                     onClick={() => {
-                      setSelected(opt);
+                      setSelectedIndex(i);
                       playClickSound();
                     }}
-                    $selected={selected === opt}
-                    $shake={shakeOption}
+                    $selected={selectedIndex === i}
+                    $shake={shakeOption && selectedIndex === i}
                   >
                     {opt}
                   </OptionButton>
@@ -289,7 +392,7 @@ useEffect(() => {
             <ButtonRow>
               <CustomButton label="Check Answer" onClick={handleCheck} width="180px" />
               <CustomButton
-                label={` Skip (${skipsLeft})`}
+                label={`⏭️ Skip (${skipsLeft})`}
                 onClick={handleSkip}
                 width="160px"
                 disabled={skipsLeft === 0}
@@ -303,22 +406,30 @@ useEffect(() => {
         <BackButton src={home} onClick={handleBackClick} />
       </GlassCard>
 
+      {/* Game Over Modal */}
       {gameOver && (
         <Overlay>
           <Modal>
             <h2>⏳ Game Over!</h2>
-            <p>Game Mode: <strong>{gameMode}</strong></p>
-            <p>Difficulty: <strong>{difficulty}</strong></p>
-            <p>Final Score: {score}</p>
-            <ButtonWrapper>
-              <CustomButton label=" Restart" onClick={handleRestart} width="160px" color="#ffb300" />
+            <p>Difficulty: <strong>{config.label}</strong></p>
+            <p>Final Score: <strong>{score}</strong></p>
+            <p style={{ fontSize: "0.9rem", color: "#666", marginTop: "5px" }}>
+              ({pointsPerCorrect} points per correct answer)
+            </p>
+            <ButtonRow>
               <CustomButton 
-          label="Exit" 
-          onClick={() => navigate("/translate")} // change "/" to your home route
-          width="160px" 
-          color="#ffb300" 
-        />
-            </ButtonWrapper>
+                label="Restart" 
+                onClick={handleRestart} 
+                width="160px" 
+                color="#ffb300" 
+              />
+              <CustomButton 
+                label="Exit" 
+                onClick={() => navigate("/HomeGame")} 
+                width="160px" 
+                color="#ffb300" 
+              />
+            </ButtonRow>
           </Modal>
         </Overlay>
       )}
@@ -339,8 +450,6 @@ useEffect(() => {
 };
 
 export default Multiple;
-
-
 
 /* ---------------- STYLES ---------------- */
 const Container = styled.div`
@@ -431,6 +540,16 @@ const PlusOne = styled.div`
 `;
 
 const Score = styled.div``;
+
+const DifficultyBadge = styled.div`
+  background: rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  display: inline-block;
+  font-weight: 600;
+`;
 
 const Question = styled.h2`
   font-size: 1.2rem;
