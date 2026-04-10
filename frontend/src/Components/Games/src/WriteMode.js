@@ -3,6 +3,7 @@ import styled, { keyframes, css } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import CustomButton from "./CustomButton.js";
 import confetti from "canvas-confetti";
+import useWriteSubmission from "../../../Hooks/GameHooks/useWriteSubmission.js";
 
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
@@ -13,12 +14,9 @@ const FALLBACK_CHARACTERS = {
   easy: ["A", "E", "I", "O", "U"],
   medium: ["A", "E", "I", "O", "U", "BA", "KA", "DA", "GA", "HA"],
   hard: ["LA", "GA", "MA", "HA"],
-  api4: ["O/U", "PA", "SA"],
-  api5: ["NGA", "YA", "TA"],
+  expert: ["O/U", "PA", "SA"],
+  master: ["NGA", "YA", "TA"],
 };
-
-const API4_CHARACTERS = ["MA", "DA", "TA", "SA"];
-const API5_CHARACTERS = ["YA", "O_U", "LA"];
 
 const TUTORIAL_CAPTIONS = {
   intro: "Hello there. I am your Baybayin teacher. Today we will practice a, ba, and ka, then play round one.",
@@ -40,13 +38,16 @@ const TUTORIAL_TRACE_PATHS = {
   ka: "M36 68 C84 26, 156 20, 220 44 C258 58, 286 62, 306 50 M160 34 C160 94, 160 120, 160 144 M36 176 C90 140, 162 132, 226 152 C262 164, 287 167, 306 156",
 };
 
-const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard", "API4", "API5"];
+const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard", "Expert", "Master"];
+
+const normalizeLevel = (levelName) => String(levelName || "").trim().toLowerCase();
 
 const WriteModeV2 = () => {
   const GAME_DURATION_SECONDS = 30;
 
   const canvasRef = useRef(null);
   const navigate = useNavigate();
+  const { submitWriteResult } = useWriteSubmission();
 
   // Prevent duplicate submits and stale async side effects
   const submitLockRef = useRef(false);
@@ -98,14 +99,15 @@ const WriteModeV2 = () => {
   const tutorialStepIndex = Math.max(0, tutorialPhases.indexOf(tutorialPhase));
 
   const getNextLevel = (currentLevel) => {
-    const idx = LEVEL_SEQUENCE.indexOf(currentLevel);
+    const idx = LEVEL_SEQUENCE.findIndex((levelName) => normalizeLevel(levelName) === normalizeLevel(currentLevel));
     if (idx === -1 || idx === LEVEL_SEQUENCE.length - 1) return null;
     return LEVEL_SEQUENCE[idx + 1];
   };
 
   const levelToRound = (lvl) => {
-    if (lvl === "API4") return 3;
-    if (lvl === "API5") return 4;
+    const normalizedLevel = normalizeLevel(lvl);
+    if (normalizedLevel === "expert") return 3;
+    if (normalizedLevel === "master") return 4;
     return 1; // easy/medium/hard use standard round
   };
 
@@ -357,19 +359,6 @@ const WriteModeV2 = () => {
       setTargetLetter(display);
     };
 
-    // API4/API5 use local pools (same model, restricted allowed set)
-    if (difficultyLevel === "API4") {
-      const key = API4_CHARACTERS[Math.floor(Math.random() * API4_CHARACTERS.length)];
-      applyCharacter(key);
-      return;
-    }
-
-    if (difficultyLevel === "API5") {
-      const key = API5_CHARACTERS[Math.floor(Math.random() * API5_CHARACTERS.length)];
-      applyCharacter(key);
-      return;
-    }
-
     try {
       const url = `http://localhost:5000/get_random_character?difficulty=${difficultyLevel.toLowerCase()}`;
       console.log('[API CALL] GET', url);
@@ -546,12 +535,11 @@ const WriteModeV2 = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
-          // In handleSubmit, replace the fetch body:
           body: JSON.stringify({
             image: imageData,
             target_character: sendTarget,
-            difficulty: (level === "API4" || level === "API5") ? "hard" : level.toLowerCase(),
-            round: (level === "API4" || level === "API5") ? 1 : roundNumber,
+            difficulty: level.toLowerCase(),
+            round: roundNumber,
           }),
         });
 
@@ -572,6 +560,19 @@ const WriteModeV2 = () => {
         const pred = data.prediction;
         console.log('[UI] prediction payload:', pred);
         setPrediction(pred);
+
+        // Persist each evaluated drawing result without blocking gameplay.
+        try {
+          await submitWriteResult({
+            targetCharacter: sendTarget,
+            predictedCharacter: pred?.predicted || "",
+            isCorrect: !!pred?.is_correct,
+            confidence: pred?.confidence,
+            imageBase64: imageData,
+          });
+        } catch (saveError) {
+          console.warn("Write submission save failed:", saveError);
+        }
 
         if (pred.is_correct) {
           setScore((sc) => sc + 1);
@@ -1049,7 +1050,7 @@ const TypingCaption = styled.div`
   font-weight: 650;
   line-height: 1.35;
   white-space: pre-wrap;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 20px (0, 0, 0, 0.22);
 `;
 
 const StepDots = styled.div`
@@ -1173,4 +1174,3 @@ const Result = styled.p`
   border-radius: 8px;
   border: 2px solid rgba(255, 255, 255, 0.08);
 `;
-  
