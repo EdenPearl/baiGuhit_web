@@ -12,8 +12,13 @@ import back from "../../../Assests/back.png";
 const FALLBACK_CHARACTERS = {
   easy: ["A", "E", "I", "O", "U"],
   medium: ["A", "E", "I", "O", "U", "BA", "KA", "DA", "GA", "HA"],
-  hard: ["A", "E", "I", "O", "U", "BA", "KA", "DA", "GA", "HA", "LA", "MA", "NA", "NGA", "PA", "RA", "SA", "TA", "WA", "YA"],
+  hard: ["LA", "GA", "MA", "HA"],
+  api4: ["O/U", "PA", "SA"],
+  api5: ["NGA", "YA", "TA"],
 };
+
+const API4_CHARACTERS = ["MA", "DA", "TA", "SA"];
+const API5_CHARACTERS = ["YA", "O_U", "LA"];
 
 const TUTORIAL_CAPTIONS = {
   intro: "Hello there. I am your Baybayin teacher. Today we will practice a, ba, and ka, then play round one.",
@@ -35,10 +40,10 @@ const TUTORIAL_TRACE_PATHS = {
   ka: "M36 68 C84 26, 156 20, 220 44 C258 58, 286 62, 306 50 M160 34 C160 94, 160 120, 160 144 M36 176 C90 140, 162 132, 226 152 C262 164, 287 167, 306 156",
 };
 
-const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard"];
+const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard", "API4", "API5"];
 
 const WriteModeV2 = () => {
-  const GAME_DURATION_SECONDS = 120;
+  const GAME_DURATION_SECONDS = 30;
 
   const canvasRef = useRef(null);
   const navigate = useNavigate();
@@ -60,6 +65,7 @@ const WriteModeV2 = () => {
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [level, setLevel] = useState("Easy");
+  const [roundNumber, setRoundNumber] = useState(1);
 
   const [score, setScore] = useState(100);
   const [time, setTime] = useState(GAME_DURATION_SECONDS);
@@ -95,6 +101,12 @@ const WriteModeV2 = () => {
     const idx = LEVEL_SEQUENCE.indexOf(currentLevel);
     if (idx === -1 || idx === LEVEL_SEQUENCE.length - 1) return null;
     return LEVEL_SEQUENCE[idx + 1];
+  };
+
+  const levelToRound = (lvl) => {
+    if (lvl === "API4") return 3;
+    if (lvl === "API5") return 4;
+    return 1; // easy/medium/hard use standard round
   };
 
   const drawCanvasBase = ({ mode = "none" } = {}) => {
@@ -338,12 +350,25 @@ const WriteModeV2 = () => {
     setPrediction("");
   };
 
-  const getRandomCharacter = async (difficultyLevel = level) => {
+  const getRandomCharacter = async (difficultyLevel = level, forcedRound = roundNumber) => {
     const applyCharacter = (key) => {
       setTargetKey(key);
       const display = key.includes("_") ? key.replace(/_/g, "/") : key;
       setTargetLetter(display);
     };
+
+    // API4/API5 use local pools (same model, restricted allowed set)
+    if (difficultyLevel === "API4") {
+      const key = API4_CHARACTERS[Math.floor(Math.random() * API4_CHARACTERS.length)];
+      applyCharacter(key);
+      return;
+    }
+
+    if (difficultyLevel === "API5") {
+      const key = API5_CHARACTERS[Math.floor(Math.random() * API5_CHARACTERS.length)];
+      applyCharacter(key);
+      return;
+    }
 
     try {
       const url = `http://localhost:5000/get_random_character?difficulty=${difficultyLevel.toLowerCase()}`;
@@ -516,15 +541,17 @@ const WriteModeV2 = () => {
       let data = null;
 
       try {
-        console.log('[API CALL] POST http://localhost:5000/submit_drawing', { target_character: sendTarget, difficulty: level.toLowerCase() });
+        console.log('[API CALL] POST http://localhost:5000/submit_drawing', { target_character: sendTarget, difficulty: level.toLowerCase(), round: roundNumber });
         const response = await fetch("http://localhost:5000/submit_drawing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
+          // In handleSubmit, replace the fetch body:
           body: JSON.stringify({
             image: imageData,
             target_character: sendTarget,
-            difficulty: level.toLowerCase(),
+            difficulty: (level === "API4" || level === "API5") ? "hard" : level.toLowerCase(),
+            round: (level === "API4" || level === "API5") ? 1 : roundNumber,
           }),
         });
 
@@ -597,7 +624,7 @@ const WriteModeV2 = () => {
       wrongFlashTimerRef.current = null;
     }
 
-    getRandomCharacter(level);
+    getRandomCharacter(level, roundNumber);
     handleClear();
   };
 
@@ -626,11 +653,12 @@ const WriteModeV2 = () => {
     handleClear();
 
     setLevel(levelToStart);
+    setRoundNumber(levelToRound(levelToStart));
     setScore(0);
     setTime(GAME_DURATION_SECONDS);
     setGameOver(false);
 
-    getRandomCharacter(levelToStart);
+    getRandomCharacter(levelToStart, levelToRound(levelToStart));
   };
 
   const handleRestart = () => {
