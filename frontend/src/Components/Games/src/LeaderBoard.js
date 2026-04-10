@@ -1,9 +1,9 @@
 // src/Components/Leaderboard.js
 import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
-import home from '../../../Assests/backB.png';
 import { useNavigate } from "react-router-dom";
 import { Trophy, Medal, Award, ChevronLeft, Layers, PenTool, MousePointer } from "lucide-react";
+import useWriteTop10 from "../../../Hooks/GameHooks/useWriteTop10";
 
 // Modes, difficulties, categories
 const MODES = [
@@ -18,10 +18,18 @@ const TRANSLATE_SUBMODES = [
   { id: "Drag", label: "Drag & Drop" }
 ];
 
-const DIFFICULTIES = [
+const TRANSLATE_DIFFICULTIES = [
   { id: "Easy", label: "Easy", color: "#22c55e" },
   { id: "Medium", label: "Medium", color: "#f59e0b" },
   { id: "Hard", label: "Hard", color: "#ef4444" }
+];
+
+const WRITE_ROUNDS = [
+  { id: "Easy", label: "Round 1 • Easy", color: "#22c55e" },
+  { id: "Medium", label: "Round 2 • Medium", color: "#f59e0b" },
+  { id: "Hard", label: "Round 3 • Hard", color: "#ef4444" },
+  { id: "Expert", label: "Round 4 • Expert", color: "#3b82f6" },
+  { id: "Master", label: "Round 5 • Master", color: "#a855f7" }
 ];
 
 const TAP_CATEGORIES = [
@@ -30,6 +38,14 @@ const TAP_CATEGORIES = [
   { id: "Fruits", label: "Fruits", icon: "🍎" },
   { id: "Things", label: "Objects", icon: "📦" }
 ];
+
+const WRITE_ROUND_AVATAR = {
+  easy: "✏️",
+  medium: "🖊️",
+  hard: "🏅",
+  expert: "🧠",
+  master: "👑",
+};
 
 // Sample leaderboard data
 const LEADERBOARD_DATA = {
@@ -108,6 +124,14 @@ const LEADERBOARD_DATA = {
     Hard: [
       { name: "Nate", score: 150, avatar: "🏅", trend: "up" },
       { name: "Ruth", score: 140, avatar: "🎓", trend: "same" }
+    ],
+    Expert: [
+      { name: "Kyla", score: 175, avatar: "🧠", trend: "up" },
+      { name: "Migs", score: 168, avatar: "⚔️", trend: "same" }
+    ],
+    Master: [
+      { name: "Aira", score: 205, avatar: "👑", trend: "up" },
+      { name: "Renz", score: 191, avatar: "🔥", trend: "up" }
     ]
   }
 };
@@ -481,11 +505,9 @@ const Leaderboard = () => {
   const navigate = useNavigate();
   const [activeMode, setActiveMode] = useState(MODES[0].id);
   const [translateSubMode, setTranslateSubMode] = useState(TRANSLATE_SUBMODES[0].id);
-  const [difficulty, setDifficulty] = useState(DIFFICULTIES[0].id);
+  const [difficulty, setDifficulty] = useState(TRANSLATE_DIFFICULTIES[0].id);
   const [category, setCategory] = useState(TAP_CATEGORIES[0].id);
-
-  const currentMode = MODES.find(m => m.id === activeMode);
-  const ModeIcon = currentMode?.icon || Trophy;
+  const { writeTop10, loading: writeLoading, error: writeError } = useWriteTop10(activeMode === "WriteMode");
 
   let displayedData = [];
 
@@ -493,6 +515,15 @@ const Leaderboard = () => {
     displayedData = LEADERBOARD_DATA[activeMode]?.[category] || [];
   } else if (activeMode === "TranslateMode") {
     displayedData = LEADERBOARD_DATA[translateSubMode]?.[difficulty] || [];
+  } else if (activeMode === "WriteMode") {
+    const roundKey = String(difficulty || "").toLowerCase();
+    const roundRows = writeTop10?.[roundKey] || [];
+    displayedData = roundRows.map((row) => ({
+      name: row.username || row.name || (row.user_id ? `User ${row.user_id}` : "Unknown"),
+      score: Number(row.points ?? row.score ?? 0),
+      avatar: WRITE_ROUND_AVATAR[roundKey] || "✍️",
+      trend: "same",
+    }));
   } else {
     displayedData = LEADERBOARD_DATA[activeMode]?.[difficulty] || [];
   }
@@ -548,12 +579,12 @@ const Leaderboard = () => {
         <FilterBar>
           {activeMode !== "TapMode" ? (
             <FilterGroup>
-              <FilterLabel>Difficulty</FilterLabel>
+              <FilterLabel>{activeMode === "WriteMode" ? "Round" : "Difficulty"}</FilterLabel>
               <Select 
                 value={difficulty} 
                 onChange={(e) => setDifficulty(e.target.value)}
               >
-                {DIFFICULTIES.map((d) => (
+                {(activeMode === "WriteMode" ? WRITE_ROUNDS : TRANSLATE_DIFFICULTIES).map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.label}
                   </option>
@@ -578,8 +609,14 @@ const Leaderboard = () => {
         </FilterBar>
 
         <LeaderboardList>
-          {displayedData.length === 0 ? (
-            <EmptyState>No players yet. Be the first to score!</EmptyState>
+          {activeMode === "WriteMode" && writeLoading ? (
+            <EmptyState>Loading write leaderboard...</EmptyState>
+          ) : displayedData.length === 0 ? (
+            <EmptyState>
+              {activeMode === "WriteMode" && writeError
+                ? "Unable to load write leaderboard right now."
+                : "No players yet. Be the first to score!"}
+            </EmptyState>
           ) : (
             displayedData.map((player, index) => {
               const rank = index + 1;
