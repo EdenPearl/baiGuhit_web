@@ -509,6 +509,15 @@ const Leaderboard = () => {
   const [category, setCategory] = useState(TAP_CATEGORIES[0].id);
   const { writeTop10, loading: writeLoading, error: writeError } = useWriteTop10(activeMode === "WriteMode");
 
+  const handleModeChange = (modeId) => {
+    if (modeId === "WriteMode") {
+      navigate("/write-board");
+      return;
+    }
+
+    setActiveMode(modeId);
+  };
+
   let displayedData = [];
 
   if (activeMode === "TapMode") {
@@ -553,7 +562,7 @@ const Leaderboard = () => {
               <ModeButton
                 key={mode.id}
                 active={activeMode === mode.id}
-                onClick={() => setActiveMode(mode.id)}
+                onClick={() => handleModeChange(mode.id)}
               >
                 <Icon />
                 {mode.label}

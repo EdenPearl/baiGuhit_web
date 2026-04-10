@@ -33,6 +33,7 @@ import LeaderBoard from './Components/Games/src/LeaderBoard';
 import MultipleBoard from './Components/Games/src/MultipleBoard';
 import TypingBoard from './Components/Games/src/TypingBoard';
 import DragBoard from './Components/Games/src/DragBoard';
+import WriteBoard from './Components/Games/src/WriteBoard';
 
 // Difficulties
 import DifficultyTap from './Components/Games/src/DifficultyTap';
@@ -73,6 +74,7 @@ const App = () => {
           <Route path="/multiple-board" element={<MultipleBoard />} />
           <Route path="/typing-board" element={<TypingBoard />} />
           <Route path="/drag-board" element={<DragBoard />} />
+          <Route path="/write-board" element={<WriteBoard />} />
 
           {/* ================= DIFFICULTY ================= */}
           <Route path="/difficulty-tap" element={<DifficultyTap />} />

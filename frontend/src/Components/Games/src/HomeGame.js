@@ -276,7 +276,7 @@ const HomeGame = () => {
               </ButtonText>
             </SidebarButton>
             
-            <SidebarButton onClick={() => { navigate("/write-mode"); closeSidebar(); }}>
+            <SidebarButton onClick={() => { navigate("/write-board"); closeSidebar(); }}>
               <ButtonIcon>✍️</ButtonIcon>
               <ButtonText>
                 <span>Write Mode</span>
