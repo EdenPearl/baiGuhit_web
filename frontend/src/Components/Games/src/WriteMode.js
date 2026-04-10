@@ -3,6 +3,7 @@ import styled, { keyframes, css } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import CustomButton from "./CustomButton.js";
 import confetti from "canvas-confetti";
+import useWriteSubmission from "../../../Hooks/GameHooks/useWriteSubmission.js";
 
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
@@ -12,7 +13,9 @@ import back from "../../../Assests/back.png";
 const FALLBACK_CHARACTERS = {
   easy: ["A", "E", "I", "O", "U"],
   medium: ["A", "E", "I", "O", "U", "BA", "KA", "DA", "GA", "HA"],
-  hard: ["A", "E", "I", "O", "U", "BA", "KA", "DA", "GA", "HA", "LA", "MA", "NA", "NGA", "PA", "RA", "SA", "TA", "WA", "YA"],
+  hard: ["LA", "GA", "MA", "HA"],
+  expert: ["O/U", "PA", "SA"],
+  master: ["NGA", "YA", "TA"],
 };
 
 const TUTORIAL_CAPTIONS = {
@@ -35,13 +38,16 @@ const TUTORIAL_TRACE_PATHS = {
   ka: "M36 68 C84 26, 156 20, 220 44 C258 58, 286 62, 306 50 M160 34 C160 94, 160 120, 160 144 M36 176 C90 140, 162 132, 226 152 C262 164, 287 167, 306 156",
 };
 
-const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard"];
+const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard", "Expert", "Master"];
+
+const normalizeLevel = (levelName) => String(levelName || "").trim().toLowerCase();
 
 const WriteModeV2 = () => {
-  const GAME_DURATION_SECONDS = 120;
+  const GAME_DURATION_SECONDS = 30;
 
   const canvasRef = useRef(null);
   const navigate = useNavigate();
+  const { submitWriteResult } = useWriteSubmission();
 
   // Prevent duplicate submits and stale async side effects
   const submitLockRef = useRef(false);
@@ -60,6 +66,7 @@ const WriteModeV2 = () => {
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [level, setLevel] = useState("Easy");
+  const [roundNumber, setRoundNumber] = useState(1);
 
   const [score, setScore] = useState(100);
   const [time, setTime] = useState(GAME_DURATION_SECONDS);
@@ -92,9 +99,16 @@ const WriteModeV2 = () => {
   const tutorialStepIndex = Math.max(0, tutorialPhases.indexOf(tutorialPhase));
 
   const getNextLevel = (currentLevel) => {
-    const idx = LEVEL_SEQUENCE.indexOf(currentLevel);
+    const idx = LEVEL_SEQUENCE.findIndex((levelName) => normalizeLevel(levelName) === normalizeLevel(currentLevel));
     if (idx === -1 || idx === LEVEL_SEQUENCE.length - 1) return null;
     return LEVEL_SEQUENCE[idx + 1];
+  };
+
+  const levelToRound = (lvl) => {
+    const normalizedLevel = normalizeLevel(lvl);
+    if (normalizedLevel === "expert") return 3;
+    if (normalizedLevel === "master") return 4;
+    return 1; // easy/medium/hard use standard round
   };
 
   const drawCanvasBase = ({ mode = "none" } = {}) => {
@@ -338,7 +352,7 @@ const WriteModeV2 = () => {
     setPrediction("");
   };
 
-  const getRandomCharacter = async (difficultyLevel = level) => {
+  const getRandomCharacter = async (difficultyLevel = level, forcedRound = roundNumber) => {
     const applyCharacter = (key) => {
       setTargetKey(key);
       const display = key.includes("_") ? key.replace(/_/g, "/") : key;
@@ -516,7 +530,7 @@ const WriteModeV2 = () => {
       let data = null;
 
       try {
-        console.log('[API CALL] POST http://localhost:5000/submit_drawing', { target_character: sendTarget, difficulty: level.toLowerCase() });
+        console.log('[API CALL] POST http://localhost:5000/submit_drawing', { target_character: sendTarget, difficulty: level.toLowerCase(), round: roundNumber });
         const response = await fetch("http://localhost:5000/submit_drawing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -525,6 +539,7 @@ const WriteModeV2 = () => {
             image: imageData,
             target_character: sendTarget,
             difficulty: level.toLowerCase(),
+            round: roundNumber,
           }),
         });
 
@@ -545,6 +560,19 @@ const WriteModeV2 = () => {
         const pred = data.prediction;
         console.log('[UI] prediction payload:', pred);
         setPrediction(pred);
+
+        // Persist each evaluated drawing result without blocking gameplay.
+        try {
+          await submitWriteResult({
+            targetCharacter: sendTarget,
+            predictedCharacter: pred?.predicted || "",
+            isCorrect: !!pred?.is_correct,
+            confidence: pred?.confidence,
+            imageBase64: imageData,
+          });
+        } catch (saveError) {
+          console.warn("Write submission save failed:", saveError);
+        }
 
         if (pred.is_correct) {
           setScore((sc) => sc + 1);
@@ -597,7 +625,7 @@ const WriteModeV2 = () => {
       wrongFlashTimerRef.current = null;
     }
 
-    getRandomCharacter(level);
+    getRandomCharacter(level, roundNumber);
     handleClear();
   };
 
@@ -626,11 +654,12 @@ const WriteModeV2 = () => {
     handleClear();
 
     setLevel(levelToStart);
+    setRoundNumber(levelToRound(levelToStart));
     setScore(0);
     setTime(GAME_DURATION_SECONDS);
     setGameOver(false);
 
-    getRandomCharacter(levelToStart);
+    getRandomCharacter(levelToStart, levelToRound(levelToStart));
   };
 
   const handleRestart = () => {
@@ -1021,7 +1050,7 @@ const TypingCaption = styled.div`
   font-weight: 650;
   line-height: 1.35;
   white-space: pre-wrap;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 20px (0, 0, 0, 0.22);
 `;
 
 const StepDots = styled.div`
@@ -1145,4 +1174,3 @@ const Result = styled.p`
   border-radius: 8px;
   border: 2px solid rgba(255, 255, 255, 0.08);
 `;
-  
