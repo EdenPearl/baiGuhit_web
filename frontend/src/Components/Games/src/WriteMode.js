@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import CustomButton from "./CustomButton.js";
 import confetti from "canvas-confetti";
 import useWriteSubmission from "../../../Hooks/GameHooks/useWriteSubmission.js";
+import useInsertLeaderboard from "../../../Hooks/GameHooks/useInsertLeaderboard.js";
+import useUpdateLeaderboard from "../../../Hooks/GameHooks/useUpdateLeaderboard.js";
 
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
@@ -48,12 +50,16 @@ const WriteModeV2 = () => {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
   const { submitWriteResult } = useWriteSubmission();
+  const { insertScore } = useInsertLeaderboard();
+  const { updateScore } = useUpdateLeaderboard();
 
   // Prevent duplicate submits and stale async side effects
   const submitLockRef = useRef(false);
   const requestAbortRef = useRef(null);
   const nextRoundTimerRef = useRef(null);
   const wrongFlashTimerRef = useRef(null);
+  const leaderboardSaveLockRef = useRef(false);
+  const playedLevelsRef = useRef(new Set());
 
   // ========== TUTORIAL STATES ==========
   const [showTutorial, setShowTutorial] = useState(true);
@@ -298,6 +304,72 @@ const WriteModeV2 = () => {
 
     return () => clearInterval(timer);
   }, [showTutorial, gameOver]);
+
+  useEffect(() => {
+    if (!gameOver) {
+      leaderboardSaveLockRef.current = false;
+    }
+  }, [gameOver]);
+
+  // ---------- Save Score to Leaderboard ----------
+  useEffect(() => {
+    if (!gameOver || leaderboardSaveLockRef.current) return;
+
+    leaderboardSaveLockRef.current = true;
+
+    const saveScore = async () => {
+      try {
+        const loginData = localStorage.getItem("loginData");
+        if (!loginData) {
+          console.warn("[LEADERBOARD] No login data found");
+          return;
+        }
+
+        const user = JSON.parse(loginData);
+        const userId = user?.id;
+        const username = user?.username || user?.email?.split("@")[0] || "Unknown";
+
+        if (!userId) {
+          console.warn("[LEADERBOARD] No user ID in login data");
+          return;
+        }
+
+        const status = normalizeLevel(level);
+        const points = score;
+        const timestamp = new Date().toLocaleString();
+        const hasPlayedLevelBefore = playedLevelsRef.current.has(status);
+        const actionLabel = hasPlayedLevelBefore ? "UPDATE" : "INSERT";
+
+        console.log("\n========== LEADERBOARD SAVE ==========");
+        console.log("Action:", actionLabel);
+        console.log("Username:", username);
+        console.log("User ID:", userId);
+        console.log("Points:", points);
+        console.log("Status (Difficulty):", status);
+        console.log("Date:", timestamp);
+        console.log("Level:", level);
+        console.log("Round Number:", roundNumber);
+        console.log("========================================\n");
+
+        const result = hasPlayedLevelBefore
+          ? await updateScore(userId, status, points)
+          : await insertScore(userId, status, points);
+
+        if (result.success) {
+          if (!hasPlayedLevelBefore) {
+            playedLevelsRef.current.add(status);
+          }
+          console.log(`✅ [SUCCESS] Score ${actionLabel.toLowerCase()} completed:`, result.data);
+        } else {
+          console.error(`❌ [ERROR] Failed to ${actionLabel.toLowerCase()} score:`, result.error);
+        }
+      } catch (error) {
+        console.error("❌ [ERROR] Exception while saving score:", error);
+      }
+    };
+
+    saveScore();
+  }, [gameOver, level, score, roundNumber, insertScore, updateScore]);
 
   const getCanvasCoords = (e) => {
     const canvas = canvasRef.current;
@@ -658,6 +730,7 @@ const WriteModeV2 = () => {
     setScore(0);
     setTime(GAME_DURATION_SECONDS);
     setGameOver(false);
+    leaderboardSaveLockRef.current = false;
 
     getRandomCharacter(levelToStart, levelToRound(levelToStart));
   };
