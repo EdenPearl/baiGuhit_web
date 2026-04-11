@@ -99,7 +99,7 @@ const keyframes = `
 `;
 
 export default function DifficultyTap() {
-  const [selected, setSelected] = useState("Animals");
+  const [selected, setSelected] = useState("animal");
   const [showDifficulty, setShowDifficulty] = useState(true);
   const [startGame, setStartGame] = useState(false);
   const [countdown, setCountdown] = useState(null);
