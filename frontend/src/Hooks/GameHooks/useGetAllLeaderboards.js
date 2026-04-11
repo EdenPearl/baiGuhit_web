@@ -3,12 +3,42 @@ import { useCallback, useEffect, useState } from "react";
 const DEFAULT_GET_ALL_ENDPOINT = (limit = 10) =>
   `http://localhost:8000/game/leaderboard?limit=${limit}`;
 
+const STATUS_KEYS = ["easy", "medium", "hard", "expert", "master"];
+
+const createEmptyLeaderboards = () => ({
+  easy: [],
+  medium: [],
+  hard: [],
+  expert: [],
+  master: [],
+});
+
+const toPoints = (value) => Number(value?.points) || 0;
+
+const normalizeAndRank = (rows, limit) => {
+  const grouped = createEmptyLeaderboards();
+
+  (Array.isArray(rows) ? rows : []).forEach((item) => {
+    const status = String(item?.status || "").trim().toLowerCase();
+    if (!STATUS_KEYS.includes(status)) return;
+    grouped[status].push(item);
+  });
+
+  STATUS_KEYS.forEach((status) => {
+    grouped[status] = grouped[status]
+      .sort((a, b) => toPoints(b) - toPoints(a))
+      .slice(0, limit);
+  });
+
+  return grouped;
+};
+
 const useGetAllLeaderboards = (
   limit = 10,
   enabled = true,
   customEndpointFn = DEFAULT_GET_ALL_ENDPOINT
 ) => {
-  const [leaderboards, setLeaderboards] = useState({});
+  const [leaderboards, setLeaderboards] = useState(createEmptyLeaderboards());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,8 +50,16 @@ const useGetAllLeaderboards = (
 
     try {
       const endpoint = customEndpointFn(limit);
+      console.log("[WRITE LEADERBOARD] Fetch start:", endpoint);
       const response = await fetch(endpoint);
       const payload = await response.json().catch(() => ({}));
+
+      console.log("[WRITE LEADERBOARD] Raw response:", {
+        ok: response.ok,
+        status: response.status,
+        success: payload?.success,
+        totalRows: Array.isArray(payload?.data) ? payload.data.length : 0,
+      });
 
       if (!response.ok || payload?.success === false) {
         throw new Error(
@@ -29,24 +67,22 @@ const useGetAllLeaderboards = (
         );
       }
 
-      // Normalize the data by status
-      const organizedData = {};
-      if (Array.isArray(payload?.data)) {
-        payload.data.forEach((item) => {
-          const status = (item?.status || "unknown").toLowerCase();
-          if (!organizedData[status]) {
-            organizedData[status] = [];
-          }
-          organizedData[status].push(item);
-        });
-      }
+      const ranked = normalizeAndRank(payload?.data, limit);
+      console.log("[WRITE LEADERBOARD] Ranked by status:", {
+        easy: ranked.easy.length,
+        medium: ranked.medium.length,
+        hard: ranked.hard.length,
+        expert: ranked.expert.length,
+        master: ranked.master.length,
+      });
 
-      setLeaderboards(organizedData);
+      setLeaderboards(ranked);
       setLoading(false);
     } catch (err) {
       const errorMsg = err?.message || "Unable to load leaderboards.";
+      console.error("[WRITE LEADERBOARD] Fetch failed:", errorMsg);
       setError(errorMsg);
-      setLeaderboards({});
+      setLeaderboards(createEmptyLeaderboards());
       setLoading(false);
     }
   }, [enabled, limit, customEndpointFn]);

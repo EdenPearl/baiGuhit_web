@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
+import useGetLeaderboardByStatus from "../../../Hooks/GameHooks/useGetLeaderboardByStatus.js";
 
 const WriteLeaderboard = () => {
-    const [leaderboard, setLeaderboard] = useState({ easy: [], medium: [], hard: [], expert: [], master: [] });
     const [activeTab, setActiveTab] = useState("easy");
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
+    const { leaderboard, loading, error, refetch } = useGetLeaderboardByStatus(activeTab, 10, true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -23,36 +22,25 @@ const WriteLeaderboard = () => {
     }, []);
 
     useEffect(() => {
-        fetchLeaderboard();
-    }, []);
+        console.log("[WRITEBOARD UI] state:", {
+            loading,
+            error,
+            activeTab,
+            totalStatusRows: (leaderboard || []).length,
+        });
+    }, [loading, error, activeTab, leaderboard]);
 
-    const fetchLeaderboard = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch("http://localhost:8000/game/write/top10");
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const json = await response.json();
-            if (json.success) {
-                setLeaderboard({
-                    easy: json.easy || [],
-                    medium: json.medium || [],
-                    hard: json.hard || [],
-                    expert: json.expert || [],
-                    master: json.master || []
-                });
-            } else {
-                throw new Error(json.message || "Failed to fetch data");
-            }
-        } catch (err) {
-            console.error("Error fetching leaderboard:", err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+    const statusData = leaderboard || [];
+    const filteredData = statusData;
+
+    const handleTabChange = (tab) => {
+        console.log("[WRITEBOARD UI] tab clicked:", tab);
+        setActiveTab(tab);
     };
 
-    const filteredData = leaderboard[activeTab] || [];
+    useEffect(() => {
+        console.log(`[WRITEBOARD UI] tab=${activeTab} showing top10=`, filteredData.length, "from statusTotal=", statusData.length);
+    }, [activeTab, filteredData.length, statusData.length]);
 
     const getRankStyle = (index) => {
         if (index === 0) return { color: "#FFD700", icon: "👑", bg: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)" };
@@ -61,16 +49,39 @@ const WriteLeaderboard = () => {
         return { color: "#64748B", icon: `#${index + 1}`, bg: "linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)" };
     };
 
-    const isCurrentUser = (email) => currentUser && currentUser.email === email;
+    const getRowPoints = (row) => Number(row?.points ?? row?.score ?? 0) || 0;
 
-    const formatPlayerName = (email) => email ? email.split("@")[0] : "Anonymous";
+    const getRowDate = (row) => row?.created_at || row?.DATE || row?.date || null;
+
+    const isCurrentUser = (row) => {
+        if (!currentUser) return false;
+        if (row?.user_id && currentUser?.id) return String(row.user_id) === String(currentUser.id);
+        if (row?.player && currentUser?.username) return String(row.player) === String(currentUser.username);
+
+        const currentEmailPrefix = String(currentUser?.email || "").split("@")[0];
+        if (row?.player && currentEmailPrefix) return String(row.player) === currentEmailPrefix;
+
+        return !!row?.email && row.email === currentUser.email;
+    };
+
+    const formatPlayerName = (row) => {
+        const player = String(row?.player || "").trim();
+        if (player) return player;
+
+        const username = String(row?.username || "").trim();
+        if (username) return username;
+
+        const email = String(row?.email || "").trim();
+        if (email.includes("@")) return email.split("@")[0];
+        return email || "Anonymous";
+    };
 
     const getStats = () => {
-        const tabData = filteredData;
+        const tabData = statusData;
         return {
             count: tabData.length,
-            best: tabData.length > 0 ? Math.max(...tabData.map(d => d.points || 0)) : 0,
-            average: tabData.length > 0 ? Math.round(tabData.reduce((a, b) => a + (b.points || 0), 0) / tabData.length) : 0
+            best: tabData.length > 0 ? Math.max(...tabData.map((d) => getRowPoints(d))) : 0,
+            average: tabData.length > 0 ? Math.round(tabData.reduce((sum, row) => sum + getRowPoints(row), 0) / tabData.length) : 0
         };
     };
 
@@ -107,7 +118,7 @@ const WriteLeaderboard = () => {
                                 <Tab
                                     key={tab}
                                     $active={activeTab === tab}
-                                    onClick={() => setActiveTab(tab)}
+                                    onClick={() => handleTabChange(tab)}
                                 >
                                     <TabIndicator $active={activeTab === tab} />
                                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -140,7 +151,7 @@ const WriteLeaderboard = () => {
                                 <BtnIcon>🎮</BtnIcon>
                                 Play Game
                             </ActionButton>
-                            <ActionButton onClick={fetchLeaderboard}>
+                            <ActionButton onClick={refetch}>
                                 <BtnIcon>↻</BtnIcon>
                                 Refresh
                             </ActionButton>
@@ -158,7 +169,7 @@ const WriteLeaderboard = () => {
                                 <ErrorState>
                                     <ErrorIcon>⚠️</ErrorIcon>
                                     <ErrorText>{error}</ErrorText>
-                                    <RetryButton onClick={fetchLeaderboard}>Try Again</RetryButton>
+                                    <RetryButton onClick={refetch}>Try Again</RetryButton>
                                 </ErrorState>
                             ) : filteredData.length === 0 ? (
                                 <EmptyState>
@@ -182,7 +193,7 @@ const WriteLeaderboard = () => {
                                     <tbody>
                                         {filteredData.map((row, index) => {
                                             const rankStyle = getRankStyle(index);
-                                            const currentUserRow = isCurrentUser(row.email);
+                                            const currentUserRow = isCurrentUser(row);
 
                                             return (
                                                 <TableRow
@@ -198,19 +209,19 @@ const WriteLeaderboard = () => {
                                                     <PlayerCell>
                                                         <PlayerInfo>
                                                             <PlayerName $isCurrentUser={currentUserRow}>
-                                                                {formatPlayerName(row.email)}
+                                                                {formatPlayerName(row)}
                                                             </PlayerName>
                                                             {currentUserRow && <YouTag>YOU</YouTag>}
                                                         </PlayerInfo>
                                                     </PlayerCell>
                                                     <DateCell>
-                                                        {row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { 
+                                                        {getRowDate(row) ? new Date(getRowDate(row)).toLocaleDateString('en-US', {
                                                             month: 'short', 
                                                             day: 'numeric'
                                                         }) : "Recently"}
                                                     </DateCell>
                                                     <ScoreCell>
-                                                        <ScoreValue>{row.points || 0}</ScoreValue>
+                                                        <ScoreValue>{getRowPoints(row)}</ScoreValue>
                                                         <ScoreLabel>points</ScoreLabel>
                                                     </ScoreCell>
                                                 </TableRow>
