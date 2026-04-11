@@ -10,6 +10,9 @@ import useUpdateLeaderboard from "../../../Hooks/GameHooks/useUpdateLeaderboard.
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
 import back from "../../../Assests/back.png";
+import preGameMusic from "../../../Assests/drag.mp3";
+import dragMusic from "../../../Assests/Tap.mp3";
+import stoneClick from "../../../Assests/stone.mp3";
 
 
 const FALLBACK_CHARACTERS = {
@@ -60,6 +63,12 @@ const WriteModeV2 = () => {
   const wrongFlashTimerRef = useRef(null);
   const leaderboardSaveLockRef = useRef(false);
   const playedLevelsRef = useRef(new Set());
+  const audioCtxRef = useRef(null);
+  const preGameMusicRef = useRef(null);
+  const bgMusicRef = useRef(null);
+  const stoneClickRef = useRef(null);
+
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // ========== TUTORIAL STATES ==========
   const [showTutorial, setShowTutorial] = useState(true);
@@ -115,6 +124,68 @@ const WriteModeV2 = () => {
     if (normalizedLevel === "expert") return 3;
     if (normalizedLevel === "master") return 4;
     return 1; // easy/medium/hard use standard round
+  };
+
+  const ensureAudioContext = () => {
+    if (typeof window === "undefined") return null;
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return null;
+
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new AudioCtx();
+    }
+
+    if (audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume().catch(() => {});
+    }
+
+    return audioCtxRef.current;
+  };
+
+  const playTone = (frequency, duration = 0.1, type = "sine", volume = 0.03) => {
+    if (!soundEnabled) return;
+
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.value = frequency;
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  };
+
+  const playCorrectSound = () => {
+    playTone(520, 0.1, "triangle", 0.04);
+    setTimeout(() => playTone(660, 0.12, "triangle", 0.04), 85);
+  };
+
+  const playWrongSound = () => {
+    playTone(210, 0.16, "sawtooth", 0.035);
+    setTimeout(() => playTone(170, 0.12, "sawtooth", 0.03), 75);
+  };
+
+  const playTimeUpSound = () => {
+    playTone(240, 0.2, "square", 0.035);
+    setTimeout(() => playTone(180, 0.22, "square", 0.03), 140);
+  };
+
+  const playStoneClick = () => {
+    if (!soundEnabled || !stoneClickRef.current) return;
+    try {
+      stoneClickRef.current.currentTime = 0;
+      stoneClickRef.current.play().catch(() => {});
+    } catch {
+      // ignore audio playback errors
+    }
   };
 
   const drawCanvasBase = ({ mode = "none" } = {}) => {
@@ -306,6 +377,61 @@ const WriteModeV2 = () => {
   }, [showTutorial, gameOver]);
 
   useEffect(() => {
+    if (gameOver) {
+      playTimeUpSound();
+    }
+  }, [gameOver]);
+
+  useEffect(() => {
+    preGameMusicRef.current = new Audio(preGameMusic);
+    preGameMusicRef.current.loop = true;
+    preGameMusicRef.current.volume = 0.2;
+
+    bgMusicRef.current = new Audio(dragMusic);
+    bgMusicRef.current.loop = true;
+    bgMusicRef.current.volume = 0.2;
+
+    stoneClickRef.current = new Audio(stoneClick);
+    stoneClickRef.current.volume = 0.45;
+
+    return () => {
+      if (preGameMusicRef.current) {
+        preGameMusicRef.current.pause();
+        preGameMusicRef.current.currentTime = 0;
+      }
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+        bgMusicRef.current.currentTime = 0;
+      }
+      if (stoneClickRef.current) {
+        stoneClickRef.current.pause();
+        stoneClickRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const shouldPlayPreGameMusic = soundEnabled && showTutorial;
+    const shouldPlayGameMusic = soundEnabled && !showTutorial && !gameOver;
+
+    if (preGameMusicRef.current) {
+      if (shouldPlayPreGameMusic) {
+        preGameMusicRef.current.play().catch(() => {});
+      } else {
+        preGameMusicRef.current.pause();
+      }
+    }
+
+    if (bgMusicRef.current) {
+      if (shouldPlayGameMusic) {
+        bgMusicRef.current.play().catch(() => {});
+      } else {
+        bgMusicRef.current.pause();
+      }
+    }
+  }, [soundEnabled, showTutorial, gameOver]);
+
+  useEffect(() => {
     if (!gameOver) {
       leaderboardSaveLockRef.current = false;
     }
@@ -415,6 +541,8 @@ const WriteModeV2 = () => {
   const handleClear = () => {
     if (gameOver) return;
 
+    playStoneClick();
+
     if (showTutorial) {
       drawCanvasBase({ mode: isTutorialTracePhase ? "trace" : isTutorialShowPhase ? "show" : "none" });
     } else {
@@ -452,6 +580,8 @@ const WriteModeV2 = () => {
 
   const handleSubmit = async () => {
     if (showTutorial || gameOver || isLoading || submitLockRef.current) return;
+
+    playStoneClick();
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -647,6 +777,7 @@ const WriteModeV2 = () => {
         }
 
         if (pred.is_correct) {
+          playCorrectSound();
           setScore((sc) => sc + 1);
 
           confetti({
@@ -661,6 +792,7 @@ const WriteModeV2 = () => {
             nextRoundTimerRef.current = null;
           }, 3000);
         } else if (!pred.retry_message) {
+          playWrongSound();
           setFlash(true);
           setIsWrong(true);
 
@@ -686,6 +818,8 @@ const WriteModeV2 = () => {
 
   const handleSkip = () => {
     if (showTutorial || gameOver) return;
+
+    playStoneClick();
 
     if (nextRoundTimerRef.current) {
       clearTimeout(nextRoundTimerRef.current);
@@ -769,6 +903,19 @@ const WriteModeV2 = () => {
 
         <Header>
           <BackIcon src={back} onClick={handleBackClick} />
+
+          <SoundToggle
+            onClick={() => {
+              ensureAudioContext();
+              playStoneClick();
+              setSoundEnabled((prev) => !prev);
+            }}
+            $active={soundEnabled}
+            aria-label={soundEnabled ? "Mute sound" : "Unmute sound"}
+            title={soundEnabled ? "Mute sound" : "Unmute sound"}
+          >
+            {soundEnabled ? "🔊 Sound On" : "🔇 Sound Off"}
+          </SoundToggle>
 
           <TopInfo>
             {showTutorial ? (
@@ -992,6 +1139,29 @@ const Header = styled.div`
   height: 70px;
   position: relative;
   padding-top: 10px;
+`;
+
+const SoundToggle = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 24px;
+  z-index: 999;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: ${({ $active }) =>
+    $active ? "rgba(34, 197, 94, 0.22)" : "rgba(15, 23, 42, 0.28)"};
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    background: ${({ $active }) =>
+      $active ? "rgba(34, 197, 94, 0.3)" : "rgba(15, 23, 42, 0.4)"};
+  }
 `;
 
 const Overlay = styled.div`
