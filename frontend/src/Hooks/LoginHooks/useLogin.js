@@ -27,7 +27,7 @@ const useLogin = (mode = 'marketplace') => {  // 👈 add mode parameter
 
     try {
       const response = await axios.post(
-        'http://localhost:8000/auth/login',
+        '/auth/login',
         { email, password }
       );
 

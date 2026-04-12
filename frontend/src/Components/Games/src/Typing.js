@@ -265,7 +265,7 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/game/questions/typing`);
+      const res = await fetch(`/game/questions/typing`);
       if (!res.ok) throw new Error("Failed to fetch questions");
       const data = await res.json();
       const filtered = data[difficulty] || [];

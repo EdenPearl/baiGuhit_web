@@ -183,7 +183,7 @@ export default function DifficultyMultiple() {
     console.log("Difficulty status:", selected.toLowerCase());
 
     try {
-      const response = await fetch("http://localhost:8000/multiple/insert-multiple", {
+      const response = await fetch("/multiple/insert-multiple", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
