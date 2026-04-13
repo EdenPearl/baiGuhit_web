@@ -121,6 +121,12 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
   const clickSound = new Audio(stoneClick);
   clickSound.volume = 0.6;
 
+  // All possible Baybayin characters for wrong options
+  const ALL_BAYBAYIN_CHARS = [
+    "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ","ᜉ","ᜊ","ᜋ","ᜌ","ᜎ",
+    "ᜏ","ᜐ","ᜑ","ᜒ","ᜓ","᜔"
+  ];
+
   useEffect(() => {
     if (!startGame) return;
     setIsGameStarted(true);
@@ -129,7 +135,7 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
     setGameOver(false);
     setTimeLeft(MAX_TIME);
     scoreSaved.current = false;
-    generateTiles();
+    // Don't call generateTiles here - wait for baybayinWord to load
   }, [startGame]);
 
   useEffect(() => {
@@ -139,30 +145,56 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
     }
   }, [gameOver, score, onGameOver]);
 
-  const BAYBAYIN_CHARACTERS = [
-    "ᜀ",
-    "ᜃ","ᜊ",
-    "ᜐᜓ", "ᜉᜓ", "ᜐ"
-  ];
+  // FIXED: Properly split Baybayin word into individual characters
+  // This handles both single chars and multi-char combinations
+  const splitBaybayinWord = (word) => {
+    if (!word) return [];
+    // Split into array of characters, properly handling Unicode
+    return Array.from(word);
+  };
 
   const generateTiles = () => {
     if (!startGame || !correctAnswer) return;
-    const correctChars = correctAnswer.match(/[\u1700-\u171F]/g) || [];
-    const allChars = [
-      "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ","ᜉ","ᜊ","ᜋ","ᜌ","ᜎ",
-      "ᜏ","ᜐ","ᜑ","ᜒ","ᜓ","᜔"
-    ];
-    const wrongChars = allChars.filter((c) => !correctChars.includes(c));
+    
+    // FIXED: Use proper character splitting instead of regex
+    const correctChars = splitBaybayinWord(correctAnswer);
+    const uniqueCorrectChars = [...new Set(correctChars)]; // Remove duplicates
+    
     const totalTiles = 10;
-    let tilesToShow = [...correctChars];
+    let tilesToShow = [];
+    
+    // FIXED: Always include ALL unique correct characters first
+    tilesToShow = [...uniqueCorrectChars];
+    
+    // Fill remaining slots with wrong characters
     const neededWrong = totalTiles - tilesToShow.length;
     if (neededWrong > 0) {
-      const randomWrong = wrongChars
-        .sort(() => 0.5 - Math.random())
-        .slice(0, neededWrong);
-      tilesToShow = [...tilesToShow, ...randomWrong];
+      // Filter out any characters that are already in correct answer
+      const wrongChars = ALL_BAYBAYIN_CHARS.filter(
+        (c) => !uniqueCorrectChars.includes(c)
+      );
+      
+      // Randomly select wrong characters
+      const shuffledWrong = [...wrongChars].sort(() => 0.5 - Math.random());
+      const selectedWrong = shuffledWrong.slice(0, neededWrong);
+      
+      tilesToShow = [...tilesToShow, ...selectedWrong];
     }
+    
+    // Shuffle all tiles
     tilesToShow = tilesToShow.sort(() => 0.5 - Math.random());
+    
+    // FIXED: Debug logging to verify correct answer is in tiles
+    console.log("Correct answer:", correctAnswer);
+    console.log("Correct chars:", uniqueCorrectChars);
+    console.log("Generated tiles:", tilesToShow);
+    
+    // Verify all correct chars are present
+    const missingChars = uniqueCorrectChars.filter(c => !tilesToShow.includes(c));
+    if (missingChars.length > 0) {
+      console.error("CRITICAL: Missing correct characters in tiles:", missingChars);
+    }
+    
     setTiles(tilesToShow);
     setSelectedTiles([]);
     setTypedAnswer("");
@@ -170,21 +202,20 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
 
   const reshuffleTiles = () => {
     if (!correctAnswer) return;
-    const correctChars = correctAnswer.match(/[\u1700-\u171F]/g) || [];
-    const allChars = [
-      "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ","ᜉ","ᜊ","ᜋ","ᜌ","ᜎ",
-      "ᜏ","ᜐ","ᜑ","ᜒ","ᜓ","᜔"
-    ];
-    const wrongChars = allChars.filter((c) => !correctChars.includes(c));
+    
+    const correctChars = [...new Set(splitBaybayinWord(correctAnswer))];
     const totalTiles = 10;
-    let newTiles = [...correctChars];
+    let newTiles = [...correctChars]; // Always include correct chars
+    
     const neededWrong = totalTiles - newTiles.length;
     if (neededWrong > 0) {
-      const randomWrong = wrongChars
-        .sort(() => 0.5 - Math.random())
-        .slice(0, neededWrong);
-      newTiles = [...newTiles, ...randomWrong];
+      const wrongChars = ALL_BAYBAYIN_CHARS.filter(
+        (c) => !correctChars.includes(c)
+      );
+      const shuffledWrong = [...wrongChars].sort(() => 0.5 - Math.random());
+      newTiles = [...newTiles, ...shuffledWrong.slice(0, neededWrong)];
     }
+    
     newTiles = newTiles.sort(() => 0.5 - Math.random());
     setTiles(newTiles);
     setSelectedTiles([]);
@@ -206,6 +237,13 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
       setCorrectAnswer(baybayinWord);
     }
   }, [baybayinWord]);
+
+  // FIXED: Generate tiles whenever correctAnswer changes and game is active
+  useEffect(() => {
+    if (correctAnswer && isGameStarted && !gameOver) {
+      generateTiles();
+    }
+  }, [correctAnswer, isGameStarted]);
 
   useEffect(() => {
     console.log("Correct answer from DB:", baybayinWord);
@@ -256,16 +294,10 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
   const skipQuestion = () => nextQuestion();
 
   const nextQuestion = () => {
-    if (!loading && baybayinWord) {
-      let newWord = baybayinWord;
-      const allWords = [...BAYBAYIN_CHARACTERS];
-      while (newWord === previousWord && allWords.length > 1) {
-        newWord = allWords[Math.floor(Math.random() * allWords.length)];
-      }
-      setCorrectAnswer(newWord);
-      setPreviousWord(newWord);
-    }
-    generateTiles();
+    // FIXED: Always fetch new word from database instead of generating random
+    // This ensures consistency with the image displayed
+    setSelectedTiles([]);
+    setTypedAnswer("");
     refetch();
   };
 
@@ -276,7 +308,8 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
     setGameOver(false);
     setTimeLeft(MAX_TIME);
     setPreviousWord(null);
-    generateTiles();
+    // Don't call generateTiles directly, let the useEffect handle it after refetch
+    refetch();
   };
 
   const handleClear = () => {
@@ -512,6 +545,13 @@ const styles = {
     alignItems: "center",
     fontSize: "2rem",
     cursor: "pointer",
+    background: "#fff",
+    border: "2px solid #ddd",
+    transition: "all 0.2s",
+    ":hover": {
+      background: "#f0f0f0",
+      transform: "scale(1.05)",
+    },
   },
   buttonGroup: {
     position: "absolute",

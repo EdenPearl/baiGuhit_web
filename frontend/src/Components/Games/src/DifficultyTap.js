@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import TapMode from "./TapMode";
 import CustomButton from "./CustomButton.js";
 
-const BAYBAYIN_CHARS = [
-  "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ",
-  "ᜉ","ᜊ","ᜋ","ᜌ","ᜎ","ᜏ","ᜐ","ᜑ"
-];
+// FIXED: Removed BAYBAYIN_CHARS since we only use database words now
+// This prevents mismatch between generated words and database images
 
 const styles = {
   difficultyContainer: {
@@ -227,7 +225,7 @@ export default function DifficultyTap() {
       >
         <div style={styles.baybayinBg}>
           {Array(40)
-            .fill(BAYBAYIN_CHARS.join("   "))
+            .fill("ᜀᜁᜂᜃᜄᜅᜆᜇᜈᜉᜊᜋᜌᜎᜏᜐᜑ   ")
             .join("\n")}
         </div>
 
