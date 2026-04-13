@@ -10,7 +10,7 @@ import ChatbotButton from './ChatbotButton'; // Import the new ChatbotButton com
 import download from '../Assests/download.jpg';
 
 
-const url_t = "http://localhost:8000/";
+const url_t = "/";
 // Custom Hooks
 const useCartInsert = () => {
   const [isLoading, setIsLoading] = useState(false);

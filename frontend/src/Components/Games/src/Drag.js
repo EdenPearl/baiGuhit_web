@@ -109,7 +109,7 @@ const Drag = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   useEffect(() => {
     scoreSaved.current = false;
     
-    fetch("http://localhost:8000/game/questions/drag")
+    fetch("/game/questions/drag")
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter(q => q.difficulty === difficulty);

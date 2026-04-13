@@ -97,8 +97,8 @@ const WriteModeV2 = () => {
   const [flash, setFlash] = useState(false);
   const [isWrong, setIsWrong] = useState(false);
 
-  const CANVAS_WIDTH = 500;
-  const CANVAS_HEIGHT = 500;
+  const CANVAS_WIDTH = 440;
+  const CANVAS_HEIGHT = 440;
 
   const isTutorialTracePhase = tutorialPhase === "a_trace" || tutorialPhase === "ba_trace" || tutorialPhase === "ka_trace";
   const isTutorialShowPhase = tutorialPhase === "a_show" || tutorialPhase === "ba_show" || tutorialPhase === "ka_show";
@@ -892,13 +892,7 @@ const WriteModeV2 = () => {
 
   return (
     <>
-      <Container
-        style={{
-          background: flash
-            ? "linear-gradient(135deg,#7f1d1d,#b91c1c)"
-            : "linear-gradient(135deg,#c2410c,#ea580c)",
-        }}
-      >
+      <Container>
         {flash && <div style={styles.damageOverlay} />}
 
         <Header>
@@ -922,9 +916,18 @@ const WriteModeV2 = () => {
               <InfoLine $tutorial={showTutorial}>Tutorial Mode</InfoLine>
             ) : (
               <>
-                <InfoLine>Score: {score}</InfoLine>
-                <InfoLine>Time: {String(time).padStart(2, "0")}</InfoLine>
-                <InfoLine>Difficulty: {level}</InfoLine>
+                <InfoCard>
+                  <InfoLabel>Score</InfoLabel>
+                  <InfoValue $highlight>{score}</InfoValue>
+                </InfoCard>
+                <InfoCard>
+                  <InfoLabel>Time</InfoLabel>
+                  <InfoValue $danger={time <= 5}>{String(time).padStart(2, "0")}</InfoValue>
+                </InfoCard>
+                <InfoCard>
+                  <InfoLabel>Level</InfoLabel>
+                  <InfoValue>{level}</InfoValue>
+                </InfoCard>
               </>
             )}
           </TopInfo>
@@ -989,23 +992,38 @@ const WriteModeV2 = () => {
 
         {!showTutorial && (
           <GameActionWrapper>
-            <CustomButton
-              label={isLoading ? "Submitting..." : "Submit"}
-              onClick={handleSubmit}
-              width="210px"
-              disabled={isLoading}
-            />
-            <CustomButton
-              label="Clear"
+            <GameActionButton
+              type="button"
+              $variant="outline"
               onClick={handleClear}
-              width="210px"
-            />
-            <CustomButton label="Skip" onClick={handleSkip} width="210px" />
+            >
+              <span className="icon" aria-hidden="true">⌫</span>
+              <span>Clear</span>
+            </GameActionButton>
+
+            <GameActionButton
+              type="button"
+              $variant="solid"
+              onClick={handleSubmit}
+              disabled={isLoading}
+            >
+              <span className="icon" aria-hidden="true">➤</span>
+              <span>{isLoading ? "Checking..." : "Submit"}</span>
+            </GameActionButton>
+
+            <GameActionButton
+              type="button"
+              $variant="outline"
+              onClick={handleSkip}
+            >
+              <span className="icon" aria-hidden="true">⏭</span>
+              <span>Skip</span>
+            </GameActionButton>
           </GameActionWrapper>
         )}
 
         {((showTutorial && tutorialPhase !== "intro") || !showTutorial) && (
-          <CanvasBorder style={!showTutorial && isWrong ? styles.shake : {}}>
+          <CanvasBorder $shake={!showTutorial && isWrong}>
             <Canvas
               ref={canvasRef}
               onMouseDown={startDrawing}
@@ -1020,11 +1038,16 @@ const WriteModeV2 = () => {
         )}
 
         {!showTutorial && prediction && (
-          <Result>
+          <Result
+            $correct={!!prediction.is_correct}
+            $error={!!prediction.retry_message}
+          >
             {prediction.retry_message ? (
               prediction.retry_message
+            ) : prediction.is_correct ? (
+              <>Correct!</>
             ) : (
-              <>ML Predicted: {prediction.predicted.toUpperCase()} ({Math.round((prediction.confidence || 0) * 100)}%){prediction.model_used ? ` • Model: ${prediction.model_used}` : ""}</>
+              <>Predicted: {String(prediction.predicted || "").toUpperCase()}</>
             )}
           </Result>
         )}
@@ -1106,6 +1129,15 @@ const lightningFlash = keyframes`
   50% { opacity: 1; transform: scale(1.08) rotate(0deg); }
 `;
 
+const centeredShake = keyframes`
+  0%, 100% { transform: translateX(-50%); }
+  15% { transform: translateX(calc(-50% - 10px)); }
+  30% { transform: translateX(calc(-50% + 10px)); }
+  45% { transform: translateX(calc(-50% - 8px)); }
+  60% { transform: translateX(calc(-50% + 8px)); }
+  75% { transform: translateX(calc(-50% - 4px)); }
+`;
+
 const styles = {
   shake: {
     animation: "shake 0.4s",
@@ -1127,10 +1159,10 @@ const styles = {
 const Container = styled.div`
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, #c2410c, #ea580c);
+  background: #943b07;
   position: relative;
   overflow-x: hidden;
-  overflow-y: visible;
+  overflow-y: hidden;
   color: white;
 `;
 
@@ -1203,10 +1235,11 @@ const BackIcon = styled.img`
 const TopInfo = styled.div`
   position: absolute;
   left: 50%;
-  top: 10px;
+  top: 6px;
   transform: translateX(-50%);
   display: flex;
-  gap: 80px;
+  gap: 12px;
+  align-items: center;
 `;
 
 const InfoLine = styled.div`
@@ -1218,6 +1251,35 @@ const InfoLine = styled.div`
       font-weight: 700;
       letter-spacing: 0.4px;
       opacity: 0.92;
+    `}
+`;
+
+const InfoCard = styled.div`
+  min-width: 96px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  text-align: center;
+  background: linear-gradient(120deg, rgba(65, 28, 6, 0.56), rgba(28, 12, 4, 0.3));
+  border: 1px solid rgba(251, 196, 23, 0.26);
+  backdrop-filter: blur(6px);
+`;
+
+const InfoLabel = styled.div`
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: rgba(255, 242, 220, 0.66);
+`;
+
+const InfoValue = styled.div`
+  margin-top: 2px;
+  font-size: 1.08rem;
+  font-weight: 900;
+  color: ${({ $highlight, $danger }) => ($danger ? "#ffb4b4" : $highlight ? "#fbc417" : "#fff4df")};
+  ${({ $danger }) =>
+    $danger && css`
+      animation: ${pulse} 1s ease-in-out infinite;
     `}
 `;
 
@@ -1241,7 +1303,7 @@ const Instruction = styled.div`
   ${({ $gameLine }) =>
     $gameLine && css`
       margin-top: 18px;
-      font-size: 22px;
+      font-size: 16px;
       white-space: nowrap;
       text-align: center;
     `}
@@ -1257,16 +1319,19 @@ const Instruction = styled.div`
 `;
 
 const GamePromptLabel = styled.span`
-  font-size: 22px;
-  font-weight: 600;
-  color: #fff7ed;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 248, 231, 0.82);
 `;
 
 const GamePromptTarget = styled.span`
-  font-size: 40px;
+  margin-top: 4px;
+  display: inline-block;
+  font-size: 48px;
   font-weight: 900;
-  color: #fef08a;
+  color: #fbc417;
   letter-spacing: 0.5px;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 `;
 
 const CenterCaptionPanel = styled.div`
@@ -1325,12 +1390,60 @@ const TutorialActionWrapper = styled.div`
 const GameActionWrapper = styled.div`
   position: absolute;
   left: 50%;
-  top: calc(25% + 544px);
+  top: calc(25% + 484px);
   transform: translateX(-50%);
   display: flex;
-  gap: 12px;
+  width: min(440px, 84vw);
+  gap: 10px;
   justify-content: center;
   z-index: 85;
+
+  @media (max-width: 760px) {
+    width: min(440px, calc(100vw - 24px));
+    gap: 8px;
+  }
+`;
+
+const GameActionButton = styled.button`
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  border-radius: 10px;
+  padding: 7px 10px;
+  border: ${({ $variant }) => ($variant === "solid" ? "0" : "2px solid rgba(251, 196, 23, 0.62)")};
+  background: ${({ $variant }) => ($variant === "solid" ? "#fbc417" : "rgba(126, 52, 5, 0.25)")};
+  color: ${({ $variant }) => ($variant === "solid" ? "#3d2401" : "#fff7e7")};
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  opacity: ${({ disabled }) => (disabled ? 0.65 : 1)};
+  transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  .icon {
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.9;
+  }
+
+  &:hover {
+    transform: ${({ disabled }) => (disabled ? "none" : "translateY(-1px)")};
+    filter: ${({ disabled }) => (disabled ? "none" : "brightness(1.06)")};
+  }
+
+  &:active {
+    transform: ${({ disabled }) => (disabled ? "none" : "translateY(1px)")};
+  }
+
+  @media (max-width: 760px) {
+    min-height: 38px;
+    font-size: 0.88rem;
+    padding: 7px 8px;
+  }
 `;
 
 const CountdownOverlay = styled.div`
@@ -1390,14 +1503,15 @@ const CanvasBorder = styled.div`
   transform: translateX(-50%);
   padding: 12px;
   border-radius: 20px;
+  animation: ${({ $shake }) => ($shake ? css`${centeredShake} 0.4s ease` : "none")};
 `;
 
 const Canvas = styled.canvas`
   position: relative;
   top: 0px;
   left: 0px;
-  width: 500px;
-  height: 500px;
+  width: min(440px, 84vw);
+  height: min(440px, 84vw);
   background: #ffffff;
   border-radius: 20px;
   cursor: crosshair;
@@ -1407,13 +1521,17 @@ const Canvas = styled.canvas`
 
 const Result = styled.p`
   position: absolute;
-  top: calc(33% + 374px + 12px);
+  top: calc(25% + 452px);
   left: 50%;
   transform: translateX(-50%);
-  color: #fff3e7;
-  font-size: 18px;
-  background: rgba(0, 0, 0, 0.18);
+  color: ${({ $correct, $error }) => ($error ? "#ffe4e6" : $correct ? "#dcfce7" : "#fee2e2")};
+  font-size: 17px;
+  font-weight: 700;
+  background: ${({ $correct, $error }) => ($error ? "rgba(127, 29, 29, 0.45)" : $correct ? "rgba(22, 101, 52, 0.28)" : "rgba(127, 29, 29, 0.34)")};
   padding: 10px 16px;
   border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.08);
+  border: 2px solid ${({ $correct, $error }) => ($error ? "rgba(251, 113, 133, 0.45)" : $correct ? "rgba(74, 222, 128, 0.45)" : "rgba(252, 165, 165, 0.42)")};
+  z-index: 96;
+  max-width: min(440px, 84vw);
+  text-align: center;
 `;

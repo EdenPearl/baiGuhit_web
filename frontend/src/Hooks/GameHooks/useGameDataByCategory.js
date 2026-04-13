@@ -15,7 +15,7 @@ const useGameDataByCategory = (category) => {
       setError(null);
 
       const response = await fetch(
-        `http://localhost:8000/game/game/category/${category}`
+        `/game/game/category/${category}`
       );
 
       if (!response.ok) {

@@ -33,7 +33,7 @@ const Dashboard = () => {
           return;
         }
         const response = await fetch(
-          'http://localhost:8000/auth/user_profile',
+          '/auth/user_profile',
           {
             headers: { 'session-id': sessionId },
           }

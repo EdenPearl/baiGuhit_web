@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import styled, { keyframes, css } from 'styled-components';
 import LoginModal from './Login';
 
 const Navbar = ({ scrollToSection, refs }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Listen to scroll event
+  const scrollAndClose = (sectionRef) => {
+    scrollToSection(sectionRef);
+    setIsMenuOpen(false);
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -22,133 +27,57 @@ const Navbar = ({ scrollToSection, refs }) => {
   }, []);
 
   return (
-    <NavbarContainer isScrolled={isScrolled}>
-      <Logo>eBaybayMo</Logo>
-      <NavLinks>
-        <NavLink onClick={() => scrollToSection(refs.heroRef)}>Home</NavLink>
-        <NavLink onClick={() => scrollToSection(refs.pricingRef)}>Pricing</NavLink>
-        <NavLink onClick={() => scrollToSection(refs.researchRef)}>Research</NavLink>
-        <NavLink onClick={() => scrollToSection(refs.aboutRef)}>About</NavLink>
-        <ButtonContainer>
-          <LoginButton onClick={toggleModal}>Login</LoginButton>
-        </ButtonContainer>
-      </NavLinks>
+    <nav
+      className={`fixed left-0 top-0 z-50 w-full border-b border-white/20 px-4 py-3 text-white transition-all md:px-8 ${
+        isScrolled
+          ? 'bg-orange-700/90 shadow-lg backdrop-blur'
+          : 'market-gradient bg-[length:300%_300%]'
+      }`}
+    >
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+        <div className="text-xl font-extrabold italic tracking-wide">eBaybayMo</div>
+
+        <button
+          type="button"
+          onClick={toggleMenu}
+          className="rounded-md border border-white/40 px-3 py-2 text-sm font-semibold md:hidden"
+          aria-label="Toggle navigation"
+        >
+          Menu
+        </button>
+
+        <div className="hidden items-center gap-2 md:flex">
+          <button className="rounded-full px-4 py-2 hover:bg-white/20" onClick={() => scrollAndClose(refs.heroRef)}>Home</button>
+          <button className="rounded-full px-4 py-2 hover:bg-white/20" onClick={() => scrollAndClose(refs.pricingRef)}>Pricing</button>
+          <button className="rounded-full px-4 py-2 hover:bg-white/20" onClick={() => scrollAndClose(refs.researchRef)}>Research</button>
+          <button className="rounded-full px-4 py-2 hover:bg-white/20" onClick={() => scrollAndClose(refs.aboutRef)}>About</button>
+          <button
+            onClick={toggleModal}
+            className="ml-3 rounded-full bg-white px-5 py-2 font-semibold text-orange-700 transition hover:scale-105"
+          >
+            Login
+          </button>
+        </div>
+      </div>
+
+      {isMenuOpen && (
+        <div className="mx-auto mt-3 flex w-full max-w-7xl flex-col gap-2 rounded-xl bg-orange-700/95 p-3 md:hidden">
+          <button className="rounded-lg px-3 py-2 text-left hover:bg-white/20" onClick={() => scrollAndClose(refs.heroRef)}>Home</button>
+          <button className="rounded-lg px-3 py-2 text-left hover:bg-white/20" onClick={() => scrollAndClose(refs.pricingRef)}>Pricing</button>
+          <button className="rounded-lg px-3 py-2 text-left hover:bg-white/20" onClick={() => scrollAndClose(refs.researchRef)}>Research</button>
+          <button className="rounded-lg px-3 py-2 text-left hover:bg-white/20" onClick={() => scrollAndClose(refs.aboutRef)}>About</button>
+          <button
+            onClick={toggleModal}
+            className="rounded-lg bg-white px-3 py-2 text-left font-semibold text-orange-700"
+          >
+            Login
+          </button>
+        </div>
+      )}
+
       <LoginModal isOpen={isModalOpen} toggleModal={toggleModal} />
-    </NavbarContainer>
+    </nav>
   );
 };
 
 export default Navbar;
-
-// Styled Components
-const gradientAnimation = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
-
-const NavbarContainer = styled.nav`
-  display: flex;
-  position: fixed;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  top: 0;
-  left: 0;
-  color: #fff;
-  font-family: 'Poppins';
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 0.5rem 1rem;
-  transition: background 0.5s ease, box-shadow 0.5s ease;
-
-  background: ${props =>
-    props.isScrolled
-      ? 'rgba(204, 70, 12, 0.85)'
-      : 'linear-gradient(135deg, #cc460c, #e66524)'};
-
-  background-size: 300% 300%;
-  animation: ${props =>
-    props.isScrolled
-      ? 'none'
-      : css`${gradientAnimation} 10s ease infinite`};
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-  }
-`;
-const Logo = styled.div`
-  padding: 1rem;
-  margin-left: 2rem;
-  color: #ffffff;
-  font-size: 1.6rem;
-  font-weight: 800;
-  font-style: italic;
-  text-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);
-
-  @media (max-width: 768px) {
-    margin-bottom: 1rem;
-  }
-`;
-
-const NavLinks = styled.div`
-  padding: 1rem;
-  margin-right: 2rem;
-  display: flex;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    display: ${props => (props.isOpen ? 'flex' : 'none')};
-    flex-direction: column;
-    width: 100%;
-    background-color: #C2410C;
-  }
-`;
-
-const NavLink = styled.div`
-  cursor: pointer;
-  color: #ffffff;
-  text-decoration: none;
-  padding: 0.7rem 1rem;
-  border-radius: 25px;
-  font-weight: 500;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  margin-left: 40px;
-  align-items: center;
-`;
-
-const LoginButton = styled.button`
-  background-color: #ffffff;
-  color: #C2410C;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-family: 'Poppins';
-  font-weight: 600;
-  width: 100px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: #f3f3f3;
-    transform: scale(1.05);
-    box-shadow: 0 3px 6px rgba(255, 255, 255, 0.3);
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    text-align: center;
-  }
-`;
