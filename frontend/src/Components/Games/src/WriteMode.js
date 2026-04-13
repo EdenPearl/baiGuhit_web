@@ -14,6 +14,7 @@ import preGameMusic from "../../../Assests/drag.mp3";
 import dragMusic from "../../../Assests/Tap.mp3";
 import stoneClick from "../../../Assests/stone.mp3";
 
+/* ─────────────────────── CONSTANTS ─────────────────────── */
 
 const FALLBACK_CHARACTERS = {
   easy: ["A", "E", "I", "O", "U"],
@@ -47,6 +48,8 @@ const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard", "Expert", "Master"];
 
 const normalizeLevel = (levelName) => String(levelName || "").trim().toLowerCase();
 
+/* ─────────────────────── COMPONENT ─────────────────────── */
+
 const WriteModeV2 = () => {
   const GAME_DURATION_SECONDS = 30;
 
@@ -56,7 +59,6 @@ const WriteModeV2 = () => {
   const { insertScore } = useInsertLeaderboard();
   const { updateScore } = useUpdateLeaderboard();
 
-  // Prevent duplicate submits and stale async side effects
   const submitLockRef = useRef(false);
   const requestAbortRef = useRef(null);
   const nextRoundTimerRef = useRef(null);
@@ -69,15 +71,12 @@ const WriteModeV2 = () => {
   const stoneClickRef = useRef(null);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
-
-  // ========== TUTORIAL STATES ==========
   const [showTutorial, setShowTutorial] = useState(true);
-  const [tutorialPhase, setTutorialPhase] = useState("intro"); // intro, a_show, a_trace, ba_show, ba_trace, ka_show, ka_trace
+  const [tutorialPhase, setTutorialPhase] = useState("intro");
   const [typedCaption, setTypedCaption] = useState("");
   const [countdown, setCountdown] = useState(null);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [currentCaption, setCurrentCaption] = useState(TUTORIAL_CAPTIONS.intro);
-
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [level, setLevel] = useState("Easy");
@@ -93,70 +92,53 @@ const WriteModeV2 = () => {
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // WRONG ANIMATION STATES
   const [flash, setFlash] = useState(false);
   const [isWrong, setIsWrong] = useState(false);
+  const [isCorrectAnim, setIsCorrectAnim] = useState(false);
 
   const CANVAS_WIDTH = 440;
   const CANVAS_HEIGHT = 440;
 
   const isTutorialTracePhase = tutorialPhase === "a_trace" || tutorialPhase === "ba_trace" || tutorialPhase === "ka_trace";
   const isTutorialShowPhase = tutorialPhase === "a_show" || tutorialPhase === "ba_show" || tutorialPhase === "ka_show";
-  const currentTutorialCharacter = tutorialPhase.startsWith("a_")
-    ? "a"
-    : tutorialPhase.startsWith("ba_")
-      ? "ba"
-      : tutorialPhase.startsWith("ka_")
-        ? "ka"
-        : null;
+  const currentTutorialCharacter = tutorialPhase.startsWith("a_") ? "a" : tutorialPhase.startsWith("ba_") ? "ba" : tutorialPhase.startsWith("ka_") ? "ka" : null;
 
   const tutorialPhases = ["intro", "a_show", "a_trace", "ba_show", "ba_trace", "ka_show", "ka_trace"];
   const tutorialStepIndex = Math.max(0, tutorialPhases.indexOf(tutorialPhase));
 
   const getNextLevel = (currentLevel) => {
-    const idx = LEVEL_SEQUENCE.findIndex((levelName) => normalizeLevel(levelName) === normalizeLevel(currentLevel));
+    const idx = LEVEL_SEQUENCE.findIndex((l) => normalizeLevel(l) === normalizeLevel(currentLevel));
     if (idx === -1 || idx === LEVEL_SEQUENCE.length - 1) return null;
     return LEVEL_SEQUENCE[idx + 1];
   };
 
   const levelToRound = (lvl) => {
-    const normalizedLevel = normalizeLevel(lvl);
-    if (normalizedLevel === "expert") return 3;
-    if (normalizedLevel === "master") return 4;
-    return 1; // easy/medium/hard use standard round
+    const n = normalizeLevel(lvl);
+    if (n === "expert") return 3;
+    if (n === "master") return 4;
+    return 1;
   };
 
+  /* ── Audio ── */
   const ensureAudioContext = () => {
     if (typeof window === "undefined") return null;
-
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return null;
-
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new AudioCtx();
-    }
-
-    if (audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume().catch(() => {});
-    }
-
+    if (!audioCtxRef.current) audioCtxRef.current = new AudioCtx();
+    if (audioCtxRef.current.state === "suspended") audioCtxRef.current.resume().catch(() => {});
     return audioCtxRef.current;
   };
 
   const playTone = (frequency, duration = 0.1, type = "sine", volume = 0.03) => {
     if (!soundEnabled) return;
-
     const ctx = ensureAudioContext();
     if (!ctx) return;
-
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = type;
     osc.frequency.value = frequency;
     gain.gain.setValueAtTime(volume, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
@@ -183,29 +165,22 @@ const WriteModeV2 = () => {
     try {
       stoneClickRef.current.currentTime = 0;
       stoneClickRef.current.play().catch(() => {});
-    } catch {
-      // ignore audio playback errors
-    }
+    } catch { }
   };
 
+  /* ── Canvas ── */
   const drawCanvasBase = ({ mode = "none" } = {}) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#fdf8f0";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     if (mode === "none" || !currentTutorialCharacter) return;
-
     const pathData = TUTORIAL_TRACE_PATHS[currentTutorialCharacter];
     if (!pathData) return;
-
     const path = new Path2D(pathData);
-
     ctx.save();
     const viewBoxWidth = 320;
     const viewBoxHeight = 220;
@@ -216,15 +191,14 @@ const WriteModeV2 = () => {
     const drawHeight = viewBoxHeight * scale;
     const offsetX = (canvas.width - drawWidth) / 2;
     const offsetY = (canvas.height - drawHeight) / 2;
-
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
     if (mode === "trace") {
-      ctx.strokeStyle = "rgba(62, 45, 25, 0.42)";
+      ctx.strokeStyle = "rgba(139, 90, 43, 0.28)";
       ctx.lineWidth = 7;
       ctx.setLineDash([8, 10]);
     } else {
-      ctx.strokeStyle = "#1f2937";
+      ctx.strokeStyle = "#5c3d1e";
       ctx.lineWidth = 8;
       ctx.setLineDash([]);
     }
@@ -235,38 +209,19 @@ const WriteModeV2 = () => {
   };
 
   const advanceTutorial = () => {
-    if (tutorialPhase === "intro") {
-      setTutorialPhase("a_show");
-      setCurrentCaption(TUTORIAL_CAPTIONS.this_is_a);
-    } else if (tutorialPhase === "a_show") {
-      setTutorialPhase("a_trace");
-      setCurrentCaption(TUTORIAL_CAPTIONS.trace_a);
-    } else if (tutorialPhase === "a_trace") {
-      setTutorialPhase("ba_show");
-      setCurrentCaption(TUTORIAL_CAPTIONS.this_is_ba);
-    } else if (tutorialPhase === "ba_show") {
-      setTutorialPhase("ba_trace");
-      setCurrentCaption(TUTORIAL_CAPTIONS.trace_ba);
-    } else if (tutorialPhase === "ba_trace") {
-      setTutorialPhase("ka_show");
-      setCurrentCaption(TUTORIAL_CAPTIONS.this_is_ka);
-    } else if (tutorialPhase === "ka_show") {
-      setTutorialPhase("ka_trace");
-      setCurrentCaption(TUTORIAL_CAPTIONS.trace_ka);
-    } else if (tutorialPhase === "ka_trace") {
-      setCurrentCaption(TUTORIAL_CAPTIONS.ready_to_play);
-      startCountdownToGame();
-    }
+    if (tutorialPhase === "intro") { setTutorialPhase("a_show"); setCurrentCaption(TUTORIAL_CAPTIONS.this_is_a); }
+    else if (tutorialPhase === "a_show") { setTutorialPhase("a_trace"); setCurrentCaption(TUTORIAL_CAPTIONS.trace_a); }
+    else if (tutorialPhase === "a_trace") { setTutorialPhase("ba_show"); setCurrentCaption(TUTORIAL_CAPTIONS.this_is_ba); }
+    else if (tutorialPhase === "ba_show") { setTutorialPhase("ba_trace"); setCurrentCaption(TUTORIAL_CAPTIONS.trace_ba); }
+    else if (tutorialPhase === "ba_trace") { setTutorialPhase("ka_show"); setCurrentCaption(TUTORIAL_CAPTIONS.this_is_ka); }
+    else if (tutorialPhase === "ka_show") { setTutorialPhase("ka_trace"); setCurrentCaption(TUTORIAL_CAPTIONS.trace_ka); }
+    else if (tutorialPhase === "ka_trace") { setCurrentCaption(TUTORIAL_CAPTIONS.ready_to_play); startCountdownToGame(); }
   };
 
-  const startCountdownToGame = () => {
-    setIsCountdownActive(true);
-    setCountdown(3);
-  };
+  const startCountdownToGame = () => { setIsCountdownActive(true); setCountdown(3); };
 
   useEffect(() => {
     if (!isCountdownActive || countdown == null) return;
-
     if (countdown === 0) {
       setIsCountdownActive(false);
       setCountdown(null);
@@ -274,21 +229,13 @@ const WriteModeV2 = () => {
       getRandomCharacter("Easy");
       return;
     }
-
-    const timer = setTimeout(() => {
-      setCountdown((prev) => prev - 1);
-    }, 900);
-
+    const timer = setTimeout(() => setCountdown((prev) => prev - 1), 900);
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCountdownActive, countdown]);
 
   useEffect(() => {
-    if (!showTutorial || isCountdownActive) {
-      setTypedCaption("");
-      return;
-    }
-
+    if (!showTutorial || isCountdownActive) { setTypedCaption(""); return; }
     let index = 0;
     setTypedCaption("");
     const text = currentCaption;
@@ -298,368 +245,214 @@ const WriteModeV2 = () => {
       setTypedCaption(text.slice(0, index));
       if (index >= text.length) clearInterval(timer);
     }, 28);
-
     return () => clearInterval(timer);
   }, [showTutorial, currentCaption, isCountdownActive]);
 
   useEffect(() => {
-    const preventScroll = (e) => {
-      if (isDrawing) e.preventDefault();
-    };
-
+    const preventScroll = (e) => { if (isDrawing) e.preventDefault(); };
     window.addEventListener("touchmove", preventScroll, { passive: false });
-
-    return () => {
-      window.removeEventListener("touchmove", preventScroll);
-    };
+    return () => window.removeEventListener("touchmove", preventScroll);
   }, [isDrawing]);
 
   useEffect(() => {
     return () => {
-      if (nextRoundTimerRef.current) {
-        clearTimeout(nextRoundTimerRef.current);
-        nextRoundTimerRef.current = null;
-      }
-      if (wrongFlashTimerRef.current) {
-        clearTimeout(wrongFlashTimerRef.current);
-        wrongFlashTimerRef.current = null;
-      }
-      if (requestAbortRef.current) {
-        requestAbortRef.current.abort();
-        requestAbortRef.current = null;
-      }
+      if (nextRoundTimerRef.current) { clearTimeout(nextRoundTimerRef.current); nextRoundTimerRef.current = null; }
+      if (wrongFlashTimerRef.current) { clearTimeout(wrongFlashTimerRef.current); wrongFlashTimerRef.current = null; }
+      if (requestAbortRef.current) { requestAbortRef.current.abort(); requestAbortRef.current = null; }
     };
   }, []);
 
-  // ---------------- Canvas Setup ----------------
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
-
     const ctx = canvas.getContext("2d");
-
     const tutorialCanvasMode = isTutorialTracePhase ? "trace" : isTutorialShowPhase ? "show" : "none";
     drawCanvasBase({ mode: showTutorial ? tutorialCanvasMode : "none" });
-
     ctx.lineWidth = 4;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#3e2d19";
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showTutorial, isTutorialTracePhase, isTutorialShowPhase, currentTutorialCharacter]);
 
   useEffect(() => {
     if (showTutorial && (isTutorialTracePhase || isTutorialShowPhase)) {
       drawCanvasBase({ mode: isTutorialTracePhase ? "trace" : "show" });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showTutorial, isTutorialTracePhase, isTutorialShowPhase, currentTutorialCharacter]);
 
-  // ---------------- Timer ----------------
   useEffect(() => {
     if (showTutorial || gameOver) return;
-
     const timer = setInterval(() => {
       setTime((t) => {
-        if (t <= 1) {
-          clearInterval(timer);
-          setGameOver(true);
-          return 0;
-        }
-
+        if (t <= 1) { clearInterval(timer); setGameOver(true); return 0; }
         return t - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [showTutorial, gameOver]);
 
-  useEffect(() => {
-    if (gameOver) {
-      playTimeUpSound();
-    }
-  }, [gameOver]);
+  useEffect(() => { if (gameOver) playTimeUpSound(); }, [gameOver]);
 
   useEffect(() => {
     preGameMusicRef.current = new Audio(preGameMusic);
     preGameMusicRef.current.loop = true;
     preGameMusicRef.current.volume = 0.2;
-
     bgMusicRef.current = new Audio(dragMusic);
     bgMusicRef.current.loop = true;
     bgMusicRef.current.volume = 0.2;
-
     stoneClickRef.current = new Audio(stoneClick);
     stoneClickRef.current.volume = 0.45;
-
     return () => {
-      if (preGameMusicRef.current) {
-        preGameMusicRef.current.pause();
-        preGameMusicRef.current.currentTime = 0;
-      }
-      if (bgMusicRef.current) {
-        bgMusicRef.current.pause();
-        bgMusicRef.current.currentTime = 0;
-      }
-      if (stoneClickRef.current) {
-        stoneClickRef.current.pause();
-        stoneClickRef.current.currentTime = 0;
-      }
+      [preGameMusicRef, bgMusicRef, stoneClickRef].forEach((r) => {
+        if (r.current) { r.current.pause(); r.current.currentTime = 0; }
+      });
     };
   }, []);
 
   useEffect(() => {
-    const shouldPlayPreGameMusic = soundEnabled && showTutorial;
-    const shouldPlayGameMusic = soundEnabled && !showTutorial && !gameOver;
-
+    const shouldPlayPreGame = soundEnabled && showTutorial;
+    const shouldPlayGame = soundEnabled && !showTutorial && !gameOver;
     if (preGameMusicRef.current) {
-      if (shouldPlayPreGameMusic) {
-        preGameMusicRef.current.play().catch(() => {});
-      } else {
-        preGameMusicRef.current.pause();
-      }
+      if (shouldPlayPreGame) preGameMusicRef.current.play().catch(() => {});
+      else preGameMusicRef.current.pause();
     }
-
     if (bgMusicRef.current) {
-      if (shouldPlayGameMusic) {
-        bgMusicRef.current.play().catch(() => {});
-      } else {
-        bgMusicRef.current.pause();
-      }
+      if (shouldPlayGame) bgMusicRef.current.play().catch(() => {});
+      else bgMusicRef.current.pause();
     }
   }, [soundEnabled, showTutorial, gameOver]);
 
-  useEffect(() => {
-    if (!gameOver) {
-      leaderboardSaveLockRef.current = false;
-    }
-  }, [gameOver]);
+  useEffect(() => { if (!gameOver) leaderboardSaveLockRef.current = false; }, [gameOver]);
 
-  // ---------- Save Score to Leaderboard ----------
   useEffect(() => {
     if (!gameOver || leaderboardSaveLockRef.current) return;
-
     leaderboardSaveLockRef.current = true;
-
     const saveScore = async () => {
       try {
         const loginData = localStorage.getItem("loginData");
-        if (!loginData) {
-          console.warn("[LEADERBOARD] No login data found");
-          return;
-        }
-
+        if (!loginData) return;
         const user = JSON.parse(loginData);
         const userId = user?.id;
         const username = user?.username || user?.email?.split("@")[0] || "Unknown";
-
-        if (!userId) {
-          console.warn("[LEADERBOARD] No user ID in login data");
-          return;
-        }
-
+        if (!userId) return;
         const status = normalizeLevel(level);
         const points = score;
-        const timestamp = new Date().toLocaleString();
         const hasPlayedLevelBefore = playedLevelsRef.current.has(status);
-        const actionLabel = hasPlayedLevelBefore ? "UPDATE" : "INSERT";
-
-        console.log("\n========== LEADERBOARD SAVE ==========");
-        console.log("Action:", actionLabel);
-        console.log("Username:", username);
-        console.log("User ID:", userId);
-        console.log("Points:", points);
-        console.log("Status (Difficulty):", status);
-        console.log("Date:", timestamp);
-        console.log("Level:", level);
-        console.log("Round Number:", roundNumber);
-        console.log("========================================\n");
-
         const result = hasPlayedLevelBefore
           ? await updateScore(userId, status, points)
           : await insertScore(userId, status, points);
-
-        if (result.success) {
-          if (!hasPlayedLevelBefore) {
-            playedLevelsRef.current.add(status);
-          }
-          console.log(`✅ [SUCCESS] Score ${actionLabel.toLowerCase()} completed:`, result.data);
-        } else {
-          console.error(`❌ [ERROR] Failed to ${actionLabel.toLowerCase()} score:`, result.error);
-        }
+        if (result.success && !hasPlayedLevelBefore) playedLevelsRef.current.add(status);
       } catch (error) {
-        console.error("❌ [ERROR] Exception while saving score:", error);
+        console.error("Score save error:", error);
       }
     };
-
     saveScore();
   }, [gameOver, level, score, roundNumber, insertScore, updateScore]);
 
+  /* ── Pointer helpers ── */
   const getCanvasCoords = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    const x = ((clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((clientY - rect.top) / rect.height) * canvas.height;
-
-    return { x, y };
+    return {
+      x: ((clientX - rect.left) / rect.width) * canvas.width,
+      y: ((clientY - rect.top) / rect.height) * canvas.height,
+    };
   };
 
   const startDrawing = (e) => {
     if (gameOver) return;
-
     setIsDrawing(true);
-
     const ctx = canvasRef.current.getContext("2d");
     const { x, y } = getCanvasCoords(e);
-
     ctx.strokeStyle = "#3e2d19";
-    ctx.lineWidth = 18; // Make the drawing bolder
+    ctx.lineWidth = 18;
     ctx.beginPath();
     ctx.moveTo(x, y);
   };
 
   const draw = (e) => {
     if (!isDrawing || gameOver) return;
-
     const ctx = canvasRef.current.getContext("2d");
     const { x, y } = getCanvasCoords(e);
-
     ctx.lineTo(x, y);
     ctx.stroke();
   };
 
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
+  const stopDrawing = () => setIsDrawing(false);
 
   const handleClear = () => {
     if (gameOver) return;
-
     playStoneClick();
-
     if (showTutorial) {
       drawCanvasBase({ mode: isTutorialTracePhase ? "trace" : isTutorialShowPhase ? "show" : "none" });
     } else {
       drawCanvasBase({ mode: "none" });
     }
-
     setPrediction("");
   };
 
   const getRandomCharacter = async (difficultyLevel = level, forcedRound = roundNumber) => {
     const applyCharacter = (key) => {
       setTargetKey(key);
-      const display = key.includes("_") ? key.replace(/_/g, "/") : key;
-      setTargetLetter(display);
+      setTargetLetter(key.includes("_") ? key.replace(/_/g, "/") : key);
     };
-
     try {
       const url = `http://localhost:5000/get_random_character?difficulty=${difficultyLevel.toLowerCase()}`;
-      console.log('[API CALL] GET', url);
       const response = await fetch(url);
-
       const data = await response.json();
-      console.log('[API RESULT] get_random_character:', data);
-
-      if (data.success) {
-        applyCharacter(data.character);
-      }
-    } catch (e) {
-      console.warn("Localhost unavailable, using local character bank:", e);
+      if (data.success) applyCharacter(data.character);
+    } catch {
       const pool = FALLBACK_CHARACTERS[difficultyLevel.toLowerCase()] || FALLBACK_CHARACTERS.easy;
-      const key = pool[Math.floor(Math.random() * pool.length)];
-      applyCharacter(key);
+      applyCharacter(pool[Math.floor(Math.random() * pool.length)]);
     }
   };
 
   const handleSubmit = async () => {
     if (showTutorial || gameOver || isLoading || submitLockRef.current) return;
-
     playStoneClick();
-
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
     const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
     let hasStroke = false;
-
     for (let i = 0; i < pixels.length; i += 4) {
-      const r = pixels[i];
-      const g = pixels[i + 1];
-      const b = pixels[i + 2];
-
-      if (r < 200 || g < 200 || b < 200) {
-        hasStroke = true;
-        break;
-      }
+      if (pixels[i] < 200 || pixels[i + 1] < 200 || pixels[i + 2] < 200) { hasStroke = true; break; }
     }
-
     if (!hasStroke) return;
 
     submitLockRef.current = true;
     setIsLoading(true);
 
-    if (nextRoundTimerRef.current) {
-      clearTimeout(nextRoundTimerRef.current);
-      nextRoundTimerRef.current = null;
-    }
-
-    if (wrongFlashTimerRef.current) {
-      clearTimeout(wrongFlashTimerRef.current);
-      wrongFlashTimerRef.current = null;
-    }
-
-    if (requestAbortRef.current) {
-      requestAbortRef.current.abort();
-      requestAbortRef.current = null;
-    }
+    if (nextRoundTimerRef.current) { clearTimeout(nextRoundTimerRef.current); nextRoundTimerRef.current = null; }
+    if (wrongFlashTimerRef.current) { clearTimeout(wrongFlashTimerRef.current); wrongFlashTimerRef.current = null; }
+    if (requestAbortRef.current) { requestAbortRef.current.abort(); requestAbortRef.current = null; }
 
     const controller = new AbortController();
     requestAbortRef.current = controller;
 
     try {
-      // ---- KNN preprocessing: crop → center → resize → binarize ----
-      // KNN compares raw pixel distances, so the image must match training
-      // data (rotatedwhite images): pure black strokes on pure white background.
-      const srcCanvas = canvasRef.current;
-      const srcCtx = srcCanvas.getContext("2d");
-      const { width: sw, height: sh } = srcCanvas;
-      const pixels = srcCtx.getImageData(0, 0, sw, sh).data;
-
-      // Step 1: Find bounding box of non-white pixels (threshold 200)
+      const srcCtx = canvas.getContext("2d");
+      const { width: sw, height: sh } = canvas;
+      const srcPixels = srcCtx.getImageData(0, 0, sw, sh).data;
       let minX = sw, minY = sh, maxX = 0, maxY = 0;
       for (let y = 0; y < sh; y++) {
         for (let x = 0; x < sw; x++) {
           const idx = (y * sw + x) * 4;
-          // Convert to grayscale brightness
-          const gray = 0.299 * pixels[idx] + 0.587 * pixels[idx + 1] + 0.114 * pixels[idx + 2];
-          if (gray < 200) { // non-white = stroke pixel
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-            if (y < minY) minY = y;
-            if (y > maxY) maxY = y;
-          }
+          const gray = 0.299 * srcPixels[idx] + 0.587 * srcPixels[idx + 1] + 0.114 * srcPixels[idx + 2];
+          if (gray < 200) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
         }
       }
-
       const hasStrokeBox = maxX > minX && maxY > minY;
-
-      // Step 2: Pad bounding box by 15% of the larger dimension
       const bboxSize = Math.max(maxX - minX, maxY - minY);
       const pad = Math.round(bboxSize * 0.15 + 6);
       const cropX = Math.max(0, minX - pad);
       const cropY = Math.max(0, minY - pad);
       const cropW = Math.min(sw, maxX + pad + 1) - cropX;
       const cropH = Math.min(sh, maxY + pad + 1) - cropY;
-
-      // Step 3: Resize the cropped region into a square canvas
       const OUT = 96;
       const offscreen = document.createElement("canvas");
       offscreen.width = OUT;
@@ -667,33 +460,21 @@ const WriteModeV2 = () => {
       const offCtx = offscreen.getContext("2d");
       offCtx.fillStyle = "#ffffff";
       offCtx.fillRect(0, 0, OUT, OUT);
-
       if (hasStrokeBox) {
-        // Scale to fill 80% of the output with equal margins (matches training layout)
         const scale = Math.min(OUT / cropW, OUT / cropH) * 0.80;
-        const dw = cropW * scale;
-        const dh = cropH * scale;
-        const dx = (OUT - dw) / 2;
-        const dy = (OUT - dh) / 2;
-        offCtx.drawImage(srcCanvas, cropX, cropY, cropW, cropH, dx, dy, dw, dh);
+        const dw = cropW * scale, dh = cropH * scale;
+        const dx = (OUT - dw) / 2, dy = (OUT - dh) / 2;
+        offCtx.drawImage(canvas, cropX, cropY, cropW, cropH, dx, dy, dw, dh);
       }
-
-      // Step 4: Binarize — force every pixel to pure black or pure white.
-      // KNN uses pixel-distance: anti-aliased grey strokes will not match
-      // the clean binary training images (rotatedwhite*).
       const imgPixels = offCtx.getImageData(0, 0, OUT, OUT);
       const d = imgPixels.data;
-      const THRESHOLD = 180; // pixels darker than this become pure black
       for (let i = 0; i < d.length; i += 4) {
         const gray = Math.round(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
-        const val = gray < THRESHOLD ? 0 : 255;
+        const val = gray < 180 ? 0 : 255;
         d[i] = val; d[i + 1] = val; d[i + 2] = val; d[i + 3] = 255;
       }
       offCtx.putImageData(imgPixels, 0, 0);
-
       const imageData = offscreen.toDataURL("image/png");
-      console.log('[IMAGE] Sending: 96x96 binary PNG, crop+center+binarize, hasStroke:', hasStrokeBox,
-        'bbox:', { cropX, cropY, cropW, cropH }, 'dataLen:', imageData.length);
       const sendTarget = targetKey.toLowerCase().replace(/_/g, "/");
 
       const tryFallbackApi = async () => {
@@ -702,113 +483,53 @@ const WriteModeV2 = () => {
         const byteArr = new Uint8Array(byteChars.length);
         for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
         const blob = new Blob([byteArr], { type: "image/png" });
-
         const formData = new FormData();
         formData.append("baybayin_photo", blob, "drawing.png");
-
-        console.log('[API CALL] POST /heroku-proxy/check_image/', { target: sendTarget });
-        const fallbackRes = await fetch("/heroku-proxy/check_image/", {
-          method: "POST",
-          body: formData,
-          signal: controller.signal,
-        });
-
+        const fallbackRes = await fetch("/heroku-proxy/check_image/", { method: "POST", body: formData, signal: controller.signal });
         const fallbackText = await fallbackRes.text();
-        console.log('[API RESULT] heroku-proxy/check_image raw:', fallbackText);
         let predicted;
-        try {
-          predicted = JSON.parse(fallbackText);
-        } catch {
-          predicted = fallbackText.trim().replace(/"/g, "");
-        }
-
-        const is_correct = predicted.toLowerCase() === sendTarget.toLowerCase();
-        return {
-          success: true,
-          prediction: { predicted, is_correct, confidence: null },
-        };
+        try { predicted = JSON.parse(fallbackText); } catch { predicted = fallbackText.trim().replace(/"/g, ""); }
+        return { success: true, prediction: { predicted, is_correct: predicted.toLowerCase() === sendTarget.toLowerCase(), confidence: null } };
       };
 
       let data = null;
-
       try {
-        console.log('[API CALL] POST http://localhost:5000/submit_drawing', { target_character: sendTarget, difficulty: level.toLowerCase(), round: roundNumber });
         const response = await fetch("http://localhost:5000/submit_drawing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
-          body: JSON.stringify({
-            image: imageData,
-            target_character: sendTarget,
-            difficulty: level.toLowerCase(),
-            round: roundNumber,
-          }),
+          body: JSON.stringify({ image: imageData, target_character: sendTarget, difficulty: level.toLowerCase(), round: roundNumber }),
         });
-
         data = await response.json();
-        console.log('[API RESULT] submit_drawing:', data);
-
-        // If primary API failed to predict, fall back to Heroku API
-        if (!data.success || data.prediction?.retry_message) {
-          data = await tryFallbackApi();
-        }
+        if (!data.success || data.prediction?.retry_message) data = await tryFallbackApi();
       } catch (primaryErr) {
         if (primaryErr.name === "AbortError") throw primaryErr;
-        console.warn("Primary API failed, trying fallback:", primaryErr);
         data = await tryFallbackApi();
       }
 
       if (data.success) {
         const pred = data.prediction;
-        console.log('[UI] prediction payload:', pred);
         setPrediction(pred);
-
-        // Persist each evaluated drawing result without blocking gameplay.
         try {
-          await submitWriteResult({
-            targetCharacter: sendTarget,
-            predictedCharacter: pred?.predicted || "",
-            isCorrect: !!pred?.is_correct,
-            confidence: pred?.confidence,
-            imageBase64: imageData,
-          });
-        } catch (saveError) {
-          console.warn("Write submission save failed:", saveError);
-        }
+          await submitWriteResult({ targetCharacter: sendTarget, predictedCharacter: pred?.predicted || "", isCorrect: !!pred?.is_correct, confidence: pred?.confidence, imageBase64: imageData });
+        } catch { }
 
         if (pred.is_correct) {
           playCorrectSound();
           setScore((sc) => sc + 1);
-
-          confetti({
-            particleCount: 100,
-            spread: 60,
-            origin: { y: 0.6 },
-          });
-
-          nextRoundTimerRef.current = setTimeout(() => {
-            getRandomCharacter(level);
-            handleClear();
-            nextRoundTimerRef.current = null;
-          }, 3000);
+          setIsCorrectAnim(true);
+          setTimeout(() => setIsCorrectAnim(false), 1000);
+          confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ["#fbc417", "#f97316", "#fde68a", "#fff"] });
+          nextRoundTimerRef.current = setTimeout(() => { getRandomCharacter(level); handleClear(); nextRoundTimerRef.current = null; }, 3000);
         } else if (!pred.retry_message) {
           playWrongSound();
           setFlash(true);
           setIsWrong(true);
-
-          wrongFlashTimerRef.current = setTimeout(() => {
-            setFlash(false);
-            setIsWrong(false);
-            handleClear();
-            wrongFlashTimerRef.current = null;
-          }, 600);
+          wrongFlashTimerRef.current = setTimeout(() => { setFlash(false); setIsWrong(false); handleClear(); wrongFlashTimerRef.current = null; }, 600);
         }
       }
     } catch (e) {
-      if (e.name !== "AbortError") {
-        console.error(e);
-        setPrediction({ retry_message: "Network error" });
-      }
+      if (e.name !== "AbortError") { console.error(e); setPrediction({ retry_message: "Network error" }); }
     } finally {
       setIsLoading(false);
       submitLockRef.current = false;
@@ -818,293 +539,272 @@ const WriteModeV2 = () => {
 
   const handleSkip = () => {
     if (showTutorial || gameOver) return;
-
     playStoneClick();
-
-    if (nextRoundTimerRef.current) {
-      clearTimeout(nextRoundTimerRef.current);
-      nextRoundTimerRef.current = null;
-    }
-
-    if (wrongFlashTimerRef.current) {
-      clearTimeout(wrongFlashTimerRef.current);
-      wrongFlashTimerRef.current = null;
-    }
-
+    if (nextRoundTimerRef.current) { clearTimeout(nextRoundTimerRef.current); nextRoundTimerRef.current = null; }
+    if (wrongFlashTimerRef.current) { clearTimeout(wrongFlashTimerRef.current); wrongFlashTimerRef.current = null; }
     getRandomCharacter(level, roundNumber);
     handleClear();
   };
 
-  const handleBackClick = () => {
-    setShowExitConfirm(true);
-  };
+  const handleBackClick = () => setShowExitConfirm(true);
 
   const confirmExit = (confirm) => {
     setShowExitConfirm(false);
-
     if (confirm) navigate("/homegame");
   };
 
   const resetRound = (levelToStart = level) => {
-    if (nextRoundTimerRef.current) {
-      clearTimeout(nextRoundTimerRef.current);
-      nextRoundTimerRef.current = null;
-    }
-
-    if (wrongFlashTimerRef.current) {
-      clearTimeout(wrongFlashTimerRef.current);
-      wrongFlashTimerRef.current = null;
-    }
-
+    if (nextRoundTimerRef.current) { clearTimeout(nextRoundTimerRef.current); nextRoundTimerRef.current = null; }
+    if (wrongFlashTimerRef.current) { clearTimeout(wrongFlashTimerRef.current); wrongFlashTimerRef.current = null; }
     setPrediction("");
     handleClear();
-
     setLevel(levelToStart);
     setRoundNumber(levelToRound(levelToStart));
     setScore(0);
     setTime(GAME_DURATION_SECONDS);
     setGameOver(false);
     leaderboardSaveLockRef.current = false;
-
     getRandomCharacter(levelToStart, levelToRound(levelToStart));
   };
 
-  const handleRestart = () => {
-    resetRound(level);
-  };
+  const handleRestart = () => resetRound(level);
+  const handleNextRound = () => { const nextLevel = getNextLevel(level); if (nextLevel) resetRound(nextLevel); };
 
-  const handleNextRound = () => {
-    const nextLevel = getNextLevel(level);
-    if (!nextLevel) return;
-    resetRound(nextLevel);
-  };
-
-  const tutorialPrimaryButtonLabel =
-    tutorialPhase === "ka_trace"
-      ? "Done & Start Game"
-      : isTutorialTracePhase
-        ? "Done"
-        : "Next";
-
+  const tutorialPrimaryButtonLabel = tutorialPhase === "ka_trace" ? "Done & Start Game" : isTutorialTracePhase ? "Done" : "Next";
   const showTutorialActionButton = showTutorial && !isCountdownActive;
-
   const nextLevel = getNextLevel(level);
 
+  /* ── Timer ring progress ── */
+  const timerProgress = time / GAME_DURATION_SECONDS;
+  const circumference = 2 * Math.PI * 22;
+  const strokeDashoffset = circumference * (1 - timerProgress);
+
+  /* ─────────────── RENDER ─────────────── */
   return (
     <>
-      <Container>
-        {flash && <div style={styles.damageOverlay} />}
+      <PageRoot>
+        {/* Ambient background layers */}
+        <BgTexture />
+        <BgGlow />
 
+        {/* Damage flash overlay */}
+        {flash && <DamageOverlay />}
+
+        {/* Correct answer burst */}
+        {isCorrectAnim && <CorrectBurst />}
+
+        {/* ── HEADER ── */}
         <Header>
-          <BackIcon src={back} onClick={handleBackClick} />
+          <BackBtn onClick={handleBackClick} title="Exit game">
+            <BackBtnIcon src={back} />
+          </BackBtn>
 
-          <SoundToggle
-            onClick={() => {
-              ensureAudioContext();
-              playStoneClick();
-              setSoundEnabled((prev) => !prev);
-            }}
-            $active={soundEnabled}
-            aria-label={soundEnabled ? "Mute sound" : "Unmute sound"}
-            title={soundEnabled ? "Mute sound" : "Unmute sound"}
-          >
-            {soundEnabled ? "🔊 Sound On" : "🔇 Sound Off"}
-          </SoundToggle>
-
-          <TopInfo>
+          <HeaderCenter>
             {showTutorial ? (
-              <InfoLine $tutorial={showTutorial}>Tutorial Mode</InfoLine>
+              <TutorialBadge>
+                <TutorialBadgeDot />
+                Tutorial Mode
+              </TutorialBadge>
             ) : (
-              <>
-                <InfoCard>
-                  <InfoLabel>Score</InfoLabel>
-                  <InfoValue $highlight>{score}</InfoValue>
-                </InfoCard>
-                <InfoCard>
-                  <InfoLabel>Time</InfoLabel>
-                  <InfoValue $danger={time <= 5}>{String(time).padStart(2, "0")}</InfoValue>
-                </InfoCard>
-                <InfoCard>
-                  <InfoLabel>Level</InfoLabel>
-                  <InfoValue>{level}</InfoValue>
-                </InfoCard>
-              </>
+              <ScoreRow>
+                <StatPill>
+                  <StatIcon>✦</StatIcon>
+                  <StatBody>
+                    <StatLabel>Score</StatLabel>
+                    <StatVal $gold>{score}</StatVal>
+                  </StatBody>
+                </StatPill>
+
+                <TimerPill $danger={time <= 5}>
+                  <TimerSvg viewBox="0 0 50 50">
+                    <circle cx="25" cy="25" r="22" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+                    <circle
+                      cx="25" cy="25" r="22"
+                      fill="none"
+                      stroke={time <= 5 ? "#ff6b6b" : "#fbc417"}
+                      strokeWidth="3"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      transform="rotate(-90 25 25)"
+                    />
+                  </TimerSvg>
+                  <TimerText $danger={time <= 5}>{String(time).padStart(2, "0")}</TimerText>
+                </TimerPill>
+
+                <StatPill>
+                  <StatIcon>◈</StatIcon>
+                  <StatBody>
+                    <StatLabel>Level</StatLabel>
+                    <StatVal>{level}</StatVal>
+                  </StatBody>
+                </StatPill>
+              </ScoreRow>
             )}
-          </TopInfo>
+          </HeaderCenter>
+
+          <SoundBtn
+            onClick={() => { ensureAudioContext(); playStoneClick(); setSoundEnabled((p) => !p); }}
+            $active={soundEnabled}
+            title={soundEnabled ? "Mute" : "Unmute"}
+          >
+            {soundEnabled ? "🔊" : "🔇"}
+          </SoundBtn>
         </Header>
 
-        <Instruction $center={showTutorial} $gameLine={!showTutorial} $tutorial={showTutorial}>
-          {showTutorial ? (
-            "Listen, watch, and trace"
-          ) : (
-            <>
-              <GamePromptLabel>Write the Baybayin equivalent for:</GamePromptLabel>{" "}
-              <GamePromptTarget>{targetLetter}</GamePromptTarget>
-            </>
+        {/* ── DECORATIVE SIDE IMAGES ── */}
+        <LeftArt src={write1} />
+        <RightArt src={write2} />
+
+        {/* ── MAIN GAME CONTENT ── */}
+        <GameBody>
+          {/* Prompt strip */}
+          {!showTutorial && (
+            <PromptStrip>
+              <PromptLabel>Write the Baybayin for</PromptLabel>
+              <PromptTarget $pulse={isCorrectAnim}>{targetLetter}</PromptTarget>
+            </PromptStrip>
           )}
-        </Instruction>
 
-        {showTutorial && !isCountdownActive && (
-          <CenterCaptionPanel $withVisual={tutorialPhase !== "intro"}>
-            <TypingCaption>{typedCaption}</TypingCaption>
-            <StepDots>
-              {tutorialPhases.map((phase, idx) => (
-                <StepDot key={phase} $active={idx <= tutorialStepIndex} />
-              ))}
-            </StepDots>
-          </CenterCaptionPanel>
-        )}
+          {/* Tutorial caption */}
+          {showTutorial && !isCountdownActive && (
+            <TutorialPanel>
+              <TutorialHeading>Listen, watch, and trace</TutorialHeading>
+              <CaptionBubble>
+                <CaptionText>{typedCaption}<CaptionCursor /></CaptionText>
+              </CaptionBubble>
+              <ProgressDots>
+                {tutorialPhases.map((phase, idx) => (
+                  <Dot key={phase} $active={idx <= tutorialStepIndex} $current={idx === tutorialStepIndex} />
+                ))}
+              </ProgressDots>
+            </TutorialPanel>
+          )}
 
-        {isCountdownActive && (
-          <CountdownOverlay>
-            <CountdownBolt $left>⚡</CountdownBolt>
-            <CountdownLabel>Round 1 starts in</CountdownLabel>
-            <CountdownNumber>{countdown}</CountdownNumber>
-            <CountdownBolt>⚡</CountdownBolt>
-          </CountdownOverlay>
-        )}
+          {/* Countdown overlay */}
+          {isCountdownActive && (
+            <CountdownOverlay>
+              <CountdownRing>
+                <CountdownNum>{countdown}</CountdownNum>
+              </CountdownRing>
+              <CountdownHint>Round 1 begins…</CountdownHint>
+            </CountdownOverlay>
+          )}
 
-        <LeftSideImage src={write1} />
-        <RightSideImage src={write2} />
+          {/* Canvas area */}
+          {((showTutorial && tutorialPhase !== "intro") || !showTutorial) && (
+            <CanvasSection>
+              <CanvasFrame $shake={!showTutorial && isWrong} $correct={isCorrectAnim}>
+                <CanvasBg />
+                <Canvas
+                  ref={canvasRef}
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                />
+                {/* Corner ornaments */}
+                <Corner $pos="tl" />
+                <Corner $pos="tr" />
+                <Corner $pos="bl" />
+                <Corner $pos="br" />
+              </CanvasFrame>
 
-        {showTutorial ? (
-          <TutorialActionWrapper $withVisual={tutorialPhase !== "intro"}>
-            {isTutorialTracePhase && (
-              <CustomButton
-                label="Clear Trace"
-                onClick={handleClear}
-                width="170px"
-              />
-            )}
-            {showTutorialActionButton && (
-              <CustomButton
-                label={tutorialPrimaryButtonLabel}
-                onClick={() => {
-                  if (isTutorialTracePhase) handleClear();
-                  advanceTutorial();
-                }}
-                width={isTutorialTracePhase ? "200px" : "230px"}
-                disabled={isCountdownActive}
-              />
-            )}
-          </TutorialActionWrapper>
-        ) : null}
+              {/* Result tag */}
+              {!showTutorial && prediction && (
+                <ResultTag $correct={!!prediction.is_correct} $error={!!prediction.retry_message}>
+                  {prediction.retry_message
+                    ? `⚠ ${prediction.retry_message}`
+                    : prediction.is_correct
+                      ? "✓ Correct!"
+                      : `✗ Got: ${String(prediction.predicted || "").toUpperCase()}`}
+                </ResultTag>
+              )}
+            </CanvasSection>
+          )}
 
-        {!showTutorial && (
-          <GameActionWrapper>
-            <GameActionButton
-              type="button"
-              $variant="outline"
-              onClick={handleClear}
-            >
-              <span className="icon" aria-hidden="true">⌫</span>
-              <span>Clear</span>
-            </GameActionButton>
+          {/* Action buttons */}
+          {showTutorial && showTutorialActionButton && (
+            <TutorialActions>
+              {isTutorialTracePhase && (
+                <ActionBtn $variant="ghost" onClick={handleClear}>
+                  <BtnIcon>⌫</BtnIcon>
+                  Clear Trace
+                </ActionBtn>
+              )}
+              <ActionBtn $variant="primary" onClick={() => { if (isTutorialTracePhase) handleClear(); advanceTutorial(); }}>
+                {tutorialPrimaryButtonLabel}
+                <BtnIcon>→</BtnIcon>
+              </ActionBtn>
+            </TutorialActions>
+          )}
 
-            <GameActionButton
-              type="button"
-              $variant="solid"
-              onClick={handleSubmit}
-              disabled={isLoading}
-            >
-              <span className="icon" aria-hidden="true">➤</span>
-              <span>{isLoading ? "Checking..." : "Submit"}</span>
-            </GameActionButton>
+          {!showTutorial && (
+            <GameActions>
+              <ActionBtn $variant="ghost" onClick={handleClear}>
+                <BtnIcon>⌫</BtnIcon>
+                Clear
+              </ActionBtn>
 
-            <GameActionButton
-              type="button"
-              $variant="outline"
-              onClick={handleSkip}
-            >
-              <span className="icon" aria-hidden="true">⏭</span>
-              <span>Skip</span>
-            </GameActionButton>
-          </GameActionWrapper>
-        )}
+              <ActionBtn $variant="primary" onClick={handleSubmit} disabled={isLoading}>
+                {isLoading ? (
+                  <><SpinnerDot /><SpinnerDot $d="0.15s" /><SpinnerDot $d="0.3s" /></>
+                ) : (
+                  <><BtnIcon>➤</BtnIcon> Submit</>
+                )}
+              </ActionBtn>
 
-        {((showTutorial && tutorialPhase !== "intro") || !showTutorial) && (
-          <CanvasBorder $shake={!showTutorial && isWrong}>
-            <Canvas
-              ref={canvasRef}
-              onMouseDown={startDrawing}
-              onMouseMove={draw}
-              onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
-              onTouchStart={startDrawing}
-              onTouchMove={draw}
-              onTouchEnd={stopDrawing}
-            />
-          </CanvasBorder>
-        )}
+              <ActionBtn $variant="ghost" onClick={handleSkip}>
+                <BtnIcon>⏭</BtnIcon>
+                Skip
+              </ActionBtn>
+            </GameActions>
+          )}
+        </GameBody>
+      </PageRoot>
 
-        {!showTutorial && prediction && (
-          <Result
-            $correct={!!prediction.is_correct}
-            $error={!!prediction.retry_message}
-          >
-            {prediction.retry_message ? (
-              prediction.retry_message
-            ) : prediction.is_correct ? (
-              <>Correct!</>
-            ) : (
-              <>Predicted: {String(prediction.predicted || "").toUpperCase()}</>
-            )}
-          </Result>
-        )}
-      </Container>
-
+      {/* ── GAME OVER MODAL ── */}
       {gameOver && (
-        <Overlay>
-          <Modal>
-            <h2>⏳ Time's Up!</h2>
-            <p>Difficulty: {level}</p>
-            <p>Final Score: {score}</p>
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-                marginTop: "18px",
-                flexWrap: "wrap",
-              }}
-            >
-              <CustomButton
-                label="Restart"
-                onClick={handleRestart}
-                width="180px"
-                color="#ffb300"
-              />
-              <CustomButton
-                label={nextLevel ? `Next Round (${nextLevel})` : "Next Round"
-                }
-                onClick={handleNextRound}
-                width="200px"
-                color="#22c55e"
-                disabled={!nextLevel}
-              />
-            </div>
-          </Modal>
-        </Overlay>
+        <ModalOverlay>
+          <GameOverModal>
+            <ModalOrb>⏳</ModalOrb>
+            <ModalTitle>Time's Up!</ModalTitle>
+            <ModalStats>
+              <ModalStat>
+                <ModalStatLabel>Difficulty</ModalStatLabel>
+                <ModalStatVal>{level}</ModalStatVal>
+              </ModalStat>
+              <ModalDivider />
+              <ModalStat>
+                <ModalStatLabel>Final Score</ModalStatLabel>
+                <ModalStatVal $gold>{score}</ModalStatVal>
+              </ModalStat>
+            </ModalStats>
+            <ModalActions>
+              <ModalBtn $variant="amber" onClick={handleRestart}>↺ Restart</ModalBtn>
+              <ModalBtn $variant="green" onClick={handleNextRound} disabled={!nextLevel}>
+                {nextLevel ? `Next: ${nextLevel} →` : "Max Level"}
+              </ModalBtn>
+            </ModalActions>
+          </GameOverModal>
+        </ModalOverlay>
       )}
 
+      {/* ── EXIT CONFIRM MODAL ── */}
       {showExitConfirm && (
-        <Overlay>
-          <Modal>
-            <h3>Exit the Writing Game?</h3>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "20px",
-                justifyContent: "center",
-                marginTop: "20px",
-              }}
-            >
-              <CustomButton label="YES" onClick={() => confirmExit(true)} width="120px" color="red" />
-              <CustomButton label="NO" onClick={() => confirmExit(false)} width="120px" color="green" />
-            </div>
-          </Modal>
-        </Overlay>
+        <ModalOverlay>
+          <ExitModal>
+            <ModalTitle style={{ fontSize: "1.1rem" }}>Exit the Writing Game?</ModalTitle>
+            <ModalSubtext>Your progress will not be saved.</ModalSubtext>
+            <ModalActions>
+              <ModalBtn $variant="red" onClick={() => confirmExit(true)}>Yes, Exit</ModalBtn>
+              <ModalBtn $variant="green" onClick={() => confirmExit(false)}>Keep Playing</ModalBtn>
+            </ModalActions>
+          </ExitModal>
+        </ModalOverlay>
       )}
     </>
   );
@@ -1112,426 +812,712 @@ const WriteModeV2 = () => {
 
 export default WriteModeV2;
 
-/* ---------------- Animation Styles ---------------- */
+/* ═══════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════ */
 
 const pulse = keyframes`
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.18); }
 `;
 
-const floatIn = keyframes`
-  0% { transform: translate(-50%, -46%); opacity: 0; }
-  100% { transform: translate(-50%, -50%); opacity: 1; }
+const floatUp = keyframes`
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 `;
 
-const lightningFlash = keyframes`
-  0%, 100% { opacity: 0.35; transform: scale(0.92) rotate(-8deg); }
-  50% { opacity: 1; transform: scale(1.08) rotate(0deg); }
+const blink = keyframes`
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 `;
 
 const centeredShake = keyframes`
-  0%, 100% { transform: translateX(-50%); }
-  15% { transform: translateX(calc(-50% - 10px)); }
-  30% { transform: translateX(calc(-50% + 10px)); }
-  45% { transform: translateX(calc(-50% - 8px)); }
-  60% { transform: translateX(calc(-50% + 8px)); }
-  75% { transform: translateX(calc(-50% - 4px)); }
+  0%, 100% { transform: translateX(0); }
+  15%  { transform: translateX(-10px); }
+  30%  { transform: translateX(10px); }
+  45%  { transform: translateX(-8px); }
+  60%  { transform: translateX(8px); }
+  75%  { transform: translateX(-4px); }
 `;
 
-const styles = {
-  shake: {
-    animation: "shake 0.4s",
-  },
+const flashRed = keyframes`
+  0%, 100% { opacity: 0; }
+  25%, 75%  { opacity: 1; }
+`;
 
-  damageOverlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(220, 38, 38, 0.35)",
-    backdropFilter: "blur(2px)",
-    pointerEvents: "none",
-    zIndex: 999,
-    animation: "screenShake 0.8s ease",
-  },
-};
+const correctPop = keyframes`
+  0%   { opacity: 0; transform: scale(0.6); }
+  40%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.4); }
+`;
 
-/* ---------------- Styled Components ---------------- */
+const glowPulse = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 196, 23, 0.5); }
+  50%       { box-shadow: 0 0 0 12px rgba(251, 196, 23, 0); }
+`;
 
-const Container = styled.div`
+const timerDanger = keyframes`
+  0%, 100% { transform: scale(1); color: #ff6b6b; }
+  50%       { transform: scale(1.22); color: #ff3333; }
+`;
+
+const dotPop = keyframes`
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.35); }
+`;
+
+const ringPop = keyframes`
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+`;
+
+/* ═══════════════════════════════════
+   STYLED COMPONENTS
+═══════════════════════════════════ */
+
+/* ── Root ── */
+const PageRoot = styled.div`
+  position: relative;
   width: 100%;
+  min-height: 100vh;
   height: 100vh;
-  background: #943b07;
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  color: white;
-`;
-
-const Header = styled.div`
-  width: 100%;
-  height: 70px;
-  position: relative;
-  padding-top: 10px;
-`;
-
-const SoundToggle = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 24px;
-  z-index: 999;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: ${({ $active }) =>
-    $active ? "rgba(34, 197, 94, 0.22)" : "rgba(15, 23, 42, 0.28)"};
+  background: #6b1f00;
+  overflow: hidden;
+  font-family: 'Georgia', serif;
   color: #fff;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    background: ${({ $active }) =>
-      $active ? "rgba(34, 197, 94, 0.3)" : "rgba(15, 23, 42, 0.4)"};
-  }
-`;
-
-const Overlay = styled.div`
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-`;
-
-const Modal = styled.div`
-  background: white;
-  padding: 40px 50px;
-  border-radius: 18px;
-  color: #333;
-  border: 2px solid #ddd;
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
-`;
-
-const BackIcon = styled.img`
-  position: absolute;
-  top: -40%;
-  left: -5%;
-  width: 350px;
-  cursor: pointer;
-  z-index: 999;
-  transition: transform 0.3s;
-
-  &:hover {
-    transform: scale(0.9);
-  }
-`;
-
-const TopInfo = styled.div`
-  position: absolute;
-  left: 50%;
-  top: 6px;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 12px;
-  align-items: center;
-`;
-
-const InfoLine = styled.div`
-  font-size: 25px;
-  font-weight: 800;
-  ${({ $tutorial }) =>
-    $tutorial && css`
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      opacity: 0.92;
-    `}
-`;
-
-const InfoCard = styled.div`
-  min-width: 96px;
-  padding: 6px 10px;
-  border-radius: 12px;
-  text-align: center;
-  background: linear-gradient(120deg, rgba(65, 28, 6, 0.56), rgba(28, 12, 4, 0.3));
-  border: 1px solid rgba(251, 196, 23, 0.26);
-  backdrop-filter: blur(6px);
-`;
-
-const InfoLabel = styled.div`
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.1px;
-  color: rgba(255, 242, 220, 0.66);
-`;
-
-const InfoValue = styled.div`
-  margin-top: 2px;
-  font-size: 1.08rem;
-  font-weight: 900;
-  color: ${({ $highlight, $danger }) => ($danger ? "#ffb4b4" : $highlight ? "#fbc417" : "#fff4df")};
-  ${({ $danger }) =>
-    $danger && css`
-      animation: ${pulse} 1s ease-in-out infinite;
-    `}
-`;
-
-const Instruction = styled.div`
-  margin-top: 30px;
-  font-size: 15px;
-  font-weight: 590;
-  position: relative;
-  ${({ $tutorial }) =>
-    $tutorial && css`
-      width: fit-content;
-      margin: 18px auto 0;
-      padding: 8px 18px;
-      font-size: 30px;
-      font-weight: 700;
-      border: 1px solid rgba(255, 255, 255, 0.65);
-      border-radius: 14px;
-      background: rgba(0, 0, 0, 0.12);
-      letter-spacing: 0.2px;
-    `}
-  ${({ $gameLine }) =>
-    $gameLine && css`
-      margin-top: 18px;
-      font-size: 16px;
-      white-space: nowrap;
-      text-align: center;
-    `}
-  ${({ $center }) =>
-    $center
-      ? css`
-          left: 0;
-          text-align: center;
-        `
-      : css`
-          left: 0%;
-        `}
-`;
-
-const GamePromptLabel = styled.span`
-  font-size: 14px;
-  font-weight: 700;
-  color: rgba(255, 248, 231, 0.82);
-`;
-
-const GamePromptTarget = styled.span`
-  margin-top: 4px;
-  display: inline-block;
-  font-size: 48px;
-  font-weight: 900;
-  color: #fbc417;
-  letter-spacing: 0.5px;
-  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-`;
-
-const CenterCaptionPanel = styled.div`
-  position: absolute;
-  left: 50%;
-  top: ${({ $withVisual }) => ($withVisual ? "73%" : "50%")};
-  transform: translate(-50%, -50%);
-  width: min(86vw, 700px);
-  text-align: center;
-  z-index: 80;
-  animation: ${floatIn} 0.45s ease-out;
-`;
-
-const TypingCaption = styled.div`
-  margin: 0 auto;
-  width: min(86vw, 880px);
-  max-width: 100%;
-  min-height: 44px;
-  padding: 10px 18px;
-  border-radius: 12px;
-  background: linear-gradient(120deg, rgba(0, 0, 0, 0.28), rgba(255, 255, 255, 0.16));
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  font-size: 1.05rem;
-  font-weight: 650;
-  line-height: 1.35;
-  white-space: pre-wrap;
-  box-shadow: 0 8px 20px (0, 0, 0, 0.22);
-`;
-
-const StepDots = styled.div`
-  margin-top: 12px;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-`;
-
-const StepDot = styled.span`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: ${({ $active }) => ($active ? "#fde68a" : "rgba(255,255,255,0.35)")};
-  box-shadow: ${({ $active }) => ($active ? "0 0 12px rgba(253, 230, 138, 0.7)" : "none")};
-`;
-
-const TutorialActionWrapper = styled.div`
-  position: absolute;
-  left: 50%;
-  top: ${({ $withVisual }) => ($withVisual ? "84%" : "calc(55% + 70px)")};
-  transform: translateX(-50%);
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  z-index: 85;
-`;
-
-const GameActionWrapper = styled.div`
-  position: absolute;
-  left: 50%;
-  top: calc(25% + 484px);
-  transform: translateX(-50%);
-  display: flex;
-  width: min(440px, 84vw);
-  gap: 10px;
-  justify-content: center;
-  z-index: 85;
-
-  @media (max-width: 760px) {
-    width: min(440px, calc(100vw - 24px));
-    gap: 8px;
-  }
-`;
-
-const GameActionButton = styled.button`
-  flex: 1;
-  min-width: 0;
-  min-height: 40px;
-  border-radius: 10px;
-  padding: 7px 10px;
-  border: ${({ $variant }) => ($variant === "solid" ? "0" : "2px solid rgba(251, 196, 23, 0.62)")};
-  background: ${({ $variant }) => ($variant === "solid" ? "#fbc417" : "rgba(126, 52, 5, 0.25)")};
-  color: ${({ $variant }) => ($variant === "solid" ? "#3d2401" : "#fff7e7")};
-  font-size: 0.92rem;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-  opacity: ${({ disabled }) => (disabled ? 0.65 : 1)};
-  transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  .icon {
-    font-size: 14px;
-    line-height: 1;
-    opacity: 0.9;
-  }
-
-  &:hover {
-    transform: ${({ disabled }) => (disabled ? "none" : "translateY(-1px)")};
-    filter: ${({ disabled }) => (disabled ? "none" : "brightness(1.06)")};
-  }
-
-  &:active {
-    transform: ${({ disabled }) => (disabled ? "none" : "translateY(1px)")};
-  }
-
-  @media (max-width: 760px) {
-    min-height: 38px;
-    font-size: 0.88rem;
-    padding: 7px 8px;
-  }
-`;
-
-const CountdownOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  z-index: 120;
 `;
 
-const CountdownLabel = styled.div`
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 14px;
-`;
-
-const CountdownNumber = styled.div`
-  font-size: 6rem;
-  font-weight: 800;
-  color: #fde68a;
-  ${({ children }) => children && css`animation: ${pulse} 0.9s ease-in-out;`}
-`;
-
-const CountdownBolt = styled.div`
+/* Layered background */
+const BgTexture = styled.div`
   position: absolute;
-  ${({ $left }) => ($left ? "left: 40%;" : "right: 40%;")}
-  top: 56%;
-  font-size: 2.2rem;
-  color: #fde047;
-  filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.9));
-  animation: ${lightningFlash} 0.45s ease-in-out infinite;
-  animation-delay: ${({ $left }) => ($left ? "0s" : "0.2s")};
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 60px,
+      rgba(0,0,0,0.04) 60px,
+      rgba(0,0,0,0.04) 61px
+    );
   pointer-events: none;
+  z-index: 0;
 `;
 
-const LeftSideImage = styled.img`
+const BgGlow = styled.div`
   position: absolute;
-  top: 0%;
-  left: 0%;
-  width: 339px;
-`;
-
-const RightSideImage = styled.img`
-  position: absolute;
-  top: 0%;
-  right: 0%;
-  width: 339px;
-`;
-
-const CanvasBorder = styled.div`
-  position: absolute;
-  top: 25%;
+  top: -30%;
   left: 50%;
   transform: translateX(-50%);
-  padding: 12px;
+  width: 80vw;
+  height: 80vw;
+  max-width: 700px;
+  max-height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,196,23,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+`;
+
+/* ── Overlays ── */
+const DamageOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(220, 38, 38, 0.38);
+  pointer-events: none;
+  z-index: 9000;
+  animation: ${flashRed} 0.55s ease forwards;
+`;
+
+const CorrectBurst = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(251, 196, 23, 0.18);
+  pointer-events: none;
+  z-index: 9000;
+  animation: ${correctPop} 0.8s ease forwards;
+`;
+
+/* ── Header ── */
+const Header = styled.header`
+  position: relative;
+  z-index: 100;
+  width: 100%;
+  padding: 12px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+`;
+
+const BackBtn = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  &:hover { transform: scale(0.9); }
+`;
+
+const BackBtnIcon = styled.img`
+  width: 140px;
+  display: block;
+  margin-top: -30px;
+`;
+
+const HeaderCenter = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+`;
+
+const TutorialBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(251, 196, 23, 0.15);
+  border: 1px solid rgba(251, 196, 23, 0.4);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #fde68a;
+`;
+
+const TutorialBadgeDot = styled.span`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fbc417;
+  box-shadow: 0 0 6px rgba(251, 196, 23, 0.8);
+  animation: ${blink} 1.4s ease-in-out infinite;
+`;
+
+const ScoreRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const StatPill = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+`;
+
+const StatIcon = styled.span`
+  font-size: 13px;
+  opacity: 0.55;
+  color: #fbc417;
+`;
+
+const StatBody = styled.div``;
+
+const StatLabel = styled.div`
+  font-family: sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255, 242, 210, 0.55);
+`;
+
+const StatVal = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: ${({ $gold }) => ($gold ? "#fbc417" : "#fff4df")};
+`;
+
+/* Timer ring */
+const TimerPill = styled.div`
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const TimerSvg = styled.svg`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+`;
+
+const TimerText = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  font-weight: 900;
+  position: relative;
+  z-index: 1;
+  color: ${({ $danger }) => ($danger ? "#ff6b6b" : "#fff")};
+  ${({ $danger }) => $danger && css`animation: ${timerDanger} 0.7s ease-in-out infinite;`}
+`;
+
+const SoundBtn = styled.button`
+  flex-shrink: 0;
+  background: ${({ $active }) => ($active ? "rgba(34,197,94,0.18)" : "rgba(0,0,0,0.28)")};
+  border: 1px solid ${({ $active }) => ($active ? "rgba(34,197,94,0.4)" : "rgba(255,255,255,0.2)")};
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  &:hover { transform: translateY(-1px); }
+`;
+
+/* ── Side art ── */
+const LeftArt = styled.img`
+  position: absolute;
+  top: 0;
+  left: -40px;
+  width: 290px;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+`;
+
+const RightArt = styled.img`
+  position: absolute;
+  top: 0;
+  right: -40px;
+  width: 290px;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+`;
+
+/* ── Game Body ── */
+const GameBody = styled.main`
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px 16px;
+  overflow-y: auto;
+`;
+
+/* ── Prompt strip ── */
+const PromptStrip = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 0 2px;
+  animation: ${floatUp} 0.4s ease;
+`;
+
+const PromptLabel = styled.div`
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255, 248, 231, 0.6);
+`;
+
+const PromptTarget = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 52px;
+  font-weight: 900;
+  line-height: 1.0;
+  color: #fbc417;
+  text-shadow: 0 4px 18px rgba(251,196,23,0.35), 0 0 40px rgba(251,196,23,0.15);
+  letter-spacing: 1px;
+  ${({ $pulse }) => $pulse && css`animation: ${glowPulse} 0.6s ease;`}
+`;
+
+/* ── Tutorial panel ── */
+const TutorialPanel = styled.div`
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  animation: ${floatUp} 0.4s ease;
+`;
+
+const TutorialHeading = styled.h2`
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: #fde68a;
+  letter-spacing: 0.3px;
+`;
+
+const CaptionBubble = styled.div`
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 220, 150, 0.25);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+`;
+
+const CaptionText = styled.p`
+  margin: 0;
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #fff8e8;
+  min-height: 22px;
+`;
+
+const CaptionCursor = styled.span`
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #fbc417;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: ${blink} 0.8s step-start infinite;
+`;
+
+const ProgressDots = styled.div`
+  display: flex;
+  gap: 7px;
+  align-items: center;
+`;
+
+const Dot = styled.span`
+  width: ${({ $current }) => ($current ? "24px" : "10px")};
+  height: 10px;
+  border-radius: 999px;
+  background: ${({ $active }) => ($active ? "#fbc417" : "rgba(255,255,255,0.2)")};
+  box-shadow: ${({ $active }) => ($active ? "0 0 8px rgba(251,196,23,0.7)" : "none")};
+  transition: all 0.3s ease;
+  ${({ $current }) => $current && css`animation: ${dotPop} 1.4s ease-in-out infinite;`}
+`;
+
+/* ── Canvas section ── */
+const CanvasSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+`;
+
+const CanvasFrame = styled.div`
+  position: relative;
   border-radius: 20px;
-  animation: ${({ $shake }) => ($shake ? css`${centeredShake} 0.4s ease` : "none")};
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(139,90,43,0.5) 0%, rgba(80,40,10,0.6) 100%);
+  border: 1px solid rgba(251, 196, 23, 0.25);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,220,150,0.15),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+  ${({ $shake }) => $shake && css`animation: ${centeredShake} 0.4s ease;`}
+  ${({ $correct }) => $correct && css`border-color: rgba(34,197,94,0.6); box-shadow: 0 0 20px rgba(34,197,94,0.3);`}
+`;
+
+const CanvasBg = styled.div`
+  position: absolute;
+  inset: 10px;
+  border-radius: 12px;
+  background: #fdf8f0;
+  z-index: 0;
+`;
+
+/* Corner ornaments */
+const Corner = styled.div`
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: rgba(251, 196, 23, 0.55);
+  border-style: solid;
+  z-index: 2;
+  pointer-events: none;
+  ${({ $pos }) => {
+    switch ($pos) {
+      case "tl": return css`top: 6px; left: 6px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0;`;
+      case "tr": return css`top: 6px; right: 6px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0;`;
+      case "bl": return css`bottom: 6px; left: 6px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px;`;
+      case "br": return css`bottom: 6px; right: 6px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0;`;
+      default: return "";
+    }
+  }}
 `;
 
 const Canvas = styled.canvas`
   position: relative;
-  top: 0px;
-  left: 0px;
-  width: min(440px, 84vw);
-  height: min(440px, 84vw);
-  background: #ffffff;
-  border-radius: 20px;
+  z-index: 1;
+  width: min(400px, 80vw);
+  height: min(400px, 80vw);
+  background: transparent;
+  border-radius: 12px;
   cursor: crosshair;
-
   touch-action: none;
+  display: block;
 `;
 
-const Result = styled.p`
-  position: absolute;
-  top: calc(25% + 452px);
-  left: 50%;
-  transform: translateX(-50%);
-  color: ${({ $correct, $error }) => ($error ? "#ffe4e6" : $correct ? "#dcfce7" : "#fee2e2")};
-  font-size: 17px;
+/* ── Result tag ── */
+const ResultTag = styled.div`
+  font-family: sans-serif;
+  font-size: 14px;
   font-weight: 700;
-  background: ${({ $correct, $error }) => ($error ? "rgba(127, 29, 29, 0.45)" : $correct ? "rgba(22, 101, 52, 0.28)" : "rgba(127, 29, 29, 0.34)")};
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 2px solid ${({ $correct, $error }) => ($error ? "rgba(251, 113, 133, 0.45)" : $correct ? "rgba(74, 222, 128, 0.45)" : "rgba(252, 165, 165, 0.42)")};
-  z-index: 96;
-  max-width: min(440px, 84vw);
+  letter-spacing: 0.3px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  color: ${({ $correct, $error }) => $error ? "#fca5a5" : $correct ? "#bbf7d0" : "#fca5a5"};
+  background: ${({ $correct, $error }) => $error ? "rgba(127,29,29,0.5)" : $correct ? "rgba(22,101,52,0.4)" : "rgba(127,29,29,0.4)"};
+  border: 1px solid ${({ $correct, $error }) => $error ? "rgba(252,165,165,0.4)" : $correct ? "rgba(74,222,128,0.4)" : "rgba(252,165,165,0.35)"};
+  animation: ${floatUp} 0.3s ease;
+`;
+
+/* ── Action buttons ── */
+const TutorialActions = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+`;
+
+const GameActions = styled.div`
+  display: flex;
+  gap: 10px;
+  width: min(420px, 84vw);
+  justify-content: center;
+`;
+
+const ActionBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  opacity: ${({ disabled }) => (disabled ? 0.55 : 1)};
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  flex: ${({ $variant }) => $variant === "primary" ? "2" : "1"};
+
+  ${({ $variant }) => {
+    if ($variant === "primary") return css`
+      background: linear-gradient(135deg, #fbc417 0%, #f59e0b 100%);
+      border: none;
+      color: #3d2401;
+      box-shadow: 0 4px 14px rgba(251,196,23,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+      &:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(251,196,23,0.45); }
+      &:active:not(:disabled) { transform: translateY(1px); }
+    `;
+    return css`
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(251,196,23,0.3);
+      color: #fff7e7;
+      &:hover:not(:disabled) { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+      &:active:not(:disabled) { transform: translateY(1px); }
+    `;
+  }}
+`;
+
+const BtnIcon = styled.span`
+  font-size: 13px;
+  opacity: 0.9;
+`;
+
+/* Spinner dots */
+const spinnerPulse = keyframes`
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+`;
+
+const SpinnerDot = styled.span`
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3d2401;
+  animation: ${spinnerPulse} 1.2s ease-in-out infinite;
+  animation-delay: ${({ $d }) => $d || "0s"};
+`;
+
+/* ── Countdown ── */
+const CountdownOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 200;
+`;
+
+const CountdownRing = styled.div`
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid rgba(251, 196, 23, 0.5);
+  background: rgba(251, 196, 23, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(251, 196, 23, 0.2);
+  animation: ${ringPop} 0.9s ease;
+`;
+
+const CountdownNum = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 64px;
+  font-weight: 900;
+  color: #fbc417;
+  text-shadow: 0 0 20px rgba(251,196,23,0.6);
+`;
+
+const CountdownHint = styled.div`
+  font-family: sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+`;
+
+/* ── Modals ── */
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+`;
+
+const GameOverModal = styled.div`
+  background: linear-gradient(160deg, #2c1204 0%, #1a0b02 100%);
+  border: 1px solid rgba(251, 196, 23, 0.3);
+  border-radius: 24px;
+  padding: 36px 32px 28px;
+  width: 100%;
+  max-width: 380px;
   text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,120,0.12);
+  animation: ${ringPop} 0.4s ease;
+`;
+
+const ExitModal = styled(GameOverModal)``;
+
+const ModalOrb = styled.div`
+  font-size: 40px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+`;
+
+const ModalTitle = styled.h2`
+  font-family: 'Georgia', serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin: 0 0 20px;
+  color: #fde68a;
+  letter-spacing: 0.3px;
+`;
+
+const ModalSubtext = styled.p`
+  font-family: sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  margin: -12px 0 20px;
+`;
+
+const ModalStats = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+`;
+
+const ModalStat = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+`;
+
+const ModalStatLabel = styled.div`
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255, 242, 210, 0.5);
+`;
+
+const ModalStatVal = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: ${({ $gold }) => ($gold ? "#fbc417" : "#fff4df")};
+`;
+
+const ModalDivider = styled.div`
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+`;
+
+const ModalBtn = styled.button`
+  flex: 1;
+  min-width: 120px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  opacity: ${({ disabled }) => (disabled ? 0.45 : 1)};
+  transition: transform 0.15s ease, filter 0.15s ease;
+  border: none;
+  &:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+  &:active:not(:disabled) { transform: translateY(1px); }
+
+  ${({ $variant }) => {
+    if ($variant === "amber") return css`background: linear-gradient(135deg, #f59e0b, #d97706); color: #3d2401;`;
+    if ($variant === "green") return css`background: linear-gradient(135deg, #22c55e, #16a34a); color: #052e16;`;
+    if ($variant === "red")   return css`background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff;`;
+    return css`background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;`;
+  }}
 `;
