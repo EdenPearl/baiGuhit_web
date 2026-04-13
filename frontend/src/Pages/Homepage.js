@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import styled from 'styled-components';
 import Navbar from '../Components/Navbar';
 import HeroSection from '../Components/Home';
 import PricingSection from '../Components/Pricing';
@@ -22,43 +21,31 @@ const HomePage = () => {
     };
 
   return (
-    <HomePageContainer>
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden font-['Poppins']">
       <Navbar 
         scrollToSection={scrollToSection} 
         refs={{ heroRef, pricingRef, researchRef ,aboutRef }} 
       />
-      <Section ref={heroRef}>
+      <section ref={heroRef} className="w-full">
         <HeroSection />
-      </Section>
-      <Section ref={pricingRef}>
+      </section>
+      <section ref={pricingRef} className="w-full">
         <PricingSection />
-      </Section>
-      <Section ref={researchRef}>
+      </section>
+      <section ref={researchRef} className="w-full">
         <ResearchSection />  {/* Add the ResearchSection here */}
-      <Section ref={aboutRef}>
+      </section>
+      <section ref={aboutRef} className="w-full">
         <AboutSection />
-      </Section>
-      </Section>
-      <Section>
+      </section>
+      <section className="w-full">
         <TeamMembers />
-      </Section>
-      <Section>
+      </section>
+      <section className="w-full">
         <Footer />
-      </Section>
-    </HomePageContainer>
+      </section>
+    </div>
   );
 };
 
 export default HomePage;
-
-const HomePageContainer = styled.div`
-  overflow-x: hidden;
-  font-family: 'Poppins', sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Section = styled.div`
-  width: 100%;
-`;
