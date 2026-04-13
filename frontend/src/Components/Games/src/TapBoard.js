@@ -220,11 +220,13 @@ const TapBoard = () => {
                                                         </PlayerInfo>
                                                     </PlayerCell>
                                                     <DateCell>
-                                                        {row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { 
-                                                            month: 'short', 
-                                                            day: 'numeric'
-                                                        }) : "Recently"}
-                                                    </DateCell>
+    {row.created_at || row.createdAt 
+        ? new Date(row.created_at || row.createdAt).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric'
+        }) 
+        : "Recently"}
+</DateCell>
                                                     <ScoreCell>
                                                         <ScoreValue>{row.score || 0}</ScoreValue>
                                                         <ScoreLabel>points</ScoreLabel>
