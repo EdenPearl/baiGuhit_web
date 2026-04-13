@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import CustomButton from "./CustomButton.js";
 import home from "../../../Assests/backB.png";
-import stoneClick from "../../../Assests/stone.mp3"; // stone click sound
+import stoneClick from "../../../Assests/stone.mp3";
 import useGameDataByCategory from "../../../Hooks/GameHooks/useGameDataByCategory";
 import confetti from "canvas-confetti";
 import errorSoundFile from "../../../Assests/stone.mp3";
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
 import { keyframes, css } from "styled-components";
-
 
 const BackButton = styled.img`
   position: absolute;
@@ -45,7 +44,6 @@ const pulse = keyframes`
   50% { transform: scale(1.25); }
 `;
 
-/* 🔥 SCORE - now standalone */
 const ScoreBox = styled.div`
   position: absolute;
   top: 30px;
@@ -53,10 +51,9 @@ const ScoreBox = styled.div`
   font-size: 1.3rem;
   font-weight: bold;
   color: white;
-  z-index: 20; /* ensure it sits on top */
+  z-index: 20;
 `;
 
-/* 🔥 TIMER - now standalone */
 const TimeWrapper = styled.div`
   position: absolute;
   top: 30px;
@@ -66,7 +63,7 @@ const TimeWrapper = styled.div`
 
 const TimeBarBackground = styled.div`
   position: relative;
-  width: 360px;   /* 🔥 ADJUST LIFE LENGTH HERE */
+  width: 360px;
   height: 32px;
   border-radius: 16px;
   background: rgba(255,255,255,0.3);
@@ -97,9 +94,9 @@ const TimeText = styled.div`
     `}
 `;
 
-
-const TapMode = ({ selectedDifficulty = "animal", startGame = false }) => {
+const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver }) => {
   const navigate = useNavigate();
+  const scoreSaved = useRef(false);
 
   const [targetIndex, setTargetIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -120,20 +117,10 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false }) => {
   errorSound.volume = 0.7;
   const [tileVibrate, setTileVibrate] = useState(false);
 
-
-
-
-
-
-
-
   const MAX_TIME = 30;
-
-  // 🔊 Stone click sound
   const clickSound = new Audio(stoneClick);
   clickSound.volume = 0.6;
 
-  /* ================= START GAME ================= */
   useEffect(() => {
     if (!startGame) return;
     setIsGameStarted(true);
@@ -141,272 +128,193 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false }) => {
     setTargetIndex(0);
     setGameOver(false);
     setTimeLeft(MAX_TIME);
+    scoreSaved.current = false;
     generateTiles();
   }, [startGame]);
 
+  useEffect(() => {
+    if (gameOver && onGameOver && !scoreSaved.current) {
+      scoreSaved.current = true;
+      onGameOver(score);
+    }
+  }, [gameOver, score, onGameOver]);
 
   const BAYBAYIN_CHARACTERS = [
-  "ᜀ",
-  "ᜃ","ᜊ",
-  "ᜐᜓ", "ᜉᜓ", "ᜐ"
-];
-
- 
-/* ================= GENERATE TILES ================= */
-const generateTiles = () => {
-  if (!startGame || !correctAnswer) return;
-
-  // Split correct answer into individual Baybayin characters
-  const correctChars = correctAnswer.match(/[\u1700-\u171F]/g) || [];
-
-  // Full pool of possible tiles
-  const allChars = [
-    "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ","ᜉ","ᜊ","ᜋ","ᜌ","ᜎ",
-    "ᜏ","ᜐ","ᜑ","ᜒ","ᜓ","᜔"
+    "ᜀ",
+    "ᜃ","ᜊ",
+    "ᜐᜓ", "ᜉᜓ", "ᜐ"
   ];
 
-  // Exclude correct characters for wrong options
-  const wrongChars = allChars.filter((c) => !correctChars.includes(c));
+  const generateTiles = () => {
+    if (!startGame || !correctAnswer) return;
+    const correctChars = correctAnswer.match(/[\u1700-\u171F]/g) || [];
+    const allChars = [
+      "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ","ᜉ","ᜊ","ᜋ","ᜌ","ᜎ",
+      "ᜏ","ᜐ","ᜑ","ᜒ","ᜓ","᜔"
+    ];
+    const wrongChars = allChars.filter((c) => !correctChars.includes(c));
+    const totalTiles = 10;
+    let tilesToShow = [...correctChars];
+    const neededWrong = totalTiles - tilesToShow.length;
+    if (neededWrong > 0) {
+      const randomWrong = wrongChars
+        .sort(() => 0.5 - Math.random())
+        .slice(0, neededWrong);
+      tilesToShow = [...tilesToShow, ...randomWrong];
+    }
+    tilesToShow = tilesToShow.sort(() => 0.5 - Math.random());
+    setTiles(tilesToShow);
+    setSelectedTiles([]);
+    setTypedAnswer("");
+  };
 
-  const totalTiles = 10;
+  const reshuffleTiles = () => {
+    if (!correctAnswer) return;
+    const correctChars = correctAnswer.match(/[\u1700-\u171F]/g) || [];
+    const allChars = [
+      "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ","ᜉ","ᜊ","ᜋ","ᜌ","ᜎ",
+      "ᜏ","ᜐ","ᜑ","ᜒ","ᜓ","᜔"
+    ];
+    const wrongChars = allChars.filter((c) => !correctChars.includes(c));
+    const totalTiles = 10;
+    let newTiles = [...correctChars];
+    const neededWrong = totalTiles - newTiles.length;
+    if (neededWrong > 0) {
+      const randomWrong = wrongChars
+        .sort(() => 0.5 - Math.random())
+        .slice(0, neededWrong);
+      newTiles = [...newTiles, ...randomWrong];
+    }
+    newTiles = newTiles.sort(() => 0.5 - Math.random());
+    setTiles(newTiles);
+    setSelectedTiles([]);
+    setTypedAnswer("");
+  };
 
-  // Always include all correct characters first
-  let tilesToShow = [...correctChars];
-
-  // Fill the remaining slots with random wrong tiles
-  const neededWrong = totalTiles - tilesToShow.length;
-  if (neededWrong > 0) {
-    const randomWrong = wrongChars
-      .sort(() => 0.5 - Math.random())
-      .slice(0, neededWrong);
-    tilesToShow = [...tilesToShow, ...randomWrong];
-  }
-
-  // Shuffle the final tiles
-  tilesToShow = tilesToShow.sort(() => 0.5 - Math.random());
-
-  setTiles(tilesToShow);
-  setSelectedTiles([]);
-  setTypedAnswer("");
-};
-
-
-const reshuffleTiles = () => {
-  if (!correctAnswer) return;
-
-  // Split correct answer into characters
-  const correctChars = correctAnswer.match(/[\u1700-\u171F]/g) || [];
-
-  // Full pool of tiles
-  const allChars = [
-    "ᜀ","ᜁ","ᜂ","ᜃ","ᜄ","ᜅ","ᜆ","ᜇ","ᜈ","ᜉ","ᜊ","ᜋ","ᜌ","ᜎ",
-    "ᜏ","ᜐ","ᜑ","ᜒ","ᜓ","᜔"
-  ];
-
-  // Exclude correct characters for wrong options
-  const wrongChars = allChars.filter((c) => !correctChars.includes(c));
-  const totalTiles = 10;
-
-  // Always include all correct characters first
-  let newTiles = [...correctChars];
-
-  // Fill remaining slots with random wrong tiles
-  const neededWrong = totalTiles - newTiles.length;
-  if (neededWrong > 0) {
-    const randomWrong = wrongChars
-      .sort(() => 0.5 - Math.random())
-      .slice(0, neededWrong);
-    newTiles = [...newTiles, ...randomWrong];
-  }
-
-  // Shuffle tiles
-  newTiles = newTiles.sort(() => 0.5 - Math.random());
-
-  setTiles(newTiles);
-  setSelectedTiles([]);
-  setTypedAnswer("");
-};
-
-
-
-  /* ================= TIMER ================= */
   useEffect(() => {
     if (!isGameStarted || gameOver) return;
-
     if (timeLeft <= 0) {
       setGameOver(true);
       return;
     }
-
     const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(timer);
   }, [timeLeft, isGameStarted, gameOver]);
 
   useEffect(() => {
-  if (baybayinWord) {
-    setCorrectAnswer(baybayinWord);
-  }
-}, [baybayinWord]);
+    if (baybayinWord) {
+      setCorrectAnswer(baybayinWord);
+    }
+  }, [baybayinWord]);
 
+  useEffect(() => {
+    console.log("Correct answer from DB:", baybayinWord);
+  }, [baybayinWord]);
 
-useEffect(() => {
-  console.log("Correct answer from DB:", baybayinWord);
-}, [baybayinWord]);
-
-
-  /* ================= GAME LOGIC ================= */
   const checkAnswer = () => {
-  if (!typedAnswer) return;
-
-  if (typedAnswer === correctAnswer) {
-    setScore((s) => s + 1);
-
-    const duration = 800;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-      });
-
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-
-    frame();
-    nextQuestion();
-
-  } else {
-    // 🔊 Error sound
-    errorSound.currentTime = 0;
-    errorSound.play();
-
-    // 🔴 Flash
-    setFlash(true);
-
-    // 💥 Shake answer
-    setIsWrong(true);
-
-    // 📳 Vibrate tiles
-    setTileVibrate(true);
-
-    setTimeout(() => {
-      setFlash(false);
-      setIsWrong(false);
-      setTileVibrate(false);
-
-      // Clear wrong answer
-      setSelectedTiles([]);
-      setTypedAnswer("");
-    }, 600);
-
-    console.log("WRONG TRIGGERED");
-
-  }
-};
-
+    if (!typedAnswer) return;
+    if (typedAnswer === correctAnswer) {
+      setScore((s) => s + 1);
+      const duration = 800;
+      const end = Date.now() + duration;
+      const frame = () => {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+        });
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+      nextQuestion();
+    } else {
+      errorSound.currentTime = 0;
+      errorSound.play();
+      setFlash(true);
+      setIsWrong(true);
+      setTileVibrate(true);
+      setTimeout(() => {
+        setFlash(false);
+        setIsWrong(false);
+        setTileVibrate(false);
+        setSelectedTiles([]);
+        setTypedAnswer("");
+      }, 600);
+      console.log("WRONG TRIGGERED");
+    }
+  };
 
   const skipQuestion = () => nextQuestion();
 
   const nextQuestion = () => {
-  if (!loading && baybayinWord) {
-    // Pick a new word until it is different from previousWord
-    let newWord = baybayinWord;
-
-    const allWords = [...BAYBAYIN_CHARACTERS]; // your full pool of words/characters
-
-    while (newWord === previousWord && allWords.length > 1) {
-      newWord = allWords[Math.floor(Math.random() * allWords.length)];
+    if (!loading && baybayinWord) {
+      let newWord = baybayinWord;
+      const allWords = [...BAYBAYIN_CHARACTERS];
+      while (newWord === previousWord && allWords.length > 1) {
+        newWord = allWords[Math.floor(Math.random() * allWords.length)];
+      }
+      setCorrectAnswer(newWord);
+      setPreviousWord(newWord);
     }
-
-    setCorrectAnswer(newWord);
-    setPreviousWord(newWord); // update previous
-  }
-
-  generateTiles();
-  refetch();
-};
-
-
+    generateTiles();
+    refetch();
+  };
 
   const handleRestart = () => {
-  setScore(0);
-  setTargetIndex(0);
-  setGameOver(false);
-  setTimeLeft(MAX_TIME);
-  setPreviousWord(null);
-  generateTiles();
-};
-
-
+    scoreSaved.current = false;
+    setScore(0);
+    setTargetIndex(0);
+    setGameOver(false);
+    setTimeLeft(MAX_TIME);
+    setPreviousWord(null);
+    generateTiles();
+  };
 
   const handleClear = () => {
-  // Remove last character
-  if (typedAnswer.length === 0) return;
+    if (typedAnswer.length === 0) return;
+    const newSelectedTiles = [...selectedTiles];
+    newSelectedTiles.pop();
+    setSelectedTiles(newSelectedTiles);
+    setTypedAnswer(newSelectedTiles.join(""));
+  };
 
-  const newSelectedTiles = [...selectedTiles];
-  newSelectedTiles.pop(); // remove last tile
-  setSelectedTiles(newSelectedTiles);
-  setTypedAnswer(newSelectedTiles.join(""));
-};
-
-  /* ================= TILE CLICK ================= */
   const handleTileClick = (tile) => {
-  if (gameOver) return;
+    if (gameOver) return;
+    clickSound.currentTime = 0;
+    clickSound.play();
+    setSelectedTiles((prev) => {
+      const newTiles = [...prev, tile];
+      setTypedAnswer(newTiles.join(""));
+      return newTiles;
+    });
+  };
 
-  clickSound.currentTime = 0;
-  clickSound.play();
-
-  setSelectedTiles((prev) => {
-    const newTiles = [...prev, tile];
-
-    // ✅ instantly update text (no animation)
-    setTypedAnswer(newTiles.join(""));
-
-    return newTiles;
-  });
-};
-
-
-
-  /* ================= RENDER ================= */
   return (
     <div
-  style={{
-    ...styles.body,
-    background: flash
-      ? "linear-gradient(135deg,#7f1d1d,#b91c1c)"
-      : "linear-gradient(135deg,#C2410C,#EA580C)",
-    transition: "background 0.15s ease-in-out",
-  }}
->
-
-    {/* FLOATING RED DAMAGE OVERLAY */}
-    {flash && <div style={styles.damageOverlay} />}
-
-    <LeftDecor src={write1} alt="Decor Left" />
-    <RightDecor src={write2} alt="Decor Right" />
-
-      {/* BACK BUTTON */}
+      style={{
+        ...styles.body,
+        background: flash
+          ? "linear-gradient(135deg,#7f1d1d,#b91c1c)"
+          : "linear-gradient(135deg,#C2410C,#EA580C)",
+        transition: "background 0.15s ease-in-out",
+      }}
+    >
+      {flash && <div style={styles.damageOverlay} />}
+      <LeftDecor src={write1} alt="Decor Left" />
+      <RightDecor src={write2} alt="Decor Right" />
       <BackButton src={home} alt="Back" onClick={() => navigate("/HomeGame")} />
-
-      {/* 🔥 SCORE (no container) */}
       <ScoreBox>
          Score: {score}
       </ScoreBox>
-
-      {/* 🔥 TIMER (no container) */}
       <TimeWrapper>
         <TimeBarBackground>
           <TimeBarFill width={(timeLeft / MAX_TIME) * 100} />
@@ -415,35 +323,30 @@ useEffect(() => {
           </TimeText>
         </TimeBarBackground>
       </TimeWrapper>
-
-      {/* CANVAS BOX */}
       <div style={styles.canvasBox}>
         {loading ? (
-  <span>Loading...</span>
-) : imageUrl ? (
-  <img
-    src={imageUrl}
-    alt="Game"
-    style={{
-      maxWidth: "100%",
-      maxHeight: "100%",
-      borderRadius: "20px",
-      objectFit: "contain",
-    }}
-  />
-) : (
-  <span>No Image</span>
-)}
-
+          <span>Loading...</span>
+        ) : imageUrl ? (
+          <img
+            src={imageUrl}
+            alt="Game"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              borderRadius: "20px",
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <span>No Image</span>
+        )}
       </div>
-
-      {/* ANSWER LINE */}
       <div
-  style={{
-    ...styles.answerLine,
-    ...(isWrong ? styles.shake : {}),
-  }}
->
+        style={{
+          ...styles.answerLine,
+          ...(isWrong ? styles.shake : {}),
+        }}
+      >
         {selectedTiles.length === 0 ? (
           <span style={styles.answerPlaceholder}>
             Click tiles below to form your answer
@@ -452,39 +355,34 @@ useEffect(() => {
           <span style={styles.answerSentence}>{typedAnswer}</span>
         )}
       </div>
-
-      {/* TILES */}
       <div style={styles.tilesPanel}>
         {tiles.map((tile, index) => (
-  <div
-    key={index}
-    style={{
-      ...styles.tile,
-      ...(tileVibrate ? styles.vibrate : {}),
-    }}
-    onClick={() => handleTileClick(tile)}
-  >
-    {tile}
-  </div>
-))}
-
-
+          <div
+            key={index}
+            style={{
+              ...styles.tile,
+              ...(tileVibrate ? styles.vibrate : {}),
+            }}
+            onClick={() => handleTileClick(tile)}
+          >
+            {tile}
+          </div>
+        ))}
       </div>
-
-      {/* BUTTONS */}
       <div style={styles.buttonGroup}>
         <CustomButton label="Check Answer" onClick={checkAnswer} />
         <CustomButton label="Clear" onClick={handleClear} />
         <CustomButton label="Skip" onClick={skipQuestion} />
         <CustomButton label="Reshuffle Tiles" onClick={reshuffleTiles} />
       </div>
-
-      {/* GAME OVER MODAL */}
       {gameOver && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
             <h2>⏰ Time's Up!</h2>
             <p>Final Score: {score}</p>
+            <p style={{ fontSize: '0.9rem', color: '#666' }}>
+              Score saved to {selectedDifficulty} leaderboard!
+            </p>
             <div style={styles.horizontalButtonGroup}>
               <CustomButton label="Restart" onClick={handleRestart} />
               <CustomButton
@@ -499,7 +397,6 @@ useEffect(() => {
   );
 };
 
-/* ================= STYLES ================= */
 const styles = {
   body: {
     minHeight: "100vh",
@@ -571,22 +468,22 @@ const styles = {
     color: "#dc2626",
   },
   answerLine: {
-  width: 500, // fixed width
-  minHeight: 60, // fixed height to avoid moving
-  height: 60, // ensure consistent height
-  borderBottom: "4px solid #fbbf24",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "0 10px",
-  marginTop: -10,
-  fontSize: "2rem",
-  color: "#1f2937",
-  fontWeight: "bold",
-  whiteSpace: "pre", // preserve spaces
-  wordBreak: "keep-all", // avoid breaking characters
-  letterSpacing: "8px", // reserve space between characters so adding letters doesn't shift layout
-},
+    width: 500,
+    minHeight: 60,
+    height: 60,
+    borderBottom: "4px solid #fbbf24",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 10px",
+    marginTop: -10,
+    fontSize: "2rem",
+    color: "#1f2937",
+    fontWeight: "bold",
+    whiteSpace: "pre",
+    wordBreak: "keep-all",
+    letterSpacing: "8px",
+  },
   answerSentence: {
     color: "#1f2937",
     fontSize: "2.5rem",
@@ -598,14 +495,14 @@ const styles = {
     fontStyle: "italic",
   },
   tilesPanel: {
-  display: "grid",
-  gridTemplateColumns: "repeat(5, 1fr)", // 5 tiles per row
-  gap: 10,
-  width: 360, // adjust to fit 5 tiles nicely
-  padding: 10,
-  background: "rgba(255,255,255,0.9)",
-  borderRadius: 16,
-},
+    display: "grid",
+    gridTemplateColumns: "repeat(5, 1fr)",
+    gap: 10,
+    width: 360,
+    padding: 10,
+    background: "rgba(255,255,255,0.9)",
+    borderRadius: 16,
+  },
   tile: {
     flex: 1,
     height: 60,
@@ -617,15 +514,15 @@ const styles = {
     cursor: "pointer",
   },
   buttonGroup: {
-  position: "absolute",
-  top: 680,           // distance from top
-  left: "50%",       // center horizontally
-  transform: "translateX(-50%)",
-  display: "flex",
-  flexDirection: "row", // horizontal row
-  gap: 20,             // space between buttons
-  zIndex: 20,
-},
+    position: "absolute",
+    top: 680,
+    left: "50%",
+    transform: "translateX(-50%)",
+    display: "flex",
+    flexDirection: "row",
+    gap: 20,
+    zIndex: 20,
+  },
   overlay: {
     position: "fixed",
     inset: 0,
@@ -646,36 +543,30 @@ const styles = {
     gap: 20,
     marginTop: 70,
   },
-
   shake: {
-  animation: "shake 0.4s",
-},
-
-wrongFlash: {
-  backgroundColor: "#fee2e2",
-  borderBottom: "4px solid #dc2626",
-  transition: "all 0.2s ease",
-},
-
-wrongPop: {
-  transform: "scale(0.9)",
-  transition: "transform 0.1s ease",
-},
-
-vibrate: {
-  animation: "tileJump 0.3s",
-},
-
-damageOverlay: {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(220, 38, 38, 0.35)",
-  backdropFilter: "blur(2px)",
-  pointerEvents: "none",
-  zIndex: 999,
-  animation: "screenShake 0.8s ease",
-},
-
+    animation: "shake 0.4s",
+  },
+  wrongFlash: {
+    backgroundColor: "#fee2e2",
+    borderBottom: "4px solid #dc2626",
+    transition: "all 0.2s ease",
+  },
+  wrongPop: {
+    transform: "scale(0.9)",
+    transition: "transform 0.1s ease",
+  },
+  vibrate: {
+    animation: "tileJump 0.3s",
+  },
+  damageOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(220, 38, 38, 0.35)",
+    backdropFilter: "blur(2px)",
+    pointerEvents: "none",
+    zIndex: 999,
+    animation: "screenShake 0.8s ease",
+  },
 };
 
 export default TapMode;

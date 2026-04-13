@@ -1,9 +1,9 @@
 // src/Components/DifficultyMultiple.js
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // ⬅️ Added import
+import { useNavigate } from "react-router-dom";
 import Multiple from "./Multiple";
 import CustomButton from "./CustomButton.js";
-import bgMusicFile from "../../../Assests/drag.mp3"; // 🎵 Background music
+import bgMusicFile from "../../../Assests/drag.mp3";
 
 /* 🪶 Baybayin Characters */
 const BAYBAYIN_CHARS = [
@@ -21,7 +21,6 @@ const styles = {
   buttons: { display: "flex", gap: "22px", justifyContent: "center", flexWrap: "wrap" },
   buttonWrapper: (delay) => ({ opacity: 0, transform: "translateY(30px)", animation: "slideUp 0.6s ease forwards", animationDelay: `${delay}s` }),
   countdown: { fontSize: "90px", color: "#fff", fontWeight: "bold", animation: "pulse 1s infinite" },
-  // ⬇️ Added close button styles
   closeButton: { 
     position: "absolute", 
     top: "15px", 
@@ -43,6 +42,42 @@ const styles = {
   closeButtonHover: {
     color: "#fff",
     transform: "scale(1.1)"
+  },
+  // Toast notification styles
+  toastContainer: {
+    position: "fixed",
+    top: "20px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 1000,
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    pointerEvents: "none"
+  },
+  toast: {
+    padding: "12px 24px",
+    borderRadius: "8px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "500",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+    animation: "slideDown 0.3s ease",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    pointerEvents: "auto",
+    minWidth: "250px",
+    justifyContent: "center"
+  },
+  toastSuccess: {
+    background: "linear-gradient(135deg, #4CAF50 0%, #45a049 100%)"
+  },
+  toastError: {
+    background: "linear-gradient(135deg, #f44336 0%, #da190b 100%)"
+  },
+  toastIcon: {
+    fontSize: "16px"
   }
 };
 
@@ -51,6 +86,14 @@ const keyframes = `
 @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 @keyframes floatBaybayin { from { transform: translate(-10%, -10%); } to { transform: translate(10%, 10%); } }
 @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.85; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes slideDown { 
+  from { opacity: 0; transform: translate(-50%, -20px); } 
+  to { opacity: 1; transform: translate(-50%, 0); } 
+}
+@keyframes fadeOut { 
+  from { opacity: 1; } 
+  to { opacity: 0; } 
+}
 `;
 
 export default function DifficultyMultiple() {
@@ -58,11 +101,14 @@ export default function DifficultyMultiple() {
   const [showDifficulty, setShowDifficulty] = useState(true);
   const [startGame, setStartGame] = useState(false);
   const [countdown, setCountdown] = useState(null);
-  const [userData, setUserData] = useState(null); // Store full user data
-  const [isCloseHovered, setIsCloseHovered] = useState(false); // ⬅️ Added hover state
+  const [userData, setUserData] = useState(null);
+  const [isCloseHovered, setIsCloseHovered] = useState(false);
+  
+  // Toast state
+  const [toasts, setToasts] = useState([]);
 
   const audioRef = useRef(null);
-  const navigate = useNavigate(); // ⬅️ Added navigate hook
+  const navigate = useNavigate();
 
   /* 🎵 Background Music */
   useEffect(() => {
@@ -97,6 +143,22 @@ export default function DifficultyMultiple() {
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
   }, []);
+
+  /* -------------------- Toast Helper -------------------- */
+  const showToast = (message, type = "success") => {
+    const id = Date.now();
+    const newToast = { id, message, type };
+    setToasts(prev => [...prev, newToast]);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   /* -------------------- Difficulty Selection -------------------- */
   const handleSelectDifficulty = (level) => {
@@ -134,13 +196,11 @@ export default function DifficultyMultiple() {
         const parsed = JSON.parse(loginDataStr);
         console.log("Parsed loginData:", parsed);
         
-        // Check if email exists
         if (!parsed.email) {
           console.error("⚠️ OLD LOGIN DATA DETECTED - Missing email field!");
           console.error("Please logout and login again to fix this.");
           console.error("Current data:", parsed);
           
-          // Auto-clear old invalid data
           localStorage.removeItem("loginData");
           setUserData(null);
           return;
@@ -156,7 +216,6 @@ export default function DifficultyMultiple() {
 
     getUserData();
     
-    // Listen for storage changes
     const handleStorageChange = () => {
       getUserData();
     };
@@ -171,10 +230,9 @@ export default function DifficultyMultiple() {
     console.log("Final score received:", finalScore);
     console.log("Current userData:", userData);
 
-    // Use the userData from state instead of reading localStorage again
     if (!userData || !userData.email) {
       console.error("No user data available");
-      alert("Please login first to save your score!");
+      showToast("⚠️ Please login first to save your score!", "error");
       return;
     }
 
@@ -204,25 +262,43 @@ export default function DifficultyMultiple() {
 
       if (result.success) {
         console.log("🏆 Score saved to Leaderboard!");
-        alert("Score saved successfully! 🏆");
+        showToast("🏆 Score saved successfully!", "success");
       } else {
         console.error("Failed to save score:", result.message);
-        alert("Failed to save score: " + result.message);
+        showToast("❌ Failed to save score: " + result.message, "error");
       }
 
     } catch (err) {
       console.error("Failed to save score:", err);
-      alert("Error saving score: " + err.message);
+      showToast("❌ Error saving score: " + err.message, "error");
     }
   };
 
   const levels = ["Easy", "Medium", "Hard"];
 
-  // Show login warning if no user data
   const showLoginWarning = !userData && !showDifficulty && startGame;
 
   return (
     <>
+      {/* Toast Notifications Container */}
+      <div style={styles.toastContainer}>
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            style={{
+              ...styles.toast,
+              ...(toast.type === "success" ? styles.toastSuccess : styles.toastError)
+            }}
+            onClick={() => removeToast(toast.id)}
+          >
+            <span style={styles.toastIcon}>
+              {toast.type === "success" ? "✓" : "✕"}
+            </span>
+            {toast.message}
+          </div>
+        ))}
+      </div>
+
       {/* Login Warning */}
       {showLoginWarning && (
         <div style={{
@@ -253,7 +329,6 @@ export default function DifficultyMultiple() {
           {Array(35).fill(BAYBAYIN_CHARS.join("   ")).join("\n")}
         </div>
         <div style={styles.card}>
-          {/* ⬇️ Added X button here */}
           <button
             style={{
               ...styles.closeButton,

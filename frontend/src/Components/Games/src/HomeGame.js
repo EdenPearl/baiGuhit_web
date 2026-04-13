@@ -268,7 +268,7 @@ const HomeGame = () => {
               </SubmenuButton>
             </SubmenuContainer>
             
-            <SidebarButton onClick={() => { navigate("/tap-mode"); closeSidebar(); }}>
+            <SidebarButton onClick={() => { navigate("/tap-board"); closeSidebar(); }}>
               <ButtonIcon>👆</ButtonIcon>
               <ButtonText>
                 <span>Tap Mode</span>
