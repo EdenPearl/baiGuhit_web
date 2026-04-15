@@ -788,49 +788,60 @@ const ScrollLabel = styled.span`
 `;
 
 /* ═══════════════════════════
-   MODES SECTION (kept light for contrast)
+   MODES SECTION (updated to complement dark hero)
 ═══════════════════════════ */
 
 const ModesSection = styled.section`
   width: 100%;
-  background: linear-gradient(160deg, #fef8f3 0%, #fff4ec 50%, #ffeedd 100%);
-  border-top: 1px solid rgba(194, 64, 12, 0.07);
+  position: relative;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(251,196,23,0.10) 0%, transparent 45%),
+    radial-gradient(circle at 85% 40%, rgba(194,64,12,0.10) 0%, transparent 46%),
+    linear-gradient(180deg, #2b1004 0%, #3b1405 45%, #1f0b03 100%);
+  border-top: 1px solid rgba(251,196,23,0.12);
 `;
 
 const ModesTopBar = styled.div`
   height: 4px;
-  background: linear-gradient(90deg, #fbc417, #c24010, #9a3000, #c24010, #fbc417);
+  background: linear-gradient(90deg, #fde68a, #fbc417, #c24010, #fbc417, #fde68a);
   background-size: 300% 100%;
   animation: ${shimmer} 3.5s linear infinite;
 `;
 
 const ModesInner = styled.div`
   width: 88%;
-  max-width: 960px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 58px 0 70px;
+  padding: 66px 0 78px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  gap: 26px;
 `;
 
 const ModesEyebrow = styled.p`
   margin: 0;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 2.5px;
+  letter-spacing: 2.6px;
   text-transform: uppercase;
-  color: rgba(194, 64, 12, 0.42);
+  color: rgba(253,230,138,0.70);
 `;
 
 const ModesHeading = styled.h2`
   margin: 0;
   font-family: 'Cinzel', serif;
-  font-size: clamp(17px, 2.5vw, 26px);
-  font-weight: 700;
-  color: #3d1a06;
+  font-size: clamp(20px, 2.7vw, 30px);
+  font-weight: 900;
   text-align: center;
+
+  background: linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fde68a);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,0.35));
 `;
 
 const ModesGrid = styled.div`
@@ -839,31 +850,44 @@ const ModesGrid = styled.div`
   gap: 16px;
   width: 100%;
 
-  @media (max-width: 640px) {
+  @media (max-width: 820px) {
     grid-template-columns: 1fr;
-    max-width: 360px;
+    max-width: 520px;
   }
 `;
 
 const ModeCard = styled.button`
   position: relative;
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
-  background: #fff;
-  border: 1px solid rgba(194, 64, 12, 0.09);
-  box-shadow: 0 2px 12px rgba(194, 64, 12, 0.05);
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(251,196,23,0.14);
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.10);
+
   display: flex;
   flex-direction: column;
-  cursor: pointer;
+
   animation: ${cardPop} 0.5s ease both;
   transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-  text-align: left;
-  padding: 0;
 
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 14px 36px rgba(194, 64, 12, 0.13);
-    border-color: ${({ $accent }) => `${$accent}44`};
+    transform: translateY(-7px);
+    border-color: rgba(251,196,23,0.34);
+    box-shadow:
+      0 22px 64px rgba(0,0,0,0.42),
+      0 0 0 1px rgba(251,196,23,0.20) inset;
+  }
+
+  &:active {
+    transform: translateY(-2px);
   }
 `;
 
@@ -874,7 +898,7 @@ const ModeStripe = styled.div`
 `;
 
 const ModeBody = styled.div`
-  padding: 24px 20px 14px;
+  padding: 22px 20px 14px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -882,39 +906,41 @@ const ModeBody = styled.div`
 `;
 
 const ModeIconBox = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
   font-size: 22px;
-  background: ${({ $bg }) => $bg};
-  border: 1px solid ${({ $accent }) => `${$accent}20`};
   flex-shrink: 0;
+
+  /* gold-tinted tile so emoji stands out on dark bg */
+  background: linear-gradient(135deg, rgba(253,230,138,0.16), rgba(251,196,23,0.10));
+  border: 1px solid rgba(251,196,23,0.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
 `;
 
 const ModeTitle = styled.div`
   font-family: 'Cinzel', serif;
   font-size: 14px;
-  font-weight: 700;
-  color: ${({ $accent }) => $accent};
+  font-weight: 900;
+  color: rgba(255,246,235,0.92);
+  letter-spacing: 0.2px;
 `;
 
 const ModeDesc = styled.div`
   font-size: 12.5px;
   line-height: 1.65;
-  color: #6b3a1f;
-  opacity: .82;
+  color: rgba(255,246,235,0.72);
 `;
 
 const ModeFooter = styled.div`
   padding: 10px 20px 16px;
   text-align: right;
-  font-size: 16px;
-  color: ${({ $accent }) => $accent};
-  opacity: .4;
-  transition: transform .2s, opacity .2s;
+  font-size: 18px;
+  color: rgba(251,196,23,0.75);
+  opacity: .6;
+  transition: transform .2s ease, opacity .2s ease;
 
-  ${ModeCard}:hover & { transform: translateX(5px); opacity: 1; }
+  ${ModeCard}:hover & { transform: translateX(6px); opacity: 1; }
 `;
