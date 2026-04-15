@@ -4,18 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { UserProvider } from './contexts/UserContext';
-
-// Pages
-import HomePage from './Pages/Homepage';
-import Dashboard from './Pages/Dashboard';
-import DashboardGame from './Pages/DashboardGame';
-import Admindashboard from './Pages/Admindashboard';
-
-
-// Components
-import LoginModal from './Components/Login';
-import OrderList from './Components/OrderList';
-import OrderPlaced from './Components/OrderPlaced';
+import HeroSection from './Components/Home';
 
 // Game Auth
 import LoginGame from './Components/Games/src/LoginGame';
@@ -49,17 +38,9 @@ const App = () => {
       <Router>
         <Routes>
 
-          {/* ================= MARKETPLACE ================= */}
-          <Route path="/*" element={<HomePage />} />
-          <Route path="/Login" element={<LoginModal />} />
-          <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="/Admindashboard" element={<Admindashboard />} />
-          <Route path="/OrderList" element={<OrderList />} />
-          <Route path="/OrderPlaced" element={<OrderPlaced />} />
-
           {/* ================= GAME ================= */}
-          <Route path="/LoginGame" element={<LoginGame />} />
-          <Route path="/DashboardGame" element={<DashboardGame />} />
+          <Route path="/" element={<HeroSection />} />
+          <Route path="/LoginGame" element={<LoginGame isOpen toggleModal={() => {}} />} />
           <Route path="/HomeGame" element={<HomeGame />} />
           
 

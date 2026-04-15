@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import Facebook from '../../../Assests/facebookicon.svg';
 import Google from '../../../Assests/googleicon.svg';
-import Logo from '../../../Assests/logo1.jpg';
+import Logo from '../../../Assests/logo1.png';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import useRegister from '../../../Hooks/RegisterHooks/useRegister';
 import useToggleRegister from '../../../Hooks/RegisterHooks/useToggleRegister';

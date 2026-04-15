@@ -1,906 +1,999 @@
 import React, { useState, useEffect } from "react";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import useGetLeaderboardByStatus from "../../../Hooks/GameHooks/useGetLeaderboardByStatus.js";
 
+/* ═══════════════════════════════════
+   COMPONENT
+═══════════════════════════════════ */
+
+const TABS = ["easy", "medium", "hard", "expert", "master"];
+
+const TAB_META = {
+  easy:   { icon: "🌱", color: "#4ade80", label: "Easy" },
+  medium: { icon: "🌿", color: "#facc15", label: "Medium" },
+  hard:   { icon: "🔥", color: "#fb923c", label: "Hard" },
+  expert: { icon: "⚡", color: "#f87171", label: "Expert" },
+  master: { icon: "💎", color: "#c084fc", label: "Master" },
+};
+
 const WriteLeaderboard = () => {
-    const [activeTab, setActiveTab] = useState("easy");
-    const [currentUser, setCurrentUser] = useState(null);
-    const { leaderboard, loading, error, refetch } = useGetLeaderboardByStatus(activeTab, 10, true);
-    const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("easy");
+  const [currentUser, setCurrentUser] = useState(null);
+  const { leaderboard, loading, error, refetch } = useGetLeaderboardByStatus(activeTab, 10, true);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const loginData = localStorage.getItem("loginData");
-        if (loginData) {
-            try {
-                const parsed = JSON.parse(loginData);
-                setCurrentUser(parsed);
-            } catch (e) {
-                console.error("Failed to parse user data");
-            }
-        }
-    }, []);
+  useEffect(() => {
+    const loginData = localStorage.getItem("loginData");
+    if (loginData) {
+      try { setCurrentUser(JSON.parse(loginData)); }
+      catch { console.error("Failed to parse user data"); }
+    }
+  }, []);
 
-    useEffect(() => {
-        console.log("[WRITEBOARD UI] state:", {
-            loading,
-            error,
-            activeTab,
-            totalStatusRows: (leaderboard || []).length,
-        });
-    }, [loading, error, activeTab, leaderboard]);
+  const statusData = leaderboard || [];
+  const filteredData = statusData;
 
-    const statusData = leaderboard || [];
-    const filteredData = statusData;
+  const getRowPoints = (row) => Number(row?.points ?? row?.score ?? 0) || 0;
+  const getRowDate   = (row) => row?.created_at || row?.DATE || row?.date || null;
 
-    const handleTabChange = (tab) => {
-        console.log("[WRITEBOARD UI] tab clicked:", tab);
-        setActiveTab(tab);
-    };
+  const isCurrentUser = (row) => {
+    if (!currentUser) return false;
+    if (row?.user_id && currentUser?.id) return String(row.user_id) === String(currentUser.id);
+    if (row?.player && currentUser?.username) return String(row.player) === String(currentUser.username);
+    const emailPrefix = String(currentUser?.email || "").split("@")[0];
+    if (row?.player && emailPrefix) return String(row.player) === emailPrefix;
+    return !!row?.email && row.email === currentUser.email;
+  };
 
-    useEffect(() => {
-        console.log(`[WRITEBOARD UI] tab=${activeTab} showing top10=`, filteredData.length, "from statusTotal=", statusData.length);
-    }, [activeTab, filteredData.length, statusData.length]);
+  const formatPlayerName = (row) => {
+    const player = String(row?.player || "").trim();
+    if (player) return player;
+    const username = String(row?.username || "").trim();
+    if (username) return username;
+    const email = String(row?.email || "").trim();
+    if (email.includes("@")) return email.split("@")[0];
+    return email || "Anonymous";
+  };
 
-    const getRankStyle = (index) => {
-        if (index === 0) return { color: "#FFD700", icon: "👑", bg: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)" };
-        if (index === 1) return { color: "#C0C0C0", icon: "🥈", bg: "linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 100%)" };
-        if (index === 2) return { color: "#CD7F32", icon: "🥉", bg: "linear-gradient(135deg, #D4A574 0%, #CD7F32 100%)" };
-        return { color: "#64748B", icon: `#${index + 1}`, bg: "linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)" };
-    };
+  const getRankMeta = (index) => {
+    if (index === 0) return { icon: "👑", label: "1st", glow: "rgba(255,215,0,0.5)",  ring: "#FFD700", bg: "linear-gradient(135deg,#fde68a,#f59e0b)" };
+    if (index === 1) return { icon: "🥈", label: "2nd", glow: "rgba(192,192,192,0.5)", ring: "#C0C0C0", bg: "linear-gradient(135deg,#e2e8f0,#94a3b8)" };
+    if (index === 2) return { icon: "🥉", label: "3rd", glow: "rgba(205,127,50,0.5)",  ring: "#CD7F32", bg: "linear-gradient(135deg,#d4a574,#a06030)" };
+    return { icon: `${index + 1}`, label: `#${index + 1}`, glow: "transparent", ring: "rgba(255,255,255,0.1)", bg: "rgba(255,255,255,0.07)" };
+  };
 
-    const getRowPoints = (row) => Number(row?.points ?? row?.score ?? 0) || 0;
+  const stats = {
+    count:   statusData.length,
+    best:    statusData.length > 0 ? Math.max(...statusData.map(getRowPoints)) : 0,
+    average: statusData.length > 0 ? Math.round(statusData.reduce((s, r) => s + getRowPoints(r), 0) / statusData.length) : 0,
+  };
 
-    const getRowDate = (row) => row?.created_at || row?.DATE || row?.date || null;
+  return (
+    <PageRoot>
+      {/* Layered background */}
+      <BgBase />
+      <BgTexture />
+      <BgRadial />
 
-    const isCurrentUser = (row) => {
-        if (!currentUser) return false;
-        if (row?.user_id && currentUser?.id) return String(row.user_id) === String(currentUser.id);
-        if (row?.player && currentUser?.username) return String(row.player) === String(currentUser.username);
+      {/* Floating particles */}
+      {Array.from({ length: 14 }, (_, i) => (
+        <Particle
+          key={i}
+          style={{
+            left:   `${(i * 7.3 + 5) % 100}%`,
+            top:    `${(i * 13.7 + 8) % 100}%`,
+            width:  2 + (i % 3),
+            height: 2 + (i % 3),
+          }}
+          $delay={i * 0.45}
+          $duration={4 + (i % 5)}
+        />
+      ))}
 
-        const currentEmailPrefix = String(currentUser?.email || "").split("@")[0];
-        if (row?.player && currentEmailPrefix) return String(row.player) === currentEmailPrefix;
+      {/* ── Back button ── */}
+      <BackBtn onClick={() => navigate("/HomeGame")}>
+        <span>←</span>
+        <span>Back</span>
+      </BackBtn>
 
-        return !!row?.email && row.email === currentUser.email;
-    };
+      {/* ── Main card ── */}
+      <Card>
+        <CardTopBar />
 
-    const formatPlayerName = (row) => {
-        const player = String(row?.player || "").trim();
-        if (player) return player;
+        <CardInner>
+          {/* ════ LEFT PANEL ════ */}
+          <LeftPanel>
+            {/* Trophy header */}
+            <TrophyArea>
+              <TrophyWrap>
+                <TrophyEmoji>🏆</TrophyEmoji>
+                <TrophyHalo />
+              </TrophyWrap>
+              <PanelTitle>Leaderboard</PanelTitle>
+              <PanelSubtitle>Writing Challenge</PanelSubtitle>
+              <ChampionBadge>
+                <BadgeDot />
+                Top 10 Champions
+              </ChampionBadge>
+            </TrophyArea>
 
-        const username = String(row?.username || "").trim();
-        if (username) return username;
+            {/* Difficulty tabs */}
+            <TabsSection>
+              <TabsLabel>Difficulty</TabsLabel>
+              <TabList>
+                {TABS.map(tab => (
+                  <TabBtn
+                    key={tab}
+                    $active={activeTab === tab}
+                    $color={TAB_META[tab].color}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    <TabBtnIcon>{TAB_META[tab].icon}</TabBtnIcon>
+                    <TabBtnLabel>{TAB_META[tab].label}</TabBtnLabel>
+                    {activeTab === tab && <TabActivePip $color={TAB_META[tab].color} />}
+                  </TabBtn>
+                ))}
+              </TabList>
+            </TabsSection>
 
-        const email = String(row?.email || "").trim();
-        if (email.includes("@")) return email.split("@")[0];
-        return email || "Anonymous";
-    };
+            {/* Stats row */}
+            <StatsRow>
+              <StatBox>
+                <StatBoxIcon>👥</StatBoxIcon>
+                <StatBoxVal>{stats.count}</StatBoxVal>
+                <StatBoxLabel>Players</StatBoxLabel>
+              </StatBox>
+              <StatSep />
+              <StatBox>
+                <StatBoxIcon>⭐</StatBoxIcon>
+                <StatBoxVal>{stats.best}</StatBoxVal>
+                <StatBoxLabel>Best</StatBoxLabel>
+              </StatBox>
+              <StatSep />
+              <StatBox>
+                <StatBoxIcon>📊</StatBoxIcon>
+                <StatBoxVal>{stats.average}</StatBoxVal>
+                <StatBoxLabel>Average</StatBoxLabel>
+              </StatBox>
+            </StatsRow>
 
-    const getStats = () => {
-        const tabData = statusData;
-        return {
-            count: tabData.length,
-            best: tabData.length > 0 ? Math.max(...tabData.map((d) => getRowPoints(d))) : 0,
-            average: tabData.length > 0 ? Math.round(tabData.reduce((sum, row) => sum + getRowPoints(row), 0) / tabData.length) : 0
-        };
-    };
+            {/* Action buttons */}
+            <ActionRow>
+              <PrimaryBtn onClick={() => navigate("/write")}>
+                <BtnShimmer />
+                <BtnContent><span>▶</span> Play Game</BtnContent>
+              </PrimaryBtn>
+              <GhostBtn onClick={refetch}>
+                <BtnContent><span>↻</span> Refresh</BtnContent>
+              </GhostBtn>
+            </ActionRow>
+          </LeftPanel>
 
-    const stats = getStats();
+          {/* ════ RIGHT PANEL ════ */}
+          <RightPanel>
+            <RightPanelHeader>
+              <RightPanelTitle>
+                {TAB_META[activeTab].icon}&nbsp; {TAB_META[activeTab].label} Rankings
+              </RightPanelTitle>
+              <ActiveTabPill $color={TAB_META[activeTab].color}>
+                Top {filteredData.length}
+              </ActiveTabPill>
+            </RightPanelHeader>
 
-    return (
-        <Container>
-            <BackgroundPattern />
-            
-            <NavButtonsContainer>
-                <BackButton onClick={() => navigate("/HomeGame")}>
-                    <ButtonIcon>←</ButtonIcon>
-                    <ButtonText>Back to Home</ButtonText>
-                </BackButton>
-            </NavButtonsContainer>
+            <TableWrap>
+              {loading ? (
+                <StateBox>
+                  <RingSpinner />
+                  <StateText>Loading rankings…</StateText>
+                </StateBox>
+              ) : error ? (
+                <StateBox>
+                  <StateEmoji>⚠️</StateEmoji>
+                  <StateTitle>Something went wrong</StateTitle>
+                  <StateText>{error}</StateText>
+                  <StateBtn onClick={refetch}>Try Again</StateBtn>
+                </StateBox>
+              ) : filteredData.length === 0 ? (
+                <StateBox>
+                  <StateEmoji>🎯</StateEmoji>
+                  <StateTitle>No scores yet!</StateTitle>
+                  <StateText>Be the first to play {TAB_META[activeTab].label} mode</StateText>
+                  <StateBtn onClick={() => navigate("/write")}>Play Now →</StateBtn>
+                </StateBox>
+              ) : (
+                <ScoreTable>
+                  <ScoreTableHead>
+                    <tr>
+                      <HeadCell $w="64px">Rank</HeadCell>
+                      <HeadCell>Player</HeadCell>
+                      <HeadCell $hide>Date</HeadCell>
+                      <HeadCell $align="right">Score</HeadCell>
+                    </tr>
+                  </ScoreTableHead>
+                  <tbody>
+                    {filteredData.map((row, index) => {
+                      const meta = getRankMeta(index);
+                      const isMe = isCurrentUser(row);
+                      return (
+                        <ScoreRow
+                          key={row.id || index}
+                          $isMe={isMe}
+                          $isTop3={index < 3}
+                          style={{ animationDelay: `${index * 0.045}s` }}
+                        >
+                          {/* Rank */}
+                          <RankTd>
+                            <RankBubble $bg={meta.bg} $ring={meta.ring} $glow={meta.glow} $isTop3={index < 3}>
+                              {index < 3 ? meta.icon : <RankNum>{index + 1}</RankNum>}
+                            </RankBubble>
+                          </RankTd>
 
-            <LeaderboardCard>
-                <TopSection>
-                    <LeftPanel>
-                        <Header>
-                            <TrophyContainer>
-                                <Trophy>🏆</Trophy>
-                                <TrophyGlow />
-                            </TrophyContainer>
-                            <Title>Leaderboard</Title>
-                            <Subtitle>Writing Challenge</Subtitle>
-                            <BadgeRow>
-                                <Badge>🏅 Top 10 Champions</Badge>
-                            </BadgeRow>
-                        </Header>
+                          {/* Player */}
+                          <PlayerTd>
+                            <PlayerRow>
+                              <PlayerAvatar $isMe={isMe}>
+                                {formatPlayerName(row).charAt(0).toUpperCase()}
+                              </PlayerAvatar>
+                              <PlayerMeta>
+                                <PlayerNameText $isMe={isMe}>
+                                  {formatPlayerName(row)}
+                                </PlayerNameText>
+                                {isMe && <YouPill>YOU</YouPill>}
+                              </PlayerMeta>
+                            </PlayerRow>
+                          </PlayerTd>
 
-                        <TabGroup>
-                            {["easy", "medium", "hard", "expert", "master"].map((tab) => (
-                                <Tab
-                                    key={tab}
-                                    $active={activeTab === tab}
-                                    onClick={() => handleTabChange(tab)}
-                                >
-                                    <TabIndicator $active={activeTab === tab} />
-                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                                </Tab>
-                            ))}
-                        </TabGroup>
+                          {/* Date */}
+                          <DateTd>
+                            {getRowDate(row)
+                              ? new Date(getRowDate(row)).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                              : "—"}
+                          </DateTd>
 
-                        <StatsBar>
-                            <Stat>
-                                <StatIcon>👥</StatIcon>
-                                <StatValue>{stats.count}</StatValue>
-                                <StatLabel>Players</StatLabel>
-                            </Stat>
-                            <StatDivider />
-                            <Stat>
-                                <StatIcon>⭐</StatIcon>
-                                <StatValue>{stats.best}</StatValue>
-                                <StatLabel>Best Score</StatLabel>
-                            </Stat>
-                            <StatDivider />
-                            <Stat>
-                                <StatIcon>📊</StatIcon>
-                                <StatValue>{stats.average}</StatValue>
-                                <StatLabel>Average</StatLabel>
-                            </Stat>
-                        </StatsBar>
-
-                        <ActionBar>
-                            <ActionButton $secondary onClick={() => navigate("/write")}>
-                                <BtnIcon>🎮</BtnIcon>
-                                Play Game
-                            </ActionButton>
-                            <ActionButton onClick={refetch}>
-                                <BtnIcon>↻</BtnIcon>
-                                Refresh
-                            </ActionButton>
-                        </ActionBar>
-                    </LeftPanel>
-
-                    <RightPanel>
-                        <TableContainer>
-                            {loading ? (
-                                <LoadingState>
-                                    <Spinner />
-                                    <LoadingText>Loading rankings...</LoadingText>
-                                </LoadingState>
-                            ) : error ? (
-                                <ErrorState>
-                                    <ErrorIcon>⚠️</ErrorIcon>
-                                    <ErrorText>{error}</ErrorText>
-                                    <RetryButton onClick={refetch}>Try Again</RetryButton>
-                                </ErrorState>
-                            ) : filteredData.length === 0 ? (
-                                <EmptyState>
-                                    <EmptyIcon>🎯</EmptyIcon>
-                                    <EmptyTitle>No scores yet!</EmptyTitle>
-                                    <EmptyText>Be the first to play the {activeTab} mode</EmptyText>
-                                    <PlayNowButton onClick={() => navigate("/write")}>
-                                        Play Now
-                                    </PlayNowButton>
-                                </EmptyState>
-                            ) : (
-                                <Table>
-                                    <thead>
-                                        <tr>
-                                            <Th>Rank</Th>
-                                            <Th>Player</Th>
-                                            <Th>Date</Th>
-                                            <Th align="right">Score</Th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredData.map((row, index) => {
-                                            const rankStyle = getRankStyle(index);
-                                            const currentUserRow = isCurrentUser(row);
-
-                                            return (
-                                                <TableRow
-                                                    key={row.id || index}
-                                                    $isCurrentUser={currentUserRow}
-                                                    style={{ animationDelay: `${index * 0.05}s` }}
-                                                >
-                                                    <RankCell>
-                                                        <RankBadge $bg={rankStyle.bg} $isTop3={index < 3}>
-                                                            {rankStyle.icon}
-                                                        </RankBadge>
-                                                    </RankCell>
-                                                    <PlayerCell>
-                                                        <PlayerInfo>
-                                                            <PlayerName $isCurrentUser={currentUserRow}>
-                                                                {formatPlayerName(row)}
-                                                            </PlayerName>
-                                                            {currentUserRow && <YouTag>YOU</YouTag>}
-                                                        </PlayerInfo>
-                                                    </PlayerCell>
-                                                    <DateCell>
-                                                        {getRowDate(row) ? new Date(getRowDate(row)).toLocaleDateString('en-US', {
-                                                            month: 'short', 
-                                                            day: 'numeric'
-                                                        }) : "Recently"}
-                                                    </DateCell>
-                                                    <ScoreCell>
-                                                        <ScoreValue>{getRowPoints(row)}</ScoreValue>
-                                                        <ScoreLabel>points</ScoreLabel>
-                                                    </ScoreCell>
-                                                </TableRow>
-                                            );
-                                        })}
-                                    </tbody>
-                                </Table>
-                            )}
-                        </TableContainer>
-                    </RightPanel>
-                </TopSection>
-            </LeaderboardCard>
-        </Container>
-    );
+                          {/* Score */}
+                          <ScoreTd>
+                            <ScoreNum $isTop3={index < 3}>{getRowPoints(row)}</ScoreNum>
+                            <ScoreUnit>pts</ScoreUnit>
+                          </ScoreTd>
+                        </ScoreRow>
+                      );
+                    })}
+                  </tbody>
+                </ScoreTable>
+              )}
+            </TableWrap>
+          </RightPanel>
+        </CardInner>
+      </Card>
+    </PageRoot>
+  );
 };
 
 export default WriteLeaderboard;
 
-/* ---------------- ANIMATIONS ---------------- */
-const spin = keyframes`
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+/* ═══════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════ */
+
+const floatTrophy = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
 `;
 
-const float = keyframes`
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+const haloBreath = keyframes`
+  0%, 100% { opacity: 0.45; transform: translate(-50%,-50%) scale(1); }
+  50%       { opacity: 0.8;  transform: translate(-50%,-50%) scale(1.15); }
 `;
 
-const slideIn = keyframes`
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+const shimmerGold = keyframes`
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
 `;
 
-const pulse = keyframes`
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
+const floatParticle = keyframes`
+  0%   { transform: translateY(0) scale(1);    opacity: 0; }
+  20%  { opacity: 0.6; }
+  80%  { opacity: 0.3; }
+  100% { transform: translateY(-100px) scale(0.4); opacity: 0; }
 `;
 
-/* ---------------- STYLES ---------------- */
-const Container = styled.div`
-    min-height: 100vh;
-    max-height: 100vh;
-    background: linear-gradient(135deg, #C2410C 0%, #EA580C 50%, #F97316 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    box-sizing: border-box;
+const slideUp = keyframes`
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
 `;
 
-const BackgroundPattern = styled.div`
-    position: absolute;
-    inset: 0;
-    background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(255,255,255,0.08) 0%, transparent 40%);
-    pointer-events: none;
+const popIn = keyframes`
+  0%   { opacity: 0; transform: scale(0.88); }
+  60%  { transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
 `;
 
-const NavButtonsContainer = styled.div`
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10;
+const rowIn = keyframes`
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
 `;
 
-const ButtonText = styled.span`
-    letter-spacing: 0.5px;
+const spinRing = keyframes`
+  to { transform: rotate(360deg); }
 `;
 
-const BackButton = styled.button`
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 12px;
-    padding: 12px 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-    
-    &:hover {
-        background: rgba(255,255,255,0.25);
-        transform: translateX(-2px);
-        border-color: rgba(255,255,255,0.4);
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
-    }
-    
-    &:active {
-        transform: translateX(0);
-    }
-    
-    @media (max-width: 640px) {
-        padding: 10px 14px;
-        
-        ${ButtonText} {
-            display: none;
-        }
-    }
+const blink = keyframes`
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 `;
 
-const ButtonIcon = styled.span`
-    font-size: 16px;
-    display: flex;
-    align-items: center;
+const dotPulse = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251,196,23,0.7); }
+  50%       { box-shadow: 0 0 0 5px rgba(251,196,23,0); }
 `;
 
-const LeaderboardCard = styled.div`
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 32px;
-    width: 100%;
-    max-width: 1200px;
-    max-height: calc(100vh - 40px);
-    color: #1E293B;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 
-        0 25px 50px -12px rgba(0,0,0,0.25),
-        0 0 0 1px rgba(255,255,255,0.1) inset;
-    position: relative;
-    z-index: 1;
-    animation: ${slideIn} 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
+/* ═══════════════════════════════════
+   STYLED COMPONENTS
+═══════════════════════════════════ */
+
+/* ── Root & Background ── */
+const PageRoot = styled.div`
+  position: relative;
+  min-height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+  font-family: 'Georgia', serif;
+  box-sizing: border-box;
+`;
+
+const BgBase = styled.div`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #7a2100 0%, #9a3000 30%, #c24010 65%, #a83008 100%);
+`;
+
+const BgTexture = styled.div`
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg, transparent, transparent 55px,
+    rgba(0,0,0,0.04) 55px, rgba(0,0,0,0.04) 56px
+  );
+  pointer-events: none;
+`;
+
+const BgRadial = styled.div`
+  position: absolute;
+  top: -25%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;
+  height: 90vw;
+  max-width: 800px;
+  max-height: 800px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,196,23,0.11) 0%, transparent 68%);
+  pointer-events: none;
+`;
+
+const Particle = styled.span`
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(251,196,23,0.55);
+  box-shadow: 0 0 5px rgba(251,196,23,0.4);
+  pointer-events: none;
+  animation: ${floatParticle} ${({ $duration }) => $duration}s ${({ $delay }) => $delay}s ease-in infinite;
+`;
+
+/* ── Back button ── */
+const BackBtn = styled.button`
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(251,196,23,0.35);
+  background: rgba(0,0,0,0.3);
+  color: #fde68a;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  &:hover {
+    background: rgba(251,196,23,0.12);
+    border-color: rgba(251,196,23,0.6);
+    transform: translateX(-3px);
+  }
+`;
+
+/* ── Main card ── */
+const Card = styled.div`
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1180px;
+  max-height: calc(100vh - 40px);
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(155deg, #2c1204 0%, #3d1a06 50%, #1e0d03 100%);
+  border: 1px solid rgba(251,196,23,0.22);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,120,0.1);
+  animation: ${popIn} 0.5s cubic-bezier(0.34,1.2,0.64,1) forwards;
+  display: flex;
+  flex-direction: column;
+`;
+
+const CardTopBar = styled.div`
+  height: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fbc417, #fde68a);
+  background-size: 300% 100%;
+  animation: ${shimmerGold} 3s linear infinite;
+`;
+
+const CardInner = styled.div`
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+
+  @media (max-width: 860px) {
     flex-direction: column;
-    overflow: hidden;
-    
-    @media (max-width: 900px) {
-        padding: 24px;
-        max-width: 640px;
-    }
-`;
-
-const TopSection = styled.div`
-    display: flex;
-    gap: 32px;
-    height: 100%;
-    min-height: 0;
-    
-    @media (max-width: 900px) {
-        flex-direction: column;
-        gap: 20px;
-    }
-`;
-
-const LeftPanel = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 300px;
-    max-width: 350px;
-    flex-shrink: 0;
-    gap: 20px;
-    
-    @media (max-width: 900px) {
-        max-width: 100%;
-        min-width: auto;
-    }
-`;
-
-const RightPanel = styled.div`
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-`;
-
-const Header = styled.div`
-    text-align: center;
-    margin-bottom: 0;
-`;
-
-const TrophyContainer = styled.div`
-    position: relative;
-    display: inline-block;
-    margin-bottom: 12px;
-`;
-
-const Trophy = styled.div`
-    font-size: 48px;
-    display: inline-block;
-    animation: ${float} 3s ease-in-out infinite;
-    position: relative;
-    z-index: 2;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-`;
-
-const TrophyGlow = styled.div`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70px;
-    height: 70px;
-    background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: ${pulse} 2s ease-in-out infinite;
-    z-index: 1;
-`;
-
-const Title = styled.h1`
-    margin: 0;
-    font-size: 28px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-    
-    @media (max-width: 640px) {
-        font-size: 24px;
-    }
-`;
-
-const Subtitle = styled.p`
-    text-align: center;
-    color: #64748B;
-    margin-top: 6px;
-    font-size: 14px;
-    font-weight: 500;
-`;
-
-const BadgeRow = styled.div`
-    margin-top: 12px;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-`;
-
-const Badge = styled.span`
-    background: linear-gradient(135deg, rgba(194, 65, 12, 0.1), rgba(234, 88, 12, 0.1));
-    color: #C2410C;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid rgba(194, 65, 12, 0.2);
-`;
-
-const TabGroup = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    background: #F1F5F9;
-    padding: 6px;
-    border-radius: 16px;
-    position: relative;
-    width: 100%;
-`;
-
-const TabIndicator = styled.div`
-    position: absolute;
-    inset: 0;
-    background: white;
-    border-radius: 12px;
-    z-index: -1;
-    opacity: ${props => props.$active ? 1 : 0};
-    transition: opacity 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-`;
-
-const Tab = styled.button`
-    padding: 12px 24px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    background: ${props => props.$active ? "white" : "transparent"};
-    color: ${props => props.$active ? "#C2410C" : "#64748B"};
-    font-weight: 700;
-    font-size: 14px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    box-shadow: ${props => props.$active ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none"};
-    z-index: 1;
-    flex: 1;
-
-    &:hover { 
-        color: ${props => props.$active ? "#C2410C" : "#475569"};
-        transform: translateY(-1px);
-    }
-    
-    &:active {
-        transform: translateY(0);
-    }
-`;
-
-const StatsBar = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    background: linear-gradient(135deg, #FEF3F0 0%, #FFF7ED 100%);
-    border-radius: 16px;
-    border: 1px solid rgba(194, 65, 12, 0.1);
-    width: 100%;
-`;
-
-const Stat = styled.div`
-    text-align: center;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-`;
-
-const StatIcon = styled.div`
-    font-size: 18px;
-    margin-bottom: 4px;
-    opacity: 0.8;
-`;
-
-const StatValue = styled.div`
-    font-size: 24px;
-    font-weight: 800;
-    color: #C2410C;
-    line-height: 1;
-    letter-spacing: -0.5px;
-`;
-
-const StatLabel = styled.div`
-    font-size: 11px;
-    color: #94A3B8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 4px;
-    font-weight: 600;
-`;
-
-const StatDivider = styled.div`
-    width: 1px;
-    height: 40px;
-    background: linear-gradient(to bottom, transparent, #E2E8F0, transparent);
-`;
-
-const TableContainer = styled.div`
-    flex: 1;
     overflow-y: auto;
-    border-radius: 16px;
-    background: #FAFAFA;
-    border: 1px solid #E2E8F0;
-    position: relative;
-
-    &::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: transparent;
-        border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: #CBD5E1;
-        border-radius: 4px;
-        border: 2px solid #FAFAFA;
-        
-        &:hover {
-            background: #94A3B8;
-        }
-    }
+  }
 `;
 
-const LoadingState = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    color: #64748B;
-    gap: 16px;
-    height: 100%;
-`;
+/* ── Left Panel ── */
+const LeftPanel = styled.div`
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 28px 22px;
+  border-right: 1px solid rgba(251,196,23,0.12);
+  background: rgba(0,0,0,0.18);
+  animation: ${slideUp} 0.5s 0.1s ease both;
 
-const LoadingText = styled.p`
-    font-size: 15px;
-    font-weight: 500;
-    margin: 0;
-`;
-
-const Spinner = styled.div`
-    width: 48px;
-    height: 48px;
-    border: 4px solid #F1F5F9;
-    border-top: 4px solid #EA580C;
-    border-radius: 50%;
-    animation: ${spin} 1s linear infinite;
-`;
-
-const ErrorState = styled.div`
-    text-align: center;
-    padding: 60px 20px;
-    color: #DC2626;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`;
-
-const ErrorIcon = styled.div`
-    font-size: 48px;
-    margin-bottom: 12px;
-`;
-
-const ErrorText = styled.p`
-    font-size: 15px;
-    font-weight: 500;
-    margin: 0 0 20px 0;
-    color: #991B1B;
-`;
-
-const RetryButton = styled.button`
-    padding: 12px 28px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    color: white;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(194, 65, 12, 0.3);
-
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(194, 65, 12, 0.4);
-    }
-    
-    &:active {
-        transform: translateY(0);
-    }
-`;
-
-const EmptyState = styled.div`
-    text-align: center;
-    padding: 60px 20px;
-    color: #64748B;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-`;
-
-const EmptyIcon = styled.div`
-    font-size: 64px;
-    margin-bottom: 16px;
-    opacity: 0.6;
-`;
-
-const EmptyTitle = styled.p`
-    font-size: 18px;
-    font-weight: 700;
-    color: #334155;
-    margin: 0 0 8px 0;
-`;
-
-const EmptyText = styled.p`
-    font-size: 14px;
-    color: #94A3B8;
-    margin: 0 0 24px 0;
-`;
-
-const PlayNowButton = styled.button`
-    padding: 14px 32px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    color: white;
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(194, 65, 12, 0.3);
-
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(194, 65, 12, 0.4);
-    }
-`;
-
-const Table = styled.table`
+  @media (max-width: 860px) {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    
-    thead {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
+    border-right: none;
+    border-bottom: 1px solid rgba(251,196,23,0.12);
+    padding: 20px;
+  }
 `;
 
-const Th = styled.th`
-    padding: 16px;
-    text-align: ${props => props.align || 'left'};
-    color: #64748B;
-    font-weight: 700;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: #F8FAFC;
-    border-bottom: 2px solid #E2E8F0;
-    
-    &:first-child {
-        padding-left: 24px;
-    }
-    
-    &:last-child {
-        padding-right: 24px;
-    }
+const TrophyArea = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 `;
 
-const TableRow = styled.tr`
-    background: ${props => props.$isCurrentUser 
-        ? "linear-gradient(135deg, rgba(194, 65, 12, 0.08), rgba(234, 88, 12, 0.08))" 
-        : "white"};
-    border-left: 4px solid ${props => props.$isCurrentUser ? "#EA580C" : "transparent"};
-    transition: all 0.2s ease;
-    animation: ${slideIn} 0.4s ease backwards;
-    position: relative;
-    
-    &:hover {
-        background: ${props => props.$isCurrentUser 
-            ? "linear-gradient(135deg, rgba(194, 65, 12, 0.12), rgba(234, 88, 12, 0.12))" 
-            : "#F8FAFC"};
-        transform: scale(1.005);
-        z-index: 1;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    
-    &:not(:last-child) {
-        border-bottom: 1px solid #F1F5F9;
-    }
+const TrophyWrap = styled.div`
+  position: relative;
+  display: inline-flex;
+  margin-bottom: 8px;
 `;
 
-const RankCell = styled.td`
-    padding: 14px 16px;
-    width: 70px;
+const TrophyEmoji = styled.div`
+  font-size: 52px;
+  position: relative;
+  z-index: 2;
+  animation: ${floatTrophy} 3s ease-in-out infinite;
+  filter: drop-shadow(0 6px 16px rgba(251,196,23,0.35));
 `;
 
-const RankBadge = styled.div`
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: ${props => props.$isTop3 ? '18px' : '13px'};
-    font-weight: 800;
-    background: ${props => props.$bg};
-    color: ${props => props.$isTop3 ? 'white' : '#475569'};
-    box-shadow: ${props => props.$isTop3 
-        ? '0 4px 12px rgba(0,0,0,0.15)' 
-        : '0 2px 4px rgba(0,0,0,0.05)'};
-    border: ${props => props.$isTop3 ? '2px solid rgba(255,255,255,0.3)' : '2px solid transparent'};
+const TrophyHalo = styled.div`
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,196,23,0.3) 0%, transparent 70%);
+  animation: ${haloBreath} 2.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
 `;
 
-const PlayerCell = styled.td`
-    padding: 14px 12px;
+const PanelTitle = styled.h1`
+  margin: 0;
+  font-family: 'Georgia', serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fde68a;
+  letter-spacing: 0.3px;
+  text-align: center;
 `;
 
-const PlayerInfo = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+const PanelSubtitle = styled.p`
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 `;
 
-const PlayerName = styled.div`
-    font-weight: 700;
-    color: ${props => props.$isCurrentUser ? "#C2410C" : "#1E293B"};
-    font-size: 15px;
-    letter-spacing: -0.2px;
+const ChampionBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(251,196,23,0.35);
+  background: rgba(251,196,23,0.1);
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #fde68a;
 `;
 
-const YouTag = styled.span`
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    color: white;
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 4px rgba(194, 65, 12, 0.3);
+const BadgeDot = styled.span`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fbc417;
+  box-shadow: 0 0 5px rgba(251,196,23,0.9);
+  animation: ${blink} 1.4s ease-in-out infinite;
+  flex-shrink: 0;
 `;
 
-const DateCell = styled.td`
-    padding: 14px 12px;
-    font-size: 13px;
-    color: #64748B;
-    font-weight: 500;
+/* ── Tabs ── */
+const TabsSection = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
-const ScoreCell = styled.td`
-    padding: 14px 24px 14px 12px;
-    text-align: right;
+const TabsLabel = styled.div`
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(253,230,138,0.45);
 `;
 
-const ScoreValue = styled.div`
-    font-size: 20px;
-    font-weight: 800;
-    color: #C2410C;
-    line-height: 1;
-    letter-spacing: -0.5px;
+const TabList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
 `;
 
-const ScoreLabel = styled.div`
-    font-size: 11px;
-    color: #94A3B8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 4px;
-    font-weight: 600;
+const TabBtn = styled.button`
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid ${({ $active, $color }) => $active ? `${$color}55` : 'rgba(255,255,255,0.07)'};
+  background: ${({ $active, $color }) => $active ? `${$color}18` : 'rgba(255,255,255,0.04)'};
+  color: ${({ $active }) => $active ? '#fff4df' : 'rgba(255,255,255,0.5)'};
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  &:hover {
+    background: ${({ $color }) => `${$color}14`};
+    border-color: ${({ $color }) => `${$color}44`};
+    color: #fff;
+    transform: translateX(3px);
+  }
 `;
 
-const ActionBar = styled.div`
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    width: 100%;
+const TabBtnIcon = styled.span`
+  font-size: 16px;
+  flex-shrink: 0;
 `;
 
-const BtnIcon = styled.span`
-    font-size: 16px;
-    display: flex;
-    align-items: center;
+const TabBtnLabel = styled.span`
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 700;
+  flex: 1;
 `;
 
-const ActionButton = styled.button`
-    padding: 14px 28px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex: 1;
-    background: ${props => props.$secondary 
-        ? "white" 
-        : "linear-gradient(135deg, #C2410C, #EA580C)"};
-    color: ${props => props.$secondary ? "#C2410C" : "white"};
-    border: ${props => props.$secondary ? "2px solid #E2E8F0" : "none"};
-    box-shadow: ${props => props.$secondary 
-        ? "0 1px 3px rgba(0,0,0,0.1)" 
-        : "0 4px 6px -1px rgba(194, 65, 12, 0.3)"};
+const TabActivePip = styled.span`
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: ${({ $color }) => $color};
+  box-shadow: ${({ $color }) => `0 0 8px ${$color}99`};
+  animation: ${dotPulse} 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+`;
 
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: ${props => props.$secondary 
-            ? "0 10px 15px -3px rgba(0,0,0,0.1)" 
-            : "0 10px 20px -3px rgba(194, 65, 12, 0.4)"};
-        border-color: ${props => props.$secondary ? "#C2410C" : "none"};
-    }
-    
-    &:active {
-        transform: translateY(0);
-    }
+/* ── Stats row ── */
+const StatsRow = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(251,196,23,0.07);
+  border: 1px solid rgba(251,196,23,0.15);
+`;
+
+const StatBox = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+`;
+
+const StatBoxIcon = styled.div`
+  font-size: 16px;
+  opacity: 0.7;
+`;
+
+const StatBoxVal = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: #fbc417;
+  line-height: 1;
+`;
+
+const StatBoxLabel = styled.div`
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.35);
+`;
+
+const StatSep = styled.div`
+  width: 1px;
+  height: 38px;
+  background: rgba(251,196,23,0.15);
+`;
+
+/* ── Action buttons ── */
+const ActionRow = styled.div`
+  width: 100%;
+  display: flex;
+  gap: 10px;
+`;
+
+const PrimaryBtn = styled.button`
+  position: relative;
+  flex: 2;
+  height: 46px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fde68a 0%, #fbc417 40%, #f59e0b 100%);
+  box-shadow: 0 5px 20px rgba(251,196,23,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 0.15s, box-shadow 0.15s;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(251,196,23,0.45); }
+  &:active { transform: translateY(1px); }
+`;
+
+const BtnShimmer = styled.span`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: ${shimmerGold} 2.4s linear infinite;
+`;
+
+const BtnContent = styled.span`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #3d2401;
+`;
+
+const GhostBtn = styled.button`
+  flex: 1;
+  height: 46px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(251,196,23,0.35);
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  &:hover { background: rgba(251,196,23,0.1); border-color: rgba(251,196,23,0.6); transform: translateY(-1px); }
+  &:active { transform: translateY(1px); }
+  ${BtnContent} { font-size: 13px; color: #fde68a; }
+`;
+
+/* ── Right Panel ── */
+const RightPanel = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 14px;
+  overflow: hidden;
+  animation: ${slideUp} 0.5s 0.18s ease both;
+`;
+
+const RightPanelHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+`;
+
+const RightPanelTitle = styled.h2`
+  margin: 0;
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #fde68a;
+  letter-spacing: 0.2px;
+`;
+
+const ActiveTabPill = styled.div`
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: ${({ $color }) => `${$color}20`};
+  border: 1px solid ${({ $color }) => `${$color}50`};
+  color: ${({ $color }) => $color};
+`;
+
+/* ── Table container ── */
+const TableWrap = styled.div`
+  flex: 1;
+  min-height: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(251,196,23,0.14);
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(251,196,23,0.25); border-radius: 4px; }
+  overflow-y: auto;
+`;
+
+/* ── State views ── */
+const StateBox = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 50px 24px;
+`;
+
+const StateEmoji = styled.div`
+  font-size: 56px;
+  opacity: 0.7;
+`;
+
+const StateTitle = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #fde68a;
+`;
+
+const StateText = styled.div`
+  font-family: sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+`;
+
+const StateBtn = styled.button`
+  padding: 10px 26px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #fde68a, #f59e0b);
+  color: #3d2401;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(251,196,23,0.3);
+  transition: all 0.18s ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(251,196,23,0.4); }
+`;
+
+const RingSpinner = styled.div`
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(251,196,23,0.15);
+  border-top-color: #fbc417;
+  animation: ${spinRing} 0.9s linear infinite;
+`;
+
+/* ── Score table ── */
+const ScoreTable = styled.table`
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+`;
+
+const ScoreTableHead = styled.thead`
+  position: sticky;
+  top: 0;
+  z-index: 10;
+`;
+
+const HeadCell = styled.th`
+  padding: 13px 16px;
+  text-align: ${({ $align }) => $align || 'left'};
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(253,230,138,0.45);
+  background: rgba(0,0,0,0.35);
+  border-bottom: 1px solid rgba(251,196,23,0.12);
+  width: ${({ $w }) => $w || 'auto'};
+
+  @media (max-width: 600px) {
+    display: ${({ $hide }) => $hide ? 'none' : 'table-cell'};
+  }
+`;
+
+const ScoreRow = styled.tr`
+  border-left: 3px solid ${({ $isMe }) => $isMe ? '#fbc417' : 'transparent'};
+  background: ${({ $isMe, $isTop3 }) =>
+    $isMe ? 'rgba(251,196,23,0.08)' :
+    $isTop3 ? 'rgba(255,255,255,0.03)' :
+    'transparent'};
+  transition: background 0.18s ease;
+  animation: ${rowIn} 0.35s ease both;
+
+  &:hover {
+    background: rgba(251,196,23,0.06);
+  }
+
+  &:not(:last-child) td {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+`;
+
+const RankTd = styled.td`
+  padding: 12px 16px;
+  width: 64px;
+`;
+
+const RankBubble = styled.div`
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${({ $isTop3 }) => $isTop3 ? '18px' : '13px'};
+  font-weight: 800;
+  background: ${({ $bg }) => $bg};
+  border: 1.5px solid ${({ $ring }) => $ring};
+  box-shadow: ${({ $glow, $isTop3 }) => $isTop3 ? `0 0 14px ${$glow}` : 'none'};
+`;
+
+const RankNum = styled.span`
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.55);
+`;
+
+const PlayerTd = styled.td`
+  padding: 12px 10px;
+`;
+
+const PlayerRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const PlayerAvatar = styled.div`
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 900;
+  background: ${({ $isMe }) => $isMe
+    ? 'linear-gradient(135deg, #fde68a, #f59e0b)'
+    : 'rgba(255,255,255,0.1)'};
+  color: ${({ $isMe }) => $isMe ? '#3d2401' : 'rgba(255,255,255,0.6)'};
+  border: 1.5px solid ${({ $isMe }) => $isMe ? 'rgba(251,196,23,0.5)' : 'rgba(255,255,255,0.1)'};
+`;
+
+const PlayerMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const PlayerNameText = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: ${({ $isMe }) => $isMe ? '#fbc417' : '#fff4df'};
+  letter-spacing: 0.1px;
+`;
+
+const YouPill = styled.span`
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fde68a, #f59e0b);
+  color: #3d2401;
+  font-family: sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+`;
+
+const DateTd = styled.td`
+  padding: 12px 10px;
+  font-family: sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+
+  @media (max-width: 600px) { display: none; }
+`;
+
+const ScoreTd = styled.td`
+  padding: 12px 20px 12px 10px;
+  text-align: right;
+`;
+
+const ScoreNum = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: ${({ $isTop3 }) => $isTop3 ? '22px' : '18px'};
+  font-weight: 900;
+  color: ${({ $isTop3 }) => $isTop3 ? '#fbc417' : '#fff4df'};
+  line-height: 1;
+  letter-spacing: -0.5px;
+`;
+
+const ScoreUnit = styled.div`
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.25);
+  margin-top: 3px;
 `;
