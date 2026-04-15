@@ -2,6 +2,15 @@ import React, { useMemo, useState } from 'react';
 import styled, { createGlobalStyle, keyframes } from 'styled-components';
 import notoSansTagalog from '../Assests/NotoSansTagalog-Regular.ttf';
 import logo1 from '../Assests/logo1.png';
+import bay1 from '../Assests/bay1.png';
+import bay2 from '../Assests/bay2.png';
+import bay3 from '../Assests/bay3.png';
+import bay4 from '../Assests/bay4.png';
+import bay5 from '../Assests/bay5.png';
+import bay6 from '../Assests/bay6.png';
+import bay7 from '../Assests/bay7.png';
+import bay8 from '../Assests/bay8.png';
+import bay9 from '../Assests/bay9.png';
 import LoginGame from './Games/src/LoginGame';
 
 const GlobalStyle = createGlobalStyle`
@@ -14,12 +23,13 @@ const GlobalStyle = createGlobalStyle`
   }
 
   :root{
-    --bg0: #fff8f2;
-    --bg1: #fff0e5;
-    --bg2: #ffe6d6;
+    /* DARKER / RICHER BACKGROUND so floating Baybayin images show up */
+    --bg0: #2b1004;   /* deep cocoa */
+    --bg1: #4a1706;   /* warm mahogany */
+    --bg2: #8a2a08;   /* burnt sienna */
 
-    --ink: #3d1a06;
-    --muted: rgba(61,26,6,.62);
+    --ink: #fff6eb;
+    --muted: rgba(255,246,235,.72);
 
     --gold: #fbc417;
     --amber: #f59e0b;
@@ -27,8 +37,8 @@ const GlobalStyle = createGlobalStyle`
     --brick:#9a3000;
     --deep:#7a2100;
 
-    --ring: rgba(251,196,23,.55);
-    --ring2: rgba(0,0,0,.28);
+    --ring: rgba(251,196,23,.6);
+    --ring2: rgba(0,0,0,.35);
   }
 
   *, *::before, *::after { box-sizing: border-box; }
@@ -37,14 +47,12 @@ const GlobalStyle = createGlobalStyle`
   body { margin: 0; padding: 0; overflow-x: hidden; background: var(--bg0); color: var(--ink); }
   button { font: inherit; }
 
-  /* Accessible focus ring everywhere */
   :focus-visible{
     outline: none;
     box-shadow: 0 0 0 3px var(--ring), 0 0 0 6px var(--ring2);
     border-radius: 12px;
   }
 
-  /* Reduce motion */
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -56,40 +64,93 @@ const MODES = [
     icon: '✍️',
     title: 'Write Mode',
     desc: 'Write the Baybayin equivalent of each Latin letter shown on screen',
-    accent: '#c24010',
-    bg: '#fff4ec',
+    accent: '#fbc417', // brighter on dark bg
+    bg: 'rgba(251,196,23,0.14)',
   },
   {
     icon: '👆',
     title: 'Tap Mode',
     desc: 'Tap the correct Baybayin character that matches the visual prompt',
-    accent: '#9a3000',
-    bg: '#fff1e8',
+    accent: '#fde68a',
+    bg: 'rgba(253,230,138,0.12)',
   },
   {
     icon: '🔄',
     title: 'Translate Mode',
     desc: 'Multiple choice, character ID, typing & drag-and-drop challenges',
-    accent: '#7a2100',
-    bg: '#ffeee5',
+    accent: '#ffb36b',
+    bg: 'rgba(255,179,107,0.12)',
   },
 ];
+
+const rand = (min, max) => min + Math.random() * (max - min);
 
 const HeroSection = () => {
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
 
-  const scrollToModes = () => document.getElementById('modes')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToModes = () =>
+    document.getElementById('modes')?.scrollIntoView({ behavior: 'smooth' });
 
-  // small perf: stable list instance
   const modes = useMemo(() => MODES, []);
+
+  const floatingImages = useMemo(() => {
+    const base = [
+      { src: bay1, top: '12%', left: '10%' },
+      { src: bay2, top: '42%', left: '8%' },
+      { src: bay3, top: '72%', left: '12%' },
+      { src: bay4, top: '7%', left: '70%' },
+      { src: bay5, top: '22%', left: '82%' },
+      { src: bay6, top: '42%', left: '68%' },
+      { src: bay7, top: '58%', left: '78%' },
+      { src: bay8, top: '74%', left: '85%' },
+      { src: bay9, top: '88%', left: '72%' },
+    ];
+
+    return base.map((img, i) => ({
+      id: `bay-${i}`,
+      ...img,
+      widthPx: Math.round(rand(120, 190)),
+      rotDeg: rand(-6, 6),
+      floatDur: rand(8, 16),
+      floatDelay: rand(0, 2.2),
+      fadeDur: rand(4.2, 7.2),
+      fadeDelay: rand(0, 2),
+      // stronger base opacity (images were too faint on light bg)
+      opacity: rand(0.28, 0.45),
+      blur: rand(0, 0.8),
+    }));
+  }, []);
 
   return (
     <>
       <GlobalStyle />
       <PageRoot>
-        {/* ══════════ HERO ══════════ */}
         <HeroWrap>
           <TopBar aria-hidden="true" />
+
+          {/* Floating baybayin images layer */}
+          <FloatingLayer aria-hidden="true">
+            {floatingImages.map((img) => (
+              <FloatingImage
+                key={img.id}
+                src={img.src}
+                alt=""
+                $top={img.top}
+                $left={img.left}
+                $w={img.widthPx}
+                $rot={img.rotDeg}
+                $floatDur={img.floatDur}
+                $floatDelay={img.floatDelay}
+                $fadeDur={img.fadeDur}
+                $fadeDelay={img.fadeDelay}
+                $opacity={img.opacity}
+                $blur={img.blur}
+              />
+            ))}
+          </FloatingLayer>
+
+          {/* extra dark vignette to increase contrast */}
+          <Vignette aria-hidden="true" />
 
           {/* subtle decorative orbs */}
           <OrbA aria-hidden="true" />
@@ -111,7 +172,8 @@ const HeroSection = () => {
                 <TitleRule aria-hidden="true" />
 
                 <Tagline>
-                  Revive the Ancient Script. <TagBold>Master Baybayin through Play.</TagBold>
+                  Revive the Ancient Script.{' '}
+                  <TagBold>Master Baybayin through Play.</TagBold>
                 </Tagline>
 
                 <BodyText>
@@ -164,7 +226,11 @@ const HeroSection = () => {
             </HeroCard>
           </HeroStage>
 
-          <ScrollCue type="button" onClick={scrollToModes} aria-label="Scroll to game modes section">
+          <ScrollCue
+            type="button"
+            onClick={scrollToModes}
+            aria-label="Scroll to game modes section"
+          >
             <Pip />
             <Pip $d=".16s" />
             <Pip $d=".32s" />
@@ -172,7 +238,6 @@ const HeroSection = () => {
           </ScrollCue>
         </HeroWrap>
 
-        {/* ══════════ MODES ══════════ */}
         <ModesSection id="modes">
           <ModesTopBar aria-hidden="true" />
           <ModesInner>
@@ -197,7 +262,9 @@ const HeroSection = () => {
                     <ModeTitle $accent={m.accent}>{m.title}</ModeTitle>
                     <ModeDesc>{m.desc}</ModeDesc>
                   </ModeBody>
-                  <ModeFooter $accent={m.accent} aria-hidden="true">→</ModeFooter>
+                  <ModeFooter $accent={m.accent} aria-hidden="true">
+                    →
+                  </ModeFooter>
                 </ModeCard>
               ))}
             </ModesGrid>
@@ -205,7 +272,10 @@ const HeroSection = () => {
         </ModesSection>
 
         {isGameModalOpen && (
-          <LoginGame isOpen={isGameModalOpen} toggleModal={() => setIsGameModalOpen(false)} />
+          <LoginGame
+            isOpen={isGameModalOpen}
+            toggleModal={() => setIsGameModalOpen(false)}
+          />
         )}
       </PageRoot>
     </>
@@ -243,6 +313,16 @@ const haloBreath = keyframes`
   50%{opacity:.9}
 `;
 
+/* Floating image animations */
+const bayFade = keyframes`
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.55; }
+`;
+const bayDrift = keyframes`
+  0%, 100% { transform: translate(-50%, -50%) translateY(0)     rotate(var(--rot)); }
+  50%      { transform: translate(-50%, -50%) translateY(-18px) rotate(var(--rot)); }
+`;
+
 /* ═══════════════════════════
    PAGE
 ═══════════════════════════ */
@@ -260,13 +340,63 @@ const PageRoot = styled.div`
 const HeroWrap = styled.section`
   position: relative;
   min-height: 100vh;
+
+  /* darker base background for contrast */
   background:
-    radial-gradient(circle at 18% 18%, rgba(251, 196, 23, 0.18) 0%, transparent 28%),
-    radial-gradient(circle at 82% 24%, rgba(194, 64, 12, 0.16) 0%, transparent 30%),
+    radial-gradient(circle at 18% 18%, rgba(251, 196, 23, 0.14) 0%, transparent 30%),
+    radial-gradient(circle at 82% 24%, rgba(194, 64, 12, 0.14) 0%, transparent 32%),
     linear-gradient(160deg, var(--bg0) 0%, var(--bg1) 46%, var(--bg2) 100%);
+
   overflow: hidden;
   display: flex;
   flex-direction: column;
+`;
+
+const Vignette = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 30%, transparent 0%, rgba(0,0,0,0.22) 60%, rgba(0,0,0,0.42) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.28));
+`;
+
+/* Floating images layer */
+const FloatingLayer = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+`;
+
+const FloatingImage = styled.img`
+  position: absolute;
+  top: ${({ $top }) => $top};
+  left: ${({ $left }) => $left};
+  width: ${({ $w }) => `${$w}px`};
+  height: auto;
+  transform: translate(-50%, -50%);
+  opacity: ${({ $opacity }) => $opacity};
+
+  /* boost contrast & visibility */
+  filter: ${({ $blur }) =>
+    `blur(${$blur}px) drop-shadow(0 10px 22px rgba(0,0,0,0.35)) brightness(1.15) contrast(1.2)`};
+
+  /* try 'screen' too, but 'lighten' usually works well */
+  mix-blend-mode: lighten;
+
+  --rot: ${({ $rot }) => `${$rot}deg`};
+  animation:
+    ${bayFade} ${({ $fadeDur }) => $fadeDur}s ${({ $fadeDelay }) => $fadeDelay}s ease-in-out infinite,
+    ${bayDrift} ${({ $floatDur }) => $floatDur}s ${({ $floatDelay }) => $floatDelay}s ease-in-out infinite;
+
+  will-change: transform, opacity;
+
+  @media (max-width: 720px) {
+    opacity: ${({ $opacity }) => Math.min(0.3, $opacity)};
+    width: ${({ $w }) => `${Math.max(84, Math.round($w * 0.72))}px`};
+  }
 `;
 
 const OrbA = styled.div`
@@ -276,7 +406,7 @@ const OrbA = styled.div`
   border-radius: 50%;
   left: -180px;
   top: 18%;
-  background: radial-gradient(circle, rgba(251,196,23,.18) 0%, transparent 62%);
+  background: radial-gradient(circle, rgba(251,196,23,.16) 0%, transparent 62%);
   filter: blur(2px);
   pointer-events: none;
   z-index: 0;
@@ -338,9 +468,18 @@ const HeroCopy = styled.div`
   text-align: left;
   padding: 44px 0 40px;
 
+  /* add subtle glass panel for readability on darker bg */
+  background: linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.10));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 18px 46px rgba(0,0,0,0.22);
+  padding-left: 28px;
+  padding-right: 28px;
+
   @media (max-width: 900px) {
     width: 100%;
-    padding: 24px 0 8px;
+    padding: 22px 18px;
     align-items: center;
     text-align: center;
   }
@@ -380,8 +519,8 @@ const LogoFrame = styled.div`
   width: min(100%, 332px);
   aspect-ratio: 1/1;
   border-radius: 999px;
-  border: 1px solid rgba(194,64,12,.18);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
   pointer-events: none;
 `;
 
@@ -392,7 +531,7 @@ const LogoImg = styled.img`
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
-  filter: drop-shadow(0 14px 28px rgba(122, 33, 0, 0.16));
+  filter: drop-shadow(0 20px 44px rgba(0, 0, 0, 0.35));
   animation: ${floatImg} 14s ease-in-out infinite;
 `;
 
@@ -401,7 +540,7 @@ const LogoCaption = styled.div`
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: rgba(154,48,0,.55);
+  color: rgba(255,255,255,.72);
 `;
 
 /* Shimmer top bar */
@@ -418,7 +557,7 @@ const TopBar = styled.div`
 /* Coloured accent line at top of card */
 const CardTopLine = styled.div`
   position: absolute;
-  top: 0; left: 24px; right: 24px;
+  top: 0; left: 18px; right: 18px;
   height: 3px;
   border-radius: 0 0 4px 4px;
   background: linear-gradient(90deg, #fbc417, #c24010, #9a3000, #c24010, #fbc417);
@@ -429,13 +568,12 @@ const CardTopLine = styled.div`
 const Eyebrow = styled.p`
   margin: 0;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: rgba(154, 48, 0, 0.6);
+  color: rgba(253, 230, 138, 0.68);
 `;
 
-/* Wordmark */
 const Title = styled.div`
   display: flex;
   align-items: baseline;
@@ -446,14 +584,14 @@ const TB = styled.span`
   font-family: 'Cinzel', serif;
   font-size: clamp(48px, 8vw, 84px);
   font-weight: 900;
-  color: #c24010;
+  color: #fde68a;
 `;
 
 const TAI = styled.span`
   font-family: 'Cinzel', serif;
   font-size: clamp(48px, 8vw, 84px);
   font-weight: 900;
-  background: linear-gradient(90deg, #c24010, #fbc417, #f59e0b, #fbc417, #c24010);
+  background: linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fbc417, #fde68a);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -465,13 +603,13 @@ const TRest = styled.span`
   font-family: 'Cinzel', serif;
   font-size: clamp(48px, 8vw, 84px);
   font-weight: 900;
-  color: #3d1a06;
+  color: rgba(255,246,235,.92);
 `;
 
 const TitleRule = styled.div`
   width: 50px;
   height: 1.5px;
-  background: linear-gradient(90deg, transparent, rgba(194,64,12,.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(251,196,23,.55), transparent);
   border-radius: 2px;
 `;
 
@@ -480,31 +618,30 @@ const Tagline = styled.p`
   font-size: clamp(15px, 2vw, 18px);
   font-weight: 400;
   font-style: italic;
-  color: rgba(61, 26, 6, 0.72);
+  color: rgba(255,246,235,.86);
   line-height: 1.55;
 `;
 
 const TagBold = styled.span`
   font-style: normal;
-  font-weight: 700;
-  color: #c24010;
+  font-weight: 800;
+  color: #fbc417;
 `;
 
 const BodyText = styled.p`
   margin: 0;
   font-size: 14px;
   line-height: 1.75;
-  color: rgba(61, 26, 6, 0.62);
+  color: rgba(255,246,235,.75);
   max-width: 460px;
 `;
 
 const Divider = styled.div`
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(194,64,12,.15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
 `;
 
-/* CTA */
 const CTARow = styled.div`
   display: flex;
   gap: 10px;
@@ -524,18 +661,18 @@ const PlayBtn = styled.button`
   border-radius: 12px;
   cursor: pointer;
   overflow: hidden;
-  background: linear-gradient(135deg, #c24010 0%, #9a3000 55%, #7a2100 100%);
-  box-shadow: 0 5px 20px rgba(194, 64, 12, 0.38), inset 0 1px 0 rgba(255,255,255,.14);
+  background: linear-gradient(135deg, #fde68a 0%, #fbc417 45%, #f59e0b 100%);
+  box-shadow: 0 12px 34px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,.22);
   transition: transform .15s, box-shadow .15s;
 
-  &:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(194,64,12,.48); }
+  &:hover { transform: translateY(-2px); box-shadow: 0 16px 44px rgba(0,0,0,.40); }
   &:active { transform: translateY(1px); }
 `;
 
 const BtnGlow = styled.span`
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
   background-size: 200% 100%;
   animation: ${shimmer} 2.4s linear infinite;
 `;
@@ -544,38 +681,37 @@ const BtnLabel = styled.span`
   position: relative;
   font-family: 'Cinzel', serif;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: .3px;
-  color: #fff;
+  color: #3d2401;
 `;
 
 const ExploreBtn = styled.button`
   height: 50px;
   padding: 0 26px;
   border-radius: 12px;
-  border: 1.5px solid rgba(194, 64, 12, 0.35);
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(251, 196, 23, 0.42);
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
   cursor: pointer;
   font-family: 'Cinzel', serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: .3px;
-  color: #9a3000;
+  color: rgba(255,246,235,.92);
   transition: all .18s ease;
 
-  &:hover { background: rgba(255,255,255,.75); border-color: rgba(194,64,12,.6); transform: translateY(-2px); }
+  &:hover { background: rgba(0,0,0,.26); border-color: rgba(251,196,23,.7); transform: translateY(-2px); }
   &:active { transform: translateY(1px); }
 `;
 
-/* Stats */
 const StatRow = styled.div`
   display: flex;
   align-items: center;
   padding: 12px 20px;
   border-radius: 12px;
-  background: rgba(194, 64, 12, 0.06);
-  border: 1px solid rgba(194, 64, 12, 0.12);
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.10);
   width: fit-content;
 
   @media (max-width: 900px){
@@ -597,25 +733,24 @@ const SNum = styled.div`
   font-family: 'Cinzel', serif;
   font-size: 20px;
   font-weight: 900;
-  color: #c24010;
+  color: #fbc417;
   line-height: 1;
 `;
 
 const SLab = styled.div`
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .8px;
-  color: rgba(154,48,0,.5);
+  color: rgba(255,246,235,.70);
 `;
 
 const SDot = styled.div`
   width: 1px;
   height: 28px;
-  background: rgba(194,64,12,.15);
+  background: rgba(255,255,255,.14);
 `;
 
-/* Scroll cue */
 const ScrollCue = styled.button`
   position: absolute;
   bottom: 24px;
@@ -629,7 +764,7 @@ const ScrollCue = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  opacity: .55;
+  opacity: .6;
   transition: opacity .2s;
 
   &:hover { opacity: 1; }
@@ -639,21 +774,21 @@ const Pip = styled.span`
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(253, 230, 138, 0.85);
+  background: rgba(253, 230, 138, 0.92);
   animation: ${pipBounce} 1.4s ${({ $d }) => $d || '0s'} ease-in-out infinite;
 `;
 
 const ScrollLabel = styled.span`
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(253,230,138,.6);
+  color: rgba(253,230,138,.75);
   margin-top: 3px;
 `;
 
 /* ═══════════════════════════
-   MODES SECTION
+   MODES SECTION (kept light for contrast)
 ═══════════════════════════ */
 
 const ModesSection = styled.section`
@@ -683,7 +818,7 @@ const ModesInner = styled.div`
 const ModesEyebrow = styled.p`
   margin: 0;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: rgba(194, 64, 12, 0.42);
