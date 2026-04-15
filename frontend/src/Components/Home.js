@@ -53,59 +53,60 @@ const HeroSection = () => {
 
         {/* ══════════ HERO ══════════ */}
         <HeroWrap>
-
-          {/* Full-bleed logo image */}
-          <BgImg src={logo1} alt="" />
-
-          {/* Light warm vignette — just edges, center stays bright */}
-          <Vignette />
-
           {/* Shimmer accent bar */}
           <TopBar />
 
-          {/* Floating content card */}
-          <HeroCard>
-            <CardTopLine />
+          <HeroStage>
+            <HeroCard>
+              <HeroCopy>
+                <CardTopLine />
 
-            <Eyebrow>AI-Powered · Philippine Baybayin</Eyebrow>
+                <Eyebrow>AI-Powered · Philippine Baybayin</Eyebrow>
 
-            <Title>
-              <TB>b</TB><TAI>AI</TAI><TRest>guhit</TRest>
-            </Title>
+                <Title>
+                  <TB>b</TB><TAI>AI</TAI><TRest>guhit</TRest>
+                </Title>
 
-            <TitleRule />
+                <TitleRule />
 
-            <Tagline>
-              Revive the Ancient Script.{' '}
-              <TagBold>Master Baybayin through Play.</TagBold>
-            </Tagline>
+                <Tagline>
+                  Revive the Ancient Script.{' '}
+                  <TagBold>Master Baybayin through Play.</TagBold>
+                </Tagline>
 
-            <BodyText>
-              Practice writing, tapping, and translating Philippine Baybayin
-              characters through AI-powered interactive game modes —
-              one stroke at a time.
-            </BodyText>
+                <BodyText>
+                  Practice writing, tapping, and translating Philippine Baybayin
+                  characters through AI-powered interactive game modes —
+                  one stroke at a time.
+                </BodyText>
 
-            <Divider />
+                <Divider />
 
-            <CTARow>
-              <PlayBtn onClick={() => setIsGameModalOpen(true)}>
-                <BtnGlow />
-                <BtnLabel>▶&nbsp; Start Playing</BtnLabel>
-              </PlayBtn>
-              <ExploreBtn onClick={scrollToModes}>
-                Explore Modes&nbsp;↓
-              </ExploreBtn>
-            </CTARow>
+                <CTARow>
+                  <PlayBtn onClick={() => setIsGameModalOpen(true)}>
+                    <BtnGlow />
+                    <BtnLabel>▶&nbsp; Start Playing</BtnLabel>
+                  </PlayBtn>
+                  <ExploreBtn onClick={scrollToModes}>
+                    Explore Modes&nbsp;↓
+                  </ExploreBtn>
+                </CTARow>
 
-            <StatRow>
-              <StatItem><SNum>3</SNum><SLab>Game Modes</SLab></StatItem>
-              <SDot />
-              <StatItem><SNum>AI</SNum><SLab>Powered</SLab></StatItem>
-              <SDot />
-              <StatItem><SNum>∞</SNum><SLab>Practice</SLab></StatItem>
-            </StatRow>
-          </HeroCard>
+                <StatRow>
+                  <StatItem><SNum>3</SNum><SLab>Game Modes</SLab></StatItem>
+                  <SDot />
+                  <StatItem><SNum>AI</SNum><SLab>Powered</SLab></StatItem>
+                  <SDot />
+                  <StatItem><SNum>∞</SNum><SLab>Practice</SLab></StatItem>
+                </StatRow>
+              </HeroCopy>
+
+              <HeroLogoPanel>
+                <LogoAura />
+                <LogoImg src={logo1} alt="bAIguhit logo" />
+              </HeroLogoPanel>
+            </HeroCard>
+          </HeroStage>
 
           {/* Scroll cue */}
           <ScrollCue onClick={scrollToModes}>
@@ -181,40 +182,105 @@ const PageRoot = styled.div`
 const HeroWrap = styled.section`
   position: relative;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-`;
-
-/* Full-bleed background image — bright, barely dimmed */
-const BgImg = styled.img`
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: 0;
-  animation: ${floatImg} 14s ease-in-out infinite;
-`;
-
-/*
-  Very light vignette — only darkens the extreme edges so the
-  centre stays as bright as the original image.
-  Nothing like the old heavy overlay.
-*/
-const Vignette = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 1;
   background:
-    radial-gradient(
-      ellipse 90% 80% at 50% 50%,
-      transparent 45%,
-      rgba(60, 18, 4, 0.55) 100%
-    );
+    radial-gradient(circle at 18% 18%, rgba(251, 196, 23, 0.18) 0%, transparent 28%),
+    radial-gradient(circle at 82% 24%, rgba(194, 64, 12, 0.16) 0%, transparent 30%),
+    linear-gradient(160deg, #fff8f2 0%, #fff0e5 46%, #ffe6d6 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+`;
+
+const HeroStage = styled.div`
+  position: relative;
+  z-index: 2;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 96px 24px 88px;
+  display: flex;
+  justify-content: center;
+
+  @media (max-width: 900px) {
+    padding: 86px 20px 102px;
+  }
+`;
+
+const HeroCard = styled.div`
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 1080px;
+  display: flex;
+  align-items: stretch;
+  gap: clamp(24px, 4vw, 48px);
+  padding: 0;
+  margin: 0;
+  animation: ${fadeUp} 0.75s 0.1s ease both;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @media (max-width: 600px) {
+    padding: 0;
+  }
+`;
+
+const HeroCopy = styled.div`
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 44px 0 40px;
+
+  @media (max-width: 900px) {
+    width: 100%;
+    padding: 24px 0 8px;
+  }
+`;
+
+const HeroLogoPanel = styled.div`
+  position: relative;
+  z-index: 1;
+  flex: 0 0 min(36vw, 360px);
+  display: grid;
+  place-items: center;
+  min-height: 420px;
+  padding: 44px 0 40px;
+
+  @media (max-width: 900px) {
+    width: 100%;
+    min-height: 0;
+    padding: 12px 0 0;
+  }
+`;
+
+const LogoAura = styled.div`
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(100%, 360px);
+  height: min(100%, 360px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(251, 196, 23, 0.18) 0%, rgba(194, 64, 12, 0.08) 38%, transparent 72%);
+  filter: blur(4px);
   pointer-events: none;
+`;
+
+const LogoImg = styled.img`
+  position: relative;
+  z-index: 1;
+  width: min(100%, 320px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 14px 28px rgba(122, 33, 0, 0.16));
+  animation: ${floatImg} 14s ease-in-out infinite;
 `;
 
 /* Shimmer top bar */
@@ -226,37 +292,6 @@ const TopBar = styled.div`
   background: linear-gradient(90deg, #fde68a, #fbc417, #c24010, #fbc417, #fde68a);
   background-size: 300% 100%;
   animation: ${shimmer} 4s linear infinite;
-`;
-
-/* ── Floating glass card ── */
-const HeroCard = styled.div`
-  position: relative;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 44px 52px 40px;
-  margin: 0 16px;
-  text-align: center;
-  max-width: 580px;
-  width: 100%;
-
-  /* Bright frosted glass — high lightness, low opacity */
-  background: rgba(255, 251, 245, 0.82);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 8px 40px rgba(122, 33, 0, 0.18),
-    0 2px 0 rgba(255, 255, 255, 0.8) inset;
-
-  animation: ${fadeUp} 0.75s 0.1s ease both;
-
-  @media (max-width: 600px) {
-    padding: 36px 28px 32px;
-  }
 `;
 
 /* Coloured accent line at top of card */
