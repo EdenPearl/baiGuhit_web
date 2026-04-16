@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { createGlobalStyle, keyframes } from 'styled-components';
 import notoSansTagalog from '../Assests/NotoSansTagalog-Regular.ttf';
 import logo1 from '../Assests/logo1.png';
@@ -86,10 +87,15 @@ const MODES = [
 const rand = (min, max) => min + Math.random() * (max - min);
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const scrollToModes = () =>
     document.getElementById('modes')?.scrollIntoView({ behavior: 'smooth' });
+
+  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+  const closeSidebar = () => setIsSidebarOpen(false);
 
   const modes = useMemo(() => MODES, []);
 
@@ -125,6 +131,60 @@ const HeroSection = () => {
     <>
       <GlobalStyle />
       <PageRoot>
+        {/* Navigation Bar */}
+        <NavBar>
+          <NavBrand>bAIguhit</NavBrand>
+          <HamburgerBtn
+            type="button"
+            onClick={toggleSidebar}
+            aria-label="Toggle menu"
+            aria-expanded={isSidebarOpen}
+          >
+            <HamburgerLine />
+            <HamburgerLine />
+            <HamburgerLine />
+          </HamburgerBtn>
+        </NavBar>
+
+        {/* Sidebar Overlay */}
+        <SidebarOverlay $isOpen={isSidebarOpen} onClick={closeSidebar} />
+
+        {/* Sidebar */}
+        <Sidebar $isOpen={isSidebarOpen}>
+          <SidebarHeader>
+            <SidebarTitle>Menu</SidebarTitle>
+            <CloseBtn
+              type="button"
+              onClick={closeSidebar}
+              aria-label="Close menu"
+            >
+              ✕
+            </CloseBtn>
+          </SidebarHeader>
+          <SidebarNav>
+            <SidebarLink
+              as="a"
+              href="/about"
+              onClick={(e) => {
+                e.preventDefault();
+                closeSidebar();
+                window.location.href = '/about';
+              }}
+            >
+              About
+            </SidebarLink>
+            <SidebarLink
+              href="#modes"
+              onClick={(e) => {
+                e.preventDefault();
+                closeSidebar();
+                scrollToModes();
+              }}
+            >
+              Explore Modes
+            </SidebarLink>
+          </SidebarNav>
+        </Sidebar>
         <HeroWrap>
           <TopBar aria-hidden="true" />
 
@@ -161,7 +221,7 @@ const HeroSection = () => {
               <HeroCopy>
                 <CardTopLine aria-hidden="true" />
 
-                <Eyebrow>AI-Powered · Philippine Baybayin</Eyebrow>
+                <Eyebrow>ML-Powered · Philippine Baybayin</Eyebrow>
 
                 <Title aria-label="bAIguhit">
                   <TB>b</TB>
@@ -177,7 +237,7 @@ const HeroSection = () => {
                 </Tagline>
 
                 <BodyText>
-                  Practice writing, tapping, and translating Philippine Baybayin characters through AI-powered interactive
+                  Practice writing, tapping, and translating Philippine Baybayin characters through ML-powered interactive
                   game modes — one stroke at a time.
                 </BodyText>
 
@@ -206,7 +266,7 @@ const HeroSection = () => {
                   </StatItem>
                   <SDot aria-hidden="true" />
                   <StatItem role="listitem">
-                    <SNum>AI</SNum>
+                    <SNum>ML</SNum>
                     <SLab>Powered</SLab>
                   </StatItem>
                   <SDot aria-hidden="true" />
@@ -271,12 +331,23 @@ const HeroSection = () => {
           </ModesInner>
         </ModesSection>
 
-        {isGameModalOpen && (
+        {/* About Section */}
+        <AboutSection>
+          <AboutInner>
+            <AboutEyebrow>Learn More</AboutEyebrow>
+            <AboutHeading>About bAIguhit</AboutHeading>
+            <AboutDescription>
+              Discover the story behind bAIguhit — an ML-powered platform dedicated to reviving and preserving the ancient Philippine Baybayin script through engaging, interactive learning experiences.
+            </AboutDescription>
+            <MoreBtn type="button" onClick={() => navigate('/about')}>
+              Learn More →
+            </MoreBtn>
+          </AboutInner>
+        </AboutSection>
           <LoginGame
             isOpen={isGameModalOpen}
             toggleModal={() => setIsGameModalOpen(false)}
           />
-        )}
       </PageRoot>
     </>
   );
@@ -334,12 +405,165 @@ const PageRoot = styled.div`
 `;
 
 /* ═══════════════════════════
+   NAVIGATION BAR
+═══════════════════════════ */
+
+const NavBar = styled.nav`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: linear-gradient(180deg, rgba(42, 16, 4, 0.95) 0%, rgba(42, 16, 4, 0.85) 100%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(251, 196, 23, 0.15);
+`;
+
+const NavBrand = styled.div`
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 900;
+  background: linear-gradient(90deg, #fbc417, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+`;
+
+const HamburgerBtn = styled.button`
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+`;
+
+const HamburgerLine = styled.span`
+  width: 24px;
+  height: 2px;
+  background: #fbc417;
+  border-radius: 1px;
+  transition: all 0.3s;
+`;
+
+const SidebarOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  visibility: ${({ $isOpen }) => ($isOpen ? 'visible' : 'hidden')};
+  transition: opacity 0.3s, visibility 0.3s;
+`;
+
+const Sidebar = styled.aside`
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  z-index: 1001;
+  background: linear-gradient(180deg, #4a1706 0%, #2b1004 100%);
+  border-left: 1px solid rgba(251, 196, 23, 0.15);
+  padding: 80px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  transform: translateX(${({ $isOpen }) => ($isOpen ? 0 : '100%')});
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+`;
+
+const SidebarHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(251, 196, 23, 0.15);
+`;
+
+const SidebarTitle = styled.h2`
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fbc417;
+`;
+
+const CloseBtn = styled.button`
+  background: none;
+  border: none;
+  color: #fbc417;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+`;
+
+const SidebarNav = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const SidebarLink = styled.a`
+  color: #fff6eb;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: block;
+
+  &:hover {
+    background: rgba(251, 196, 23, 0.12);
+    color: #fbc417;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+`;
+
+/* ═══════════════════════════
    HERO
 ═══════════════════════════ */
 
 const HeroWrap = styled.section`
   position: relative;
   min-height: 100vh;
+  padding-top: 64px;
 
   /* darker base background for contrast */
   background:
@@ -519,8 +743,8 @@ const LogoFrame = styled.div`
   width: min(100%, 332px);
   aspect-ratio: 1/1;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.18);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
+  border: none;
+  box-shadow: none;
   pointer-events: none;
 `;
 
@@ -943,4 +1167,89 @@ const ModeFooter = styled.div`
   transition: transform .2s ease, opacity .2s ease;
 
   ${ModeCard}:hover & { transform: translateX(6px); opacity: 1; }
+`;
+
+/* ═══════════════════════════
+   ABOUT SECTION
+═══════════════════════════ */
+
+const AboutSection = styled.section`
+  width: 100%;
+  position: relative;
+  background: linear-gradient(180deg, #1f0b03 0%, #2b1004 45%, #3b1405 100%);
+  border-top: 1px solid rgba(251, 196, 23, 0.12);
+  padding: 80px 24px;
+`;
+
+const AboutInner = styled.div`
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: ${fadeUp} 0.6s ease-out;
+`;
+
+const AboutEyebrow = styled.p`
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+  color: rgba(253, 230, 138, 0.65);
+`;
+
+const AboutHeading = styled.h2`
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(24px, 2.5vw, 36px);
+  font-weight: 900;
+  background: linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fbc417, #fde68a);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.35));
+`;
+
+const AboutDescription = styled.p`
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.75;
+  color: rgba(255, 246, 235, 0.82);
+  max-width: 600px;
+`;
+
+const MoreBtn = styled.button`
+  margin-top: 16px;
+  padding: 14px 36px;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #fff6eb;
+  background: linear-gradient(135deg, rgba(251, 196, 23, 0.3), rgba(245, 158, 11, 0.2));
+  border: 1.5px solid rgba(251, 196, 23, 0.5);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(251, 196, 23, 0.15);
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(251, 196, 23, 0.5), rgba(245, 158, 11, 0.3));
+    border-color: rgba(251, 196, 23, 0.8);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(251, 196, 23, 0.25);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(251, 196, 23, 0.8);
+    outline-offset: 2px;
+  }
 `;

@@ -5,6 +5,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { UserProvider } from './contexts/UserContext';
 import HeroSection from './Components/Home';
+import About from './Components/About';
 
 // Game Auth
 import LoginGame from './Components/Games/src/LoginGame';
@@ -38,8 +39,9 @@ const App = () => {
       <Router>
         <Routes>
 
-          {/* ================= GAME ================= */}
+          {/* ================= PAGES ================= */}
           <Route path="/" element={<HeroSection />} />
+          <Route path="/about" element={<About />} />
           <Route path="/LoginGame" element={<LoginGame isOpen toggleModal={() => {}} />} />
           <Route path="/HomeGame" element={<HomeGame />} />
           
