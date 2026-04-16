@@ -234,9 +234,7 @@ export default function DifficultyTyping() {
 
       const result = await response.json();
 
-      if (result.success) {
-        showToast("Score saved successfully!", "success");
-      } else {
+      if (!result.success) {
         showToast("Failed to save score: " + result.message, "error");
         console.error("Failed to save score:", result.message);
       }

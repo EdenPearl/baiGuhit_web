@@ -3,8 +3,8 @@ import styled, { keyframes, css } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import typingQuestions from "./data/typingQuestions";
 import CustomButton from "./CustomButton.js";
-import green1 from '../../../Assests/green1.png';
-import green4 from '../../../Assests/green4.png';
+import write1 from '../../../Assests/write1.png';
+import write2 from '../../../Assests/write2.png';
 import home from '../../../Assests/backB.png';
 import confetti from "canvas-confetti"; // 🎉 ADD CONFETTI
 
@@ -152,8 +152,8 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
 
   return (
     <Container>
-      <LeftImage src={green1} alt="Green1" />
-      <RightImage src={green4} alt="Green4" />
+      <LeftImage src={write1} alt="Write1" />
+      <RightImage src={write2} alt="Write2" />
 
       <GlassCard>
         <TimeBarContainer>
