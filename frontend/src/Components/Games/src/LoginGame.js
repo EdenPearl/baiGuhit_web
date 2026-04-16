@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
-import Facebook from '../../../Assests/facebookicon.svg';
-import Google from '../../../Assests/googleicon.svg';
 import Logo from '../../../Assests/logo1.png';
 import RegisterModal from './RegisterGame';
 import Loader from './CustomizeLoaderGame';
@@ -88,11 +86,6 @@ const LoginModal = ({ isOpen, toggleModal }) => {
 
                 <OrRow><OrLine /><OrText>or</OrText><OrLine /></OrRow>
 
-                <SocialRow>
-                  <SocialBtn href="#"><SIcon src={Facebook} alt="Facebook" /></SocialBtn>
-                  <SocialBtn href="#"><SIcon src={Google} alt="Google" /></SocialBtn>
-                </SocialRow>
-
                 <Prompt>
                   No account?{' '}
                   <PromptLink onClick={openSignUpModal}>Create one</PromptLink>
@@ -120,7 +113,8 @@ const float   = keyframes`0%,100%{transform:translateY(0)}50%{transform:translat
 const Backdrop = styled.div`
   position:fixed;inset:0;z-index:1000;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(20,5,0,.65);backdrop-filter:blur(6px);
+  background:linear-gradient(160deg,rgba(43,16,4,.85),rgba(74,23,6,.85));
+  backdrop-filter:blur(8px);
   padding:16px;
 `;
 
@@ -130,7 +124,8 @@ const Card = styled.div`
   width:min(760px,100%);
   height:min(500px,90vh);
   border-radius:20px;overflow:hidden;
-  box-shadow:0 24px 60px rgba(0,0,0,.45);
+  border:1px solid rgba(251,196,23,.15);
+  box-shadow:0 24px 60px rgba(0,0,0,.45), 0 0 60px rgba(251,196,23,.1);
   animation:${popIn} .4s cubic-bezier(.34,1.56,.64,1) both;
 `;
 
@@ -171,7 +166,7 @@ const BrandTag  = styled.p`
 
 /* ── Form side ── */
 const FormSide = styled.div`
-  flex:1;background:#fff;
+  flex:1;background:linear-gradient(160deg,#2b1004 0%,#4a1706 100%);
   display:flex;flex-direction:column;justify-content:center;
   padding:40px 36px;position:relative;
   overflow-y:auto;
@@ -180,48 +175,48 @@ const FormSide = styled.div`
 const CloseBtn = styled.button`
   position:absolute;top:16px;right:18px;
   background:none;border:none;cursor:pointer;
-  font-size:16px;color:#aaa;
+  font-size:16px;color:rgba(255,246,235,.5);
   transition:color .15s,transform .15s;
-  &:hover{color:#c24010;transform:rotate(90deg);}
+  &:hover{color:#fbc417;transform:rotate(90deg);}
 `;
 
 const FormTitle = styled.h2`
   margin:0 0 4px;font-family:'Cinzel',serif;
-  font-size:20px;font-weight:900;color:#3d1a06;
+  font-size:20px;font-weight:900;color:#fff6eb;
 `;
 const FormSub = styled.p`
   margin:0 0 20px;font-family:sans-serif;
-  font-size:12px;color:rgba(107,58,31,.5);
+  font-size:12px;color:rgba(255,246,235,.6);
 `;
 
 const Form  = styled.form`display:flex;flex-direction:column;gap:12px;`;
 const Field = styled.div`display:flex;flex-direction:column;gap:5px;`;
 const Label = styled.label`
   font-family:sans-serif;font-size:11px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.5px;color:#5a2a0a;
+  text-transform:uppercase;letter-spacing:.5px;color:#fde68a;
 `;
 
 const Input = styled.input`
   width:100%;padding:11px 14px;
-  border-radius:10px;border:1.5px solid rgba(194,64,12,.15);
-  background:#faf7f5;font-family:sans-serif;font-size:13px;color:#3d1a06;
+  border-radius:10px;border:1.5px solid rgba(251,196,23,.25);
+  background:rgba(42,16,4,.6);font-family:sans-serif;font-size:13px;color:#fff6eb;
   outline:none;transition:border-color .15s,box-shadow .15s;
-  &::placeholder{color:rgba(107,58,31,.3);}
-  &:focus{border-color:rgba(194,64,12,.45);box-shadow:0 0 0 3px rgba(194,64,12,.07);background:#fff;}
+  &::placeholder{color:rgba(255,246,235,.3);}
+  &:focus{border-color:rgba(251,196,23,.5);box-shadow:0 0 0 3px rgba(251,196,23,.15);background:rgba(42,16,4,.8);}
 `;
 
 const PwWrap = styled.div`position:relative;`;
 const EyeBtn = styled.button`
   position:absolute;right:12px;top:50%;transform:translateY(-50%);
   background:none;border:none;cursor:pointer;
-  color:rgba(107,58,31,.4);font-size:14px;
-  &:hover{color:#c24010;}
+  color:rgba(255,246,235,.4);font-size:14px;
+  &:hover{color:#fbc417;}
 `;
 
 const Forgot = styled.a`
   font-family:sans-serif;font-size:11px;font-weight:600;
-  color:rgba(154,48,0,.5);text-decoration:none;align-self:flex-end;margin-top:-4px;
-  &:hover{color:#c24010;text-decoration:underline;}
+  color:rgba(251,196,23,.6);text-decoration:none;align-self:flex-end;margin-top:-4px;
+  &:hover{color:#fbc417;text-decoration:underline;}
 `;
 
 const Shine = styled.span`
@@ -241,26 +236,26 @@ const SubmitBtn = styled.button`
 `;
 
 const OrRow  = styled.div`display:flex;align-items:center;gap:8px;`;
-const OrLine = styled.div`flex:1;height:1px;background:rgba(0,0,0,.08);`;
-const OrText = styled.span`font-family:sans-serif;font-size:10px;color:rgba(0,0,0,.28);letter-spacing:.4px;`;
+const OrLine = styled.div`flex:1;height:1px;background:rgba(251,196,23,.15);`;
+const OrText = styled.span`font-family:sans-serif;font-size:10px;color:rgba(255,246,235,.45);letter-spacing:.4px;`;
 
 const SocialRow = styled.div`display:flex;justify-content:center;gap:10px;`;
 const SocialBtn = styled.a`
   width:42px;height:42px;border-radius:10px;
-  border:1.5px solid rgba(0,0,0,.1);background:#faf7f5;
+  border:1.5px solid rgba(251,196,23,.25);background:rgba(42,16,4,.5);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;text-decoration:none;
   transition:all .15s;
-  &:hover{border-color:rgba(194,64,12,.3);background:#fff;transform:translateY(-2px);}
+  &:hover{border-color:rgba(251,196,23,.6);background:rgba(42,16,4,.8);transform:translateY(-2px);}
 `;
 const SIcon = styled.img`width:20px;height:20px;`;
 
 const Prompt = styled.p`
   margin:0;text-align:center;
-  font-family:sans-serif;font-size:12px;color:#6b3a1f;
+  font-family:sans-serif;font-size:12px;color:rgba(255,246,235,.65);
 `;
 const PromptLink = styled.span`
-  font-weight:700;color:#c24010;cursor:pointer;
+  font-weight:700;color:#fbc417;cursor:pointer;
   &:hover{text-decoration:underline;}
 `;
 
