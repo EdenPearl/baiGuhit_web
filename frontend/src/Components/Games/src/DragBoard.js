@@ -81,7 +81,7 @@ const DragLeaderboard = () => {
             <NavButtonsContainer>
                 <BackButton onClick={() => navigate("/HomeGame")}>
                     <ButtonIcon>←</ButtonIcon>
-                    <ButtonText>Back to Home</ButtonText>
+                    <ButtonText>Back</ButtonText>
                 </BackButton>
             </NavButtonsContainer>
 
@@ -248,33 +248,40 @@ const pulse = keyframes`
     50% { opacity: 1; transform: scale(1.05); }
 `;
 
-const floatShape = keyframes`
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(5deg); }
-`;
-
 /* ---------------- STYLES ---------------- */
 const Container = styled.div`
     min-height: 100vh;
     max-height: 100vh;
-    background: linear-gradient(135deg, #C2410C 0%, #EA580C 50%, #F97316 100%);
+    background: linear-gradient(160deg, #7a2100 0%, #9a3000 30%, #c24010 65%, #a83008 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
     position: relative;
     overflow: hidden;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Segoe UI", sans-serif;
     box-sizing: border-box;
+
+    @media (max-width: 860px) {
+        align-items: flex-start;
+        max-height: none;
+        overflow-y: auto;
+        padding: 14px;
+    }
 `;
 
 const BackgroundPattern = styled.div`
     position: absolute;
     inset: 0;
     background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(255,255,255,0.08) 0%, transparent 40%);
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 55px,
+            rgba(0,0,0,0.04) 55px,
+            rgba(0,0,0,0.04) 56px
+        ),
+        radial-gradient(circle at 50% -25%, rgba(251,196,23,0.11) 0%, transparent 68%);
     pointer-events: none;
 `;
 
@@ -290,15 +297,15 @@ const ButtonText = styled.span`
 `;
 
 const BackButton = styled.button`
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(251,196,23,0.35);
     border-radius: 12px;
     padding: 12px 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 10px;
-    color: white;
+    color: #fde68a;
     font-size: 14px;
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -306,22 +313,14 @@ const BackButton = styled.button`
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
     
     &:hover {
-        background: rgba(255,255,255,0.25);
+        background: rgba(251,196,23,0.12);
         transform: translateX(-2px);
-        border-color: rgba(255,255,255,0.4);
+        border-color: rgba(251,196,23,0.6);
         box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
     }
     
     &:active {
         transform: translateX(0);
-    }
-    
-    @media (max-width: 640px) {
-        padding: 10px 14px;
-        
-        ${ButtonText} {
-            display: none;
-        }
     }
 `;
 
@@ -332,56 +331,62 @@ const ButtonIcon = styled.span`
 `;
 
 const LeaderboardCard = styled.div`
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 32px;
+    background: linear-gradient(155deg, #2c1204 0%, #3d1a06 50%, #1e0d03 100%);
+    backdrop-filter: blur(16px);
+    border-radius: 22px;
+    padding: 0;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1180px;
     max-height: calc(100vh - 40px);
-    color: #1E293B;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff4df;
+    border: 1px solid rgba(251,196,23,0.22);
     box-shadow: 
-        0 25px 50px -12px rgba(0,0,0,0.25),
-        0 0 0 1px rgba(255,255,255,0.1) inset;
+        0 32px 80px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,220,120,0.1);
     position: relative;
     z-index: 1;
     animation: ${slideIn} 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    
-    @media (max-width: 900px) {
-        padding: 24px;
+
+    @media (max-width: 860px) {
         max-width: 640px;
+        max-height: none;
+        min-height: calc(100vh - 28px);
     }
 `;
 
 const TopSection = styled.div`
     display: flex;
-    gap: 32px;
+    gap: 0;
     height: 100%;
     min-height: 0;
+    overflow: hidden;
     
-    @media (max-width: 900px) {
+    @media (max-width: 860px) {
         flex-direction: column;
-        gap: 20px;
+        overflow-y: auto;
     }
 `;
 
 const LeftPanel = styled.div`
+    width: 300px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-width: 300px;
-    max-width: 350px;
-    flex-shrink: 0;
-    gap: 20px;
+    gap: 18px;
+    padding: 28px 22px;
+    border-right: 1px solid rgba(251,196,23,0.12);
+    background: rgba(0,0,0,0.18);
+    animation: ${slideIn} 0.5s 0.1s ease both;
     
-    @media (max-width: 900px) {
-        max-width: 100%;
-        min-width: auto;
+    @media (max-width: 860px) {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(251,196,23,0.12);
+        padding: 20px;
     }
 `;
 
@@ -390,7 +395,15 @@ const RightPanel = styled.div`
     min-width: 0;
     display: flex;
     flex-direction: column;
+    padding: 24px;
+    gap: 14px;
     overflow: hidden;
+    animation: ${slideIn} 0.5s 0.18s ease both;
+
+    @media (max-width: 860px) {
+        padding: 16px;
+        overflow: visible;
+    }
 `;
 
 const Header = styled.div`
@@ -430,13 +443,10 @@ const Title = styled.h1`
     margin: 0;
     font-size: 28px;
     font-weight: 800;
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #fde68a;
     letter-spacing: -0.5px;
     line-height: 1.2;
-    
+
     @media (max-width: 640px) {
         font-size: 24px;
     }
@@ -444,7 +454,7 @@ const Title = styled.h1`
 
 const Subtitle = styled.p`
     text-align: center;
-    color: #64748B;
+    color: rgba(255,255,255,0.45);
     margin-top: 6px;
     font-size: 14px;
     font-weight: 500;
@@ -458,23 +468,23 @@ const BadgeRow = styled.div`
 `;
 
 const Badge = styled.span`
-    background: linear-gradient(135deg, rgba(194, 65, 12, 0.1), rgba(234, 88, 12, 0.1));
-    color: #C2410C;
+    background: rgba(251,196,23,0.1);
+    color: #fde68a;
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border: 1px solid rgba(194, 65, 12, 0.2);
+    border: 1px solid rgba(251,196,23,0.35);
 `;
 
 const TabGroup = styled.div`
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     gap: 8px;
-    background: #F1F5F9;
-    padding: 6px;
+    background: transparent;
+    padding: 8px;
     border-radius: 16px;
     position: relative;
     width: 100%;
@@ -483,37 +493,40 @@ const TabGroup = styled.div`
 const TabIndicator = styled.div`
     position: absolute;
     inset: 0;
-    background: white;
+    background: rgba(251,196,23,0.12);
     border-radius: 12px;
     z-index: -1;
     opacity: ${props => props.$active ? 1 : 0};
     transition: opacity 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    box-shadow: none;
 `;
 
 const Tab = styled.button`
-    padding: 12px 24px;
+    padding: 12px 16px;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    background: ${props => props.$active ? "white" : "transparent"};
-    color: ${props => props.$active ? "#C2410C" : "#64748B"};
+    background: ${props => props.$active ? "rgba(251,196,23,0.18)" : "rgba(255,255,255,0.04)"};
+    color: ${props => props.$active ? "#fff4df" : "rgba(255,255,255,0.5)"};
     font-weight: 700;
     font-size: 14px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    box-shadow: ${props => props.$active ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none"};
+    box-shadow: none;
     z-index: 1;
-    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
 
     &:hover { 
-        color: ${props => props.$active ? "#C2410C" : "#475569"};
-        transform: translateY(-1px);
+        color: #fff;
+        transform: translateX(4px);
     }
     
     &:active {
-        transform: translateY(0);
+        transform: translateX(0);
     }
 `;
 
@@ -521,17 +534,24 @@ const StatsBar = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
     padding: 20px;
-    background: linear-gradient(135deg, #FEF3F0 0%, #FFF7ED 100%);
+    background: rgba(255,255,255,0.03);
     border-radius: 16px;
-    border: 1px solid rgba(194, 65, 12, 0.1);
+    border: 1px solid rgba(251,196,23,0.12);
     width: 100%;
+    box-sizing: border-box;
+
+    @media (max-width: 860px) {
+        padding: 14px;
+        gap: 8px;
+    }
 `;
 
 const Stat = styled.div`
     text-align: center;
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -546,32 +566,46 @@ const StatIcon = styled.div`
 const StatValue = styled.div`
     font-size: 24px;
     font-weight: 800;
-    color: #C2410C;
+    color: #fde68a;
     line-height: 1;
     letter-spacing: -0.5px;
+
+    @media (max-width: 860px) {
+        font-size: 21px;
+    }
 `;
 
 const StatLabel = styled.div`
     font-size: 11px;
-    color: #94A3B8;
+    color: rgba(255,255,255,0.4);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 4px;
     font-weight: 600;
+    white-space: nowrap;
+
+    @media (max-width: 860px) {
+        font-size: 10px;
+        letter-spacing: 0.7px;
+    }
 `;
 
 const StatDivider = styled.div`
     width: 1px;
     height: 40px;
-    background: linear-gradient(to bottom, transparent, #E2E8F0, transparent);
+    background: linear-gradient(to bottom, transparent, rgba(251,196,23,0.25), transparent);
+
+    @media (max-width: 860px) {
+        height: 34px;
+    }
 `;
 
 const TableContainer = styled.div`
     flex: 1;
     overflow-y: auto;
     border-radius: 16px;
-    background: #FAFAFA;
-    border: 1px solid #E2E8F0;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(251,196,23,0.14);
     position: relative;
 
     &::-webkit-scrollbar {
@@ -584,13 +618,18 @@ const TableContainer = styled.div`
     }
 
     &::-webkit-scrollbar-thumb {
-        background: #CBD5E1;
+        background: rgba(251,196,23,0.25);
         border-radius: 4px;
-        border: 2px solid #FAFAFA;
+        border: 2px solid transparent;
         
         &:hover {
-            background: #94A3B8;
+            background: rgba(251,196,23,0.45);
         }
+    }
+
+    @media (max-width: 860px) {
+        min-height: 320px;
+        max-height: 56vh;
     }
 `;
 
@@ -600,7 +639,7 @@ const LoadingState = styled.div`
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    color: #64748B;
+    color: rgba(255,255,255,0.45);
     gap: 16px;
     height: 100%;
 `;
@@ -614,8 +653,8 @@ const LoadingText = styled.p`
 const Spinner = styled.div`
     width: 48px;
     height: 48px;
-    border: 4px solid #F1F5F9;
-    border-top: 4px solid #EA580C;
+    border: 3px solid rgba(251,196,23,0.15);
+    border-top: 3px solid #fbc417;
     border-radius: 50%;
     animation: ${spin} 1s linear infinite;
 `;
@@ -623,7 +662,7 @@ const Spinner = styled.div`
 const ErrorState = styled.div`
     text-align: center;
     padding: 60px 20px;
-    color: #DC2626;
+    color: #ffb36b;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -640,24 +679,24 @@ const ErrorText = styled.p`
     font-size: 15px;
     font-weight: 500;
     margin: 0 0 20px 0;
-    color: #991B1B;
+    color: #ffb36b;
 `;
 
 const RetryButton = styled.button`
     padding: 12px 28px;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    color: white;
+    background: linear-gradient(135deg, #fde68a, #f59e0b);
+    color: #3d2401;
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(194, 65, 12, 0.3);
+    box-shadow: 0 4px 16px rgba(251,196,23,0.3);
 
     &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(194, 65, 12, 0.4);
+        box-shadow: 0 8px 24px rgba(251,196,23,0.4);
     }
     
     &:active {
@@ -668,7 +707,7 @@ const RetryButton = styled.button`
 const EmptyState = styled.div`
     text-align: center;
     padding: 60px 20px;
-    color: #64748B;
+    color: rgba(255,255,255,0.45);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -685,13 +724,13 @@ const EmptyIcon = styled.div`
 const EmptyTitle = styled.p`
     font-size: 18px;
     font-weight: 700;
-    color: #334155;
+    color: #fde68a;
     margin: 0 0 8px 0;
 `;
 
 const EmptyText = styled.p`
     font-size: 14px;
-    color: #94A3B8;
+    color: rgba(255,255,255,0.45);
     margin: 0 0 24px 0;
 `;
 
@@ -699,17 +738,17 @@ const PlayNowButton = styled.button`
     padding: 14px 32px;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    color: white;
+    background: linear-gradient(135deg, #fde68a, #f59e0b);
+    color: #3d2401;
     font-weight: 700;
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(194, 65, 12, 0.3);
+    box-shadow: 0 4px 16px rgba(251,196,23,0.3);
 
     &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(194, 65, 12, 0.4);
+        box-shadow: 0 8px 24px rgba(251,196,23,0.4);
     }
 `;
 
@@ -728,13 +767,13 @@ const Table = styled.table`
 const Th = styled.th`
     padding: 16px;
     text-align: ${props => props.align || 'left'};
-    color: #64748B;
+    color: rgba(253,230,138,0.45);
     font-weight: 700;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    background: #F8FAFC;
-    border-bottom: 2px solid #E2E8F0;
+    background: rgba(0,0,0,0.35);
+    border-bottom: 1px solid rgba(251,196,23,0.12);
     
     &:first-child {
         padding-left: 24px;
@@ -747,24 +786,24 @@ const Th = styled.th`
 
 const TableRow = styled.tr`
     background: ${props => props.$isCurrentUser 
-        ? "linear-gradient(135deg, rgba(194, 65, 12, 0.08), rgba(234, 88, 12, 0.08))" 
-        : "white"};
-    border-left: 4px solid ${props => props.$isCurrentUser ? "#EA580C" : "transparent"};
+        ? "rgba(251,196,23,0.08)" 
+        : "transparent"};
+    border-left: 3px solid ${props => props.$isCurrentUser ? "#fbc417" : "transparent"};
     transition: all 0.2s ease;
     animation: ${slideIn} 0.4s ease backwards;
     position: relative;
     
     &:hover {
         background: ${props => props.$isCurrentUser 
-            ? "linear-gradient(135deg, rgba(194, 65, 12, 0.12), rgba(234, 88, 12, 0.12))" 
-            : "#F8FAFC"};
+            ? "rgba(251,196,23,0.12)" 
+            : "rgba(251,196,23,0.06)"};
         transform: scale(1.005);
         z-index: 1;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     
     &:not(:last-child) {
-        border-bottom: 1px solid #F1F5F9;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
     }
 `;
 
@@ -783,7 +822,7 @@ const RankBadge = styled.div`
     font-size: ${props => props.$isTop3 ? '18px' : '13px'};
     font-weight: 800;
     background: ${props => props.$bg};
-    color: ${props => props.$isTop3 ? 'white' : '#475569'};
+    color: ${props => props.$isTop3 ? 'white' : 'rgba(255,255,255,0.55)'};
     box-shadow: ${props => props.$isTop3 
         ? '0 4px 12px rgba(0,0,0,0.15)' 
         : '0 2px 4px rgba(0,0,0,0.05)'};
@@ -803,27 +842,27 @@ const PlayerInfo = styled.div`
 
 const PlayerName = styled.div`
     font-weight: 700;
-    color: ${props => props.$isCurrentUser ? "#C2410C" : "#1E293B"};
+    color: ${props => props.$isCurrentUser ? "#fbc417" : "#fff4df"};
     font-size: 15px;
     letter-spacing: -0.2px;
 `;
 
 const YouTag = styled.span`
-    background: linear-gradient(135deg, #C2410C, #EA580C);
-    color: white;
+    background: linear-gradient(135deg, #fde68a, #f59e0b);
+    color: #3d2401;
     font-size: 10px;
     padding: 3px 10px;
     border-radius: 12px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 2px 4px rgba(194, 65, 12, 0.3);
+    box-shadow: 0 2px 8px rgba(251,196,23,0.35);
 `;
 
 const DateCell = styled.td`
     padding: 14px 12px;
     font-size: 13px;
-    color: #64748B;
+    color: rgba(255,255,255,0.35);
     font-weight: 500;
 `;
 
@@ -835,14 +874,14 @@ const ScoreCell = styled.td`
 const ScoreValue = styled.div`
     font-size: 20px;
     font-weight: 800;
-    color: #C2410C;
+    color: #fde68a;
     line-height: 1;
     letter-spacing: -0.5px;
 `;
 
 const ScoreLabel = styled.div`
     font-size: 11px;
-    color: #94A3B8;
+    color: rgba(255,255,255,0.25);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 4px;
@@ -851,9 +890,10 @@ const ScoreLabel = styled.div`
 
 const ActionBar = styled.div`
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: center;
     width: 100%;
+    box-sizing: border-box;
 `;
 
 const BtnIcon = styled.span`
@@ -875,24 +915,33 @@ const ActionButton = styled.button`
     justify-content: center;
     gap: 8px;
     flex: 1;
+    min-width: 0;
+    width: 0;
     background: ${props => props.$secondary 
-        ? "white" 
-        : "linear-gradient(135deg, #C2410C, #EA580C)"};
-    color: ${props => props.$secondary ? "#C2410C" : "white"};
-    border: ${props => props.$secondary ? "2px solid #E2E8F0" : "none"};
+        ? "linear-gradient(135deg, #fde68a, #fbc417, #f59e0b)" 
+        : "rgba(255,255,255,0.07)"};
+    color: ${props => props.$secondary ? "#3d2401" : "#fff7e7"};
+    border: ${props => props.$secondary ? "none" : "1.5px solid rgba(251,196,23,0.4)"};
     box-shadow: ${props => props.$secondary 
-        ? "0 1px 3px rgba(0,0,0,0.1)" 
-        : "0 4px 6px -1px rgba(194, 65, 12, 0.3)"};
+        ? "0 6px 20px rgba(251,196,23,0.35), 0 1px 0 rgba(255,255,255,0.24) inset" 
+        : "none"};
+    white-space: nowrap;
 
     &:hover {
         transform: translateY(-2px);
         box-shadow: ${props => props.$secondary 
-            ? "0 10px 15px -3px rgba(0,0,0,0.1)" 
-            : "0 10px 20px -3px rgba(194, 65, 12, 0.4)"};
-        border-color: ${props => props.$secondary ? "#C2410C" : "none"};
+            ? "0 9px 24px rgba(251,196,23,0.45)" 
+            : "0 0 0 1px rgba(251,196,23,0.55)"};
+        border-color: ${props => props.$secondary ? "transparent" : "rgba(251,196,23,0.65)"};
     }
     
     &:active {
         transform: translateY(0);
+    }
+
+    @media (max-width: 860px) {
+        padding: 12px 14px;
+        font-size: 14px;
+        gap: 6px;
     }
 `;

@@ -129,7 +129,6 @@ const WriteLeaderboard = () => {
                     $color={TAB_META[tab].color}
                     onClick={() => setActiveTab(tab)}
                   >
-                    <TabBtnIcon>{TAB_META[tab].icon}</TabBtnIcon>
                     <TabBtnLabel>{TAB_META[tab].label}</TabBtnLabel>
                     {activeTab === tab && <TabActivePip $color={TAB_META[tab].color} />}
                   </TabBtn>
@@ -344,6 +343,13 @@ const PageRoot = styled.div`
   overflow: hidden;
   font-family: 'Georgia', serif;
   box-sizing: border-box;
+
+  @media (max-width: 860px) {
+    align-items: flex-start;
+    max-height: none;
+    overflow-y: auto;
+    padding: 14px;
+  }
 `;
 
 const BgBase = styled.div`
@@ -427,6 +433,11 @@ const Card = styled.div`
   animation: ${popIn} 0.5s cubic-bezier(0.34,1.2,0.64,1) forwards;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 860px) {
+    max-height: none;
+    min-height: calc(100vh - 28px);
+  }
 `;
 
 const CardTopBar = styled.div`
@@ -577,8 +588,10 @@ const TabList = styled.div`
 const TabBtn = styled.button`
   position: relative;
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 12px;
   align-items: center;
+  justify-items: center;
   gap: 10px;
   padding: 11px 14px;
   border-radius: 12px;
@@ -597,16 +610,13 @@ const TabBtn = styled.button`
   }
 `;
 
-const TabBtnIcon = styled.span`
-  font-size: 16px;
-  flex-shrink: 0;
-`;
-
 const TabBtnLabel = styled.span`
   font-family: 'Georgia', serif;
   font-size: 14px;
   font-weight: 700;
-  flex: 1;
+  width: 100%;
+  text-align: center;
+  justify-self: center;
 `;
 
 const TabActivePip = styled.span`
@@ -617,6 +627,7 @@ const TabActivePip = styled.span`
   box-shadow: ${({ $color }) => `0 0 8px ${$color}99`};
   animation: ${dotPulse} 1.6s ease-in-out infinite;
   flex-shrink: 0;
+  justify-self: end;
 `;
 
 /* ── Stats row ── */
@@ -732,6 +743,11 @@ const RightPanel = styled.div`
   gap: 14px;
   overflow: hidden;
   animation: ${slideUp} 0.5s 0.18s ease both;
+
+  @media (max-width: 860px) {
+    padding: 16px;
+    overflow: visible;
+  }
 `;
 
 const RightPanelHeader = styled.div`
@@ -778,6 +794,11 @@ const TableWrap = styled.div`
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: rgba(251,196,23,0.25); border-radius: 4px; }
   overflow-y: auto;
+
+  @media (max-width: 860px) {
+    min-height: 320px;
+    max-height: 56vh;
+  }
 `;
 
 /* ── State views ── */

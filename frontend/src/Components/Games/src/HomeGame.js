@@ -72,6 +72,11 @@ const HomeGame = () => {
   const openTranslateModal = () => setIsTranslateModalOpen(true);
   const closeTranslateModal = () => setIsTranslateModalOpen(false);
 
+  const selectMode = (mode) => {
+    setActivePlate(mode);
+    setReplaceWriteWithPlate1(mode !== 'write');
+  };
+
   const goToMode = (mode) => {
     if (mode === "multiple") navigate("/difficulty-multiple");
     if (mode === "typing") navigate("/difficulty-typing");
@@ -180,13 +185,13 @@ const HomeGame = () => {
           <Plate1
             src={activePlate === 'write' ? write : plate1}
             $isActive={activePlate === 'write'}
-            onClick={() => { setReplaceWriteWithPlate1(false); setActivePlate('write'); }}
+            onClick={() => selectMode('write')}
           />
         ) : (
           <Write
             src={write}
             $isActive={activePlate === 'write'}
-            onClick={() => { setReplaceWriteWithPlate1(false); setActivePlate('write'); }}
+            onClick={() => selectMode('write')}
           />
         )
       )}
@@ -195,7 +200,7 @@ const HomeGame = () => {
         <Plate2
           src={activePlate === 'plate2' ? translate : plate2}
           $isActive={activePlate === 'plate2'}
-          onClick={() => { setReplaceWriteWithPlate1(true); setActivePlate('plate2'); }}
+          onClick={() => selectMode('plate2')}
         />
       )}
 
@@ -203,8 +208,22 @@ const HomeGame = () => {
         <Plate3
           src={activePlate === 'plate3' ? tap : plate3}
           $isActive={activePlate === 'plate3'}
-          onClick={() => { setReplaceWriteWithPlate1(true); setActivePlate('plate3'); }}
+          onClick={() => selectMode('plate3')}
         />
+      )}
+
+      {sequence.startGame && (
+        <MobileModePicker>
+          <MobileModeBtn $active={activePlate === 'write'} onClick={() => selectMode('write')}>
+            ✍️ Write
+          </MobileModeBtn>
+          <MobileModeBtn $active={activePlate === 'plate2'} onClick={() => selectMode('plate2')}>
+            🔄 Translate
+          </MobileModeBtn>
+          <MobileModeBtn $active={activePlate === 'plate3'} onClick={() => selectMode('plate3')}>
+            👆 Tap
+          </MobileModeBtn>
+        </MobileModePicker>
       )}
 
       {/* ── Character ── */}
@@ -248,6 +267,27 @@ const HomeGame = () => {
           title="Go home"
         />
       )}
+
+      {sequence.home && (
+        <MobileBackBar>
+          <MobileUtilityBtn $wide onClick={() => navigate('/')} title="Back">
+            <MobileUtilityLabel>Back</MobileUtilityLabel>
+          </MobileUtilityBtn>
+        </MobileBackBar>
+      )}
+
+      {sequence.sound && sequence.leaderboardIcon && (
+        <MobileUtilityBar>
+          <MobileUtilityBtn onClick={toggleMusic} title={isPlaying ? 'Mute music' : 'Play music'}>
+            <MobileUtilityIcon aria-hidden="true">{isPlaying ? '🔊' : '🔇'}</MobileUtilityIcon>
+          </MobileUtilityBtn>
+          <MobileUtilityBtn onClick={toggleSidebar} title="Leaderboard">
+            <MobileUtilityIcon aria-hidden="true">🏆</MobileUtilityIcon>
+          </MobileUtilityBtn>
+        </MobileUtilityBar>
+      )}
+
+      {sequence.startGame && <ActionAura aria-hidden="true" />}
 
       {/* ── Active mode indicator chip ── */}
       {sequence.startGame && (
@@ -445,17 +485,17 @@ const rotateFromRight = keyframes`
 `;
 
 const waveZoom = keyframes`
-  0%   { transform: scale(0.8) rotate(0deg);  opacity: 0; }
+  0%   { transform: translateX(-50%) scale(0.8) rotate(0deg);  opacity: 0; }
   15%  { opacity: 1; }
-  50%  { transform: scale(1.04) rotate(-2deg); }
-  75%  { transform: scale(0.98) rotate(2deg); }
-  100% { transform: scale(1) rotate(0deg);     opacity: 1; }
+  50%  { transform: translateX(-50%) scale(1.04) rotate(-2deg); }
+  75%  { transform: translateX(-50%) scale(0.98) rotate(2deg); }
+  100% { transform: translateX(-50%) scale(1) rotate(0deg);     opacity: 1; }
 `;
 
 const waveIdle = keyframes`
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  30%       { transform: scale(1.03) rotate(-1.5deg); }
-  70%       { transform: scale(1.01) rotate(1.5deg); }
+  0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+  30%       { transform: translateX(-50%) scale(1.03) rotate(-1.5deg); }
+  70%       { transform: translateX(-50%) scale(1.01) rotate(1.5deg); }
 `;
 
 const heartbeat = keyframes`
@@ -485,9 +525,9 @@ const bounceLoop = keyframes`
 `;
 
 const bounceIn = keyframes`
-  0%   { transform: scale(0.6) translateY(20px); opacity: 0; }
-  60%  { transform: scale(1.06) translateY(-4px); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0%   { transform: translate(-50%, -50%) scale(0.6) translateY(20px); opacity: 0; }
+  60%  { transform: translate(-50%, -50%) scale(1.06) translateY(-4px); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) translateY(0); opacity: 1; }
 `;
 
 const floatParticle = keyframes`
@@ -583,35 +623,47 @@ const Particle = styled.span`
 const LeftImage = styled.img`
   position: absolute;
   left: 0; top: 0;
-  width: 410px;
+  width: clamp(180px, 28vw, 410px);
   height: auto;
   z-index: 3;
   animation: ${translateInLeft} 0.55s ease-out forwards;
+
+  @media (max-width: 700px) {
+    display: none;
+  }
 `;
 
 const BottomImage = styled.img`
   position: absolute;
   bottom: -20%; left: 0;
-  width: 1530px;
+  width: clamp(800px, 120vw, 1530px);
   height: auto;
   z-index: 3;
   animation: ${translateInBottom} 0.55s ease-out forwards;
+
+  @media (max-width: 700px) {
+    display: none;
+  }
 `;
 
 const RightImage = styled.img`
   position: absolute;
   right: -3%; top: 0;
-  width: 410px;
+  width: clamp(180px, 28vw, 410px);
   height: auto;
   z-index: 3;
   animation: ${translateInRight} 0.55s ease-out forwards;
+
+  @media (max-width: 700px) {
+    display: none;
+  }
 `;
 
 /* ── Mode plates ── */
 const Write = styled.img`
   position: absolute;
   top: 61%; left: -8%;
-  width: 550px;
+  width: clamp(290px, 44vw, 550px);
   height: auto;
   cursor: pointer;
   z-index: 50;
@@ -620,13 +672,21 @@ const Write = styled.img`
   ${({ $isActive }) => $isActive
     ? css`animation: ${heartbeat} 1.6s ease-in-out infinite; z-index: 900;`
     : css`animation: ${zoomRotate} 1s ease-out, ${shake} 6s 1s ease-in-out infinite;`
+  }
+
+  @media (max-width: 1150px) {
+    left: -14%;
+  }
+
+  @media (max-width: 900px) {
+    display: none;
   }
 `;
 
 const Plate1 = styled.img`
   position: absolute;
   top: 61%; left: -8%;
-  width: 550px;
+  width: clamp(290px, 44vw, 550px);
   height: auto;
   cursor: pointer;
   z-index: 50;
@@ -636,12 +696,20 @@ const Plate1 = styled.img`
     ? css`animation: ${heartbeat} 1.6s ease-in-out infinite; z-index: 900;`
     : css`animation: ${zoomRotate} 1s ease-out, ${shake} 6s 1s ease-in-out infinite;`
   }
+
+  @media (max-width: 1150px) {
+    left: -14%;
+  }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
 `;
 
 const Plate2 = styled.img`
   position: absolute;
   top: 32%; left: -8%;
-  width: 500px;
+  width: clamp(270px, 40vw, 500px);
   height: auto;
   z-index: 320;
   cursor: pointer;
@@ -653,12 +721,20 @@ const Plate2 = styled.img`
     : css`animation: ${zoomRotate} 1s ease-out, ${shake} 3.6s 0.6s ease-in-out infinite;`
   }
   &:hover { filter: drop-shadow(0 0 10px rgba(251,196,23,0.35)); }
+
+  @media (max-width: 1150px) {
+    left: -14%;
+  }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
 `;
 
 const Plate3 = styled.img`
   position: absolute;
   top: 42%; left: 7%;
-  width: 520px;
+  width: clamp(280px, 42vw, 520px);
   height: auto;
   z-index: 310;
   cursor: pointer;
@@ -670,24 +746,88 @@ const Plate3 = styled.img`
     : css`animation: ${zoomRotate} 1s ease-out, ${shake} 3.6s 0.6s ease-in-out infinite;`
   }
   &:hover { filter: drop-shadow(0 0 10px rgba(251,196,23,0.35)); }
+
+  @media (max-width: 1150px) {
+    left: 2%;
+  }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+`;
+
+const MobileModePicker = styled.div`
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 220;
+  display: none;
+  gap: 8px;
+  width: min(92vw, 480px);
+
+  @media (max-width: 900px) {
+    display: grid;
+    grid-template-columns: repeat(3, 96px);
+    justify-content: center;
+  }
+
+  @media (max-width: 520px) {
+    top: 36%;
+  }
+`;
+
+const MobileModeBtn = styled.button`
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  border: 1px solid ${({ $active }) => ($active ? 'rgba(251,196,23,0.7)' : 'rgba(255,255,255,0.14)')};
+  background: ${({ $active }) => ($active ? 'rgba(251,196,23,0.2)' : 'rgba(0,0,0,0.28)')};
+  color: ${({ $active }) => ($active ? '#fde68a' : '#fff6eb')};
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1.15;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+
+  &:hover {
+    border-color: rgba(251,196,23,0.6);
+    background: rgba(251,196,23,0.18);
+  }
 `;
 
 /* ── Character ── */
 const Girl9 = styled.img`
   position: absolute;
   bottom: 0%; left: 75%;
-  width: 430px;
+  width: clamp(220px, 31vw, 430px);
   height: auto;
   z-index: 10;
   animation: ${slideFromBottom} 1s ease-out,
              ${({ $isBouncing }) => $isBouncing ? css`${bounceLoop} 1.5s ease` : 'none'};
+
+  @media (max-width: 900px) {
+    left: 62%;
+    opacity: 0.78;
+  }
+
+  @media (max-width: 620px) {
+    display: none;
+  }
 `;
 
 /* ── Game name ── */
 const GameName = styled.img`
   position: absolute;
-  top: 2%; left: 25%;
-  width: 760px;
+  top: 2%; left: 50%;
+  width: clamp(280px, 56vw, 760px);
   height: auto;
   z-index: 15;
   filter: drop-shadow(0 6px 24px rgba(0,0,0,0.4));
@@ -707,6 +847,10 @@ const SoundBtn = styled.img`
   transition: transform 0.25s ease, filter 0.25s;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
   &:hover { transform: scale(0.91); filter: drop-shadow(0 6px 16px rgba(251,196,23,0.4)); }
+
+  @media (max-width: 700px) {
+    display: none;
+  }
 `;
 
 const LeaderboardIconImg = styled.img`
@@ -721,6 +865,10 @@ const LeaderboardIconImg = styled.img`
   transition: transform 0.25s ease, filter 0.25s;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
   &:hover { transform: scale(0.91); filter: drop-shadow(0 6px 16px rgba(251,196,23,0.4)); }
+
+  @media (max-width: 700px) {
+    display: none;
+  }
 `;
 
 const HomeImg = styled.img`
@@ -735,13 +883,76 @@ const HomeImg = styled.img`
   transition: transform 0.25s ease, filter 0.25s;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
   &:hover { transform: scale(0.91); filter: drop-shadow(0 6px 16px rgba(251,196,23,0.4)); }
+
+  @media (max-width: 700px) {
+    display: none;
+  }
+`;
+
+const MobileUtilityBar = styled.div`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 230;
+  display: none;
+  gap: 8px;
+
+  @media (max-width: 700px) {
+    display: flex;
+  }
+`;
+
+const MobileBackBar = styled.div`
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 230;
+  display: none;
+
+  @media (max-width: 700px) {
+    display: flex;
+  }
+`;
+
+const MobileUtilityBtn = styled.button`
+  width: ${({ $wide }) => ($wide ? '64px' : '44px')};
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(251,196,23,0.45);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: rgba(251,196,23,0.16);
+    border-color: rgba(251,196,23,0.65);
+  }
+`;
+
+const MobileUtilityLabel = styled.span`
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: #fff6eb;
+`;
+
+const MobileUtilityIcon = styled.span`
+  font-size: 19px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
 `;
 
 /* ── Active mode chip ── */
 const ModeChip = styled.div`
   position: absolute;
-  top: calc(55% - 58px);
-  left: 40%;
+  top: 49%;
+  left: calc(50% - 180px);
   transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
@@ -753,6 +964,41 @@ const ModeChip = styled.div`
   backdrop-filter: blur(8px);
   z-index: 200;
   animation: ${chipPop} 0.5s ease forwards;
+
+  @media (max-width: 1200px) {
+    left: calc(50% - 150px);
+  }
+
+  @media (max-width: 1024px) {
+    left: calc(50% - 120px);
+  }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+`;
+
+const ActionAura = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: min(78vw, 420px);
+  height: 220px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 190;
+  background: radial-gradient(circle, rgba(251,196,23,0.16) 0%, rgba(251,196,23,0.08) 38%, transparent 78%);
+  filter: blur(2px);
+
+  @media (max-width: 900px) {
+    top: 63%;
+  }
+
+  @media (max-width: 520px) {
+    top: 68%;
+    height: 180px;
+  }
 `;
 
 const ModeChipDot = styled.span`
@@ -777,20 +1023,36 @@ const ModeChipLabel = styled.span`
 /* ── CTA buttons ── */
 const StartGameWrapper = styled.div`
   position: absolute;
-  top: 55%;
-  left: 40%;
+  top: 60%;
+  left: 50%;
   transform: translate(-50%, -50%);
   z-index: 200;
   animation: ${bounceIn} 0.9s ease forwards;
+
+  @media (max-width: 900px) {
+    top: 58%;
+  }
+
+  @media (max-width: 520px) {
+    top: 62%;
+  }
 `;
 
 const QuitWrapper = styled.div`
   position: absolute;
-  top: 65%;
-  left: 40%;
+  top: 71%;
+  left: 50%;
   transform: translate(-50%, -50%);
   z-index: 200;
   animation: ${bounceIn} 0.9s 0.1s ease both;
+
+  @media (max-width: 900px) {
+    top: 69%;
+  }
+
+  @media (max-width: 520px) {
+    top: 74%;
+  }
 `;
 
 /* Gold primary button */
@@ -816,6 +1078,16 @@ const GoldButton = styled.button`
     transform: translateY(1px);
     box-shadow: 0 3px 12px rgba(251,196,23,0.35);
   }
+
+  @media (max-width: 900px) {
+    width: min(86vw, 300px);
+  }
+
+  @media (max-width: 520px) {
+    width: min(92vw, 260px);
+    height: 52px;
+    border-radius: 12px;
+  }
 `;
 
 const BtnGlow = styled.span`
@@ -837,6 +1109,11 @@ const BtnInner = styled.span`
   font-weight: 900;
   letter-spacing: 0.4px;
   color: #3d2401;
+
+  @media (max-width: 520px) {
+    font-size: 15px;
+    gap: 8px;
+  }
 `;
 
 const BtnIconSpan = styled.span`
@@ -863,6 +1140,16 @@ const GhostButton = styled.button`
     font-size: 16px;
     font-weight: 700;
     color: #fff7e7;
+  }
+
+  @media (max-width: 900px) {
+    width: min(86vw, 300px);
+  }
+
+  @media (max-width: 520px) {
+    width: min(92vw, 260px);
+    height: 48px;
+    border-radius: 12px;
   }
 `;
 
