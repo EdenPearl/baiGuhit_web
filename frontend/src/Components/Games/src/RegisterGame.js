@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import Facebook from '../../../Assests/facebookicon.svg';
-import Google from '../../../Assests/googleicon.svg';
 import Logo from '../../../Assests/logo1.png';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import useRegister from '../../../Hooks/RegisterHooks/useRegister';
@@ -44,7 +42,18 @@ const RegisterModal = ({ isOpen, openLoginModal }) => {
     <Modal>
     <StyledToastContainer />
       <ModalContent>
+        <RightContainer>
+          <LogoContainer>
+            <LogoImage src={Logo} alt="bAIguhit" />
+            <BrandName>
+              <B1>b</B1><B2>AI</B2><B3>guhit</B3>
+            </BrandName>
+            <BrandLine />
+            <BrandTag>Revive the Ancient Script.<br />Master Baybayin through Play.</BrandTag>
+          </LogoContainer>
+        </RightContainer>
         <LeftContainer>
+          <CloseButton onClick={toggleModal}>&times;</CloseButton>
           <SignInForm>
             <FormLabel>Create new account</FormLabel>
             <FormField>
@@ -89,29 +98,11 @@ const RegisterModal = ({ isOpen, openLoginModal }) => {
             </FormField>
             {error && <ErrorText>{error}</ErrorText>}
             <SubmitButton onClick={handleSubmit}>Sign Up</SubmitButton>
-            <OtherWaysToSignIn>
-              <OtherWaysText>Other ways to sign in</OtherWaysText>
-              <IconsContainer>
-                <IconLink href="#">
-                  <Icon src={Facebook} alt="Facebook" />
-                </IconLink>
-                <IconLink href="#">
-                  <Icon src={Google} alt="Google" />
-                </IconLink>
-              </IconsContainer>
-            </OtherWaysToSignIn>
             <SignUpPrompt>
               Already have an account? <SignUpLink onClick={openLoginModal}>Login here</SignUpLink>
             </SignUpPrompt>
           </SignInForm>
         </LeftContainer>
-        <RightContainer>
-          <CloseButton onClick={toggleModal}>&times;</CloseButton>
-          <LogoContainer>
-            <LogoImage src={Logo} alt="Logo1" />
-            <LogoText>EBaybayMo</LogoText>
-          </LogoContainer>
-        </RightContainer>
       </ModalContent>
     </Modal>
   );
@@ -128,17 +119,22 @@ const Modal = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background:linear-gradient(160deg,rgba(43,16,4,.85),rgba(74,23,6,.85));
+  backdrop-filter:blur(8px);
+  padding: 16px;
   z-index: 1000;
 `;
 
 const ModalContent = styled.div`
-  width: 800px;
-  height: 80vh;
-  background-color: white;
-  border-radius: 10px;
+  width: min(760px, 100%);
+  height: min(500px, 90vh);
+  background-color: #2b1004;
+  border-radius: 20px;
+  overflow: hidden;
   display: flex;
   flex-direction: row;
+  border:1px solid rgba(251,196,23,.15);
+  box-shadow:0 24px 60px rgba(0,0,0,.45),0 0 60px rgba(251,196,23,.1);
 `;
 
 const LeftContainer = styled.div`
@@ -146,21 +142,27 @@ const LeftContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center; 
-  width: 50%;
-  padding: 20px;
-  background-color: #ffffff;
+  flex: 1;
+  position: relative;
+  padding: 40px 36px;
+  background:linear-gradient(160deg,#2b1004 0%,#4a1706 100%);
+  overflow-y: auto;
 `;
 const RightContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 50%;
-  background: linear-gradient(90deg, rgb(170, 39, 13), rgb(231, 145, 91)); /* Changed from #a52a2a to gradient */
+  width: 280px;
+  flex-shrink: 0;
+  background: linear-gradient(155deg,#7a2100 0%,#9a3000 40%,#c24010 100%);
   color: white;
-  padding: 20px;
-  border-radius: 25px 0 0 25px;
+  padding: 36px 28px;
   position: relative; 
+
+  @media (max-width: 560px) {
+    display: none;
+  }
 `;
 const CloseButton = styled.span`
   position: absolute; 
@@ -168,8 +170,9 @@ const CloseButton = styled.span`
   right: 20px;
   cursor: pointer;
   font-size: 2.5rem;
+  color:rgba(255,246,235,.5);
   &:hover {
-    color: rgb(170, 39, 13); /* Changed from red to gradient's starting color */
+    color: #fbc417;
   }
 `;
 const SignInForm = styled.form`
@@ -183,7 +186,7 @@ const FormLabel = styled.h2`
   font-size: 1.2rem;
   text-align: center;
   margin-bottom: 20px;
-  color: #a52a2a;
+  color: #fff6eb;
 `;
 
 const FormField = styled.div`
@@ -199,7 +202,7 @@ const InputLabel = styled.label`
   font-size: 0.9rem;
   font-weight: bold;
   margin-bottom: 5px;
-  color: #000000;
+  color: #fde68a;
 `;
 
 const Input = styled.input`
@@ -207,13 +210,21 @@ const Input = styled.input`
   width: 100%;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #C4C4C4;
+  border: 1.5px solid rgba(251,196,23,.25);
+  background:rgba(42,16,4,.6);
   font-size: 12px;
   box-sizing: border-box;
+  color:#fff6eb;
+
+  &::placeholder{
+    color:rgba(255,246,235,.3);
+  }
 
   &:focus{
-    border-color: #a52a2a;
+    border-color: rgba(251,196,23,.5);
+    background:rgba(42,16,4,.8);
     outline: none;
+    box-shadow:0 0 0 3px rgba(251,196,23,.15);
   }
 `;
 
@@ -223,15 +234,21 @@ const SubmitButton = styled.button`
   width: 100%;
   font-family: 'Poppins';
   padding: 10px;
-  background: linear-gradient(90deg, rgb(170, 39, 13), rgb(231, 145, 91)); /* Changed from #a52a2a to gradient */
+  background: linear-gradient(135deg,#c24010,#9a3000);
   color: white;
   border: none;
-  border-radius: 25px;
+  border-radius: 8px;
   cursor: pointer;
   margin-top: 20px;
   font-size: 0.8rem;
+  box-shadow:0 4px 16px rgba(194,64,12,.28);
+  transition:transform .15s,box-shadow .15s;
   &:hover {
-    background: linear-gradient(90deg, rgb(120, 27, 9), rgb(185, 116, 73)); /* Darkened gradient for hover */
+    transform:translateY(-2px);
+    box-shadow:0 7px 22px rgba(194,64,12,.38);
+  }
+  &:active{
+    transform:translateY(1px);
   }
 `;
 
@@ -239,12 +256,12 @@ const SignUpPrompt = styled.p`
   margin-top: 10px;
   text-align: center;
   font-size: 0.7rem;
-  color: #333;
+  color: rgba(255,246,235,.65);
 `;
 
 const SignUpLink = styled.a`
   cursor: pointer;
-  color: #a52a2a;
+  color: #fbc417;
   text-decoration: none;
   font-weight: bold;
   &:hover {
@@ -259,7 +276,7 @@ const OtherWaysToSignIn = styled.div`
 
 const OtherWaysText = styled.p`
   font-size: 0.7rem;
-  color: #757575;
+  color: rgba(255,246,235,.5);
 `;
 
 const IconsContainer = styled.div`
@@ -272,6 +289,11 @@ const IconLink = styled.a`
   margin: 0 10px;
   cursor: pointer;
   text-decoration: none;
+  transition:all .15s;
+  &:hover{
+    opacity:.8;
+    transform:translateY(-2px);
+  }
 `;
 
 const Icon = styled.img`
@@ -281,28 +303,72 @@ const Icon = styled.img`
 
 const LogoContainer = styled.div`
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
 `;
 
 const LogoImage = styled.img`
-  width: 200px;
-  height: auto;
-  margin-bottom: 20px;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 0;
   border-radius: 50%;
-  border: 2px solid #ffffff
-  
+  object-fit: cover;
+  display: block;
+  border: 2px solid rgba(251,196,23,.45);
+  box-shadow: 0 8px 28px rgba(0,0,0,.35);
 `;
 
-const LogoText = styled.p`
-  font-family: 'Poppins';
-  font-size: 2rem;
-  color: #ffffff;
-  margin-top: 1rem;
-  font-weight: 800;
-  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  `;
+const BrandName = styled.div`
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+`;
+
+const B1 = styled.span`
+  font-family: 'Cinzel', serif;
+  font-size: 30px;
+  font-weight: 900;
+  color: #fff8ee;
+`;
+
+const B2 = styled.span`
+  font-family: 'Cinzel', serif;
+  font-size: 30px;
+  font-weight: 900;
+  background: linear-gradient(90deg,#fde68a,#fbc417,#fde68a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const B3 = styled.span`
+  font-family: 'Cinzel', serif;
+  font-size: 30px;
+  font-weight: 900;
+  color: rgba(255,245,220,.55);
+`;
+
+const BrandLine = styled.div`
+  width: 50px;
+  height: 1px;
+  background: rgba(251,196,23,.35);
+`;
+
+const BrandTag = styled.p`
+  margin: 0;
+  text-align: center;
+  font-family: 'Georgia', serif;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.7;
+  color: rgba(255,245,215,.65);
+`;
 
 const ErrorText = styled.p`
-  color: red;
+  color: #ffb36b;
   font-size: 0.8rem;
   margin-top: -10px;
   margin-bottom: 10px;
@@ -319,8 +385,11 @@ const PasswordToggleIcon = styled.span`
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  color: #757575;
+  color: rgba(255,246,235,.4);
   font-size: 18px;
+  &:hover{
+    color:#fbc417;
+  }
 `;
 
 const StyledToastContainer = styled(ToastContainer)`

@@ -9,4 +9,13 @@ module.exports = function (app) {
       pathRewrite: { "^/heroku-proxy": "" },
     })
   );
+
+  app.use(
+    "/auth-proxy",
+    createProxyMiddleware({
+      target: "https://ebaybaymo-server-b084d082cda7.herokuapp.com",
+      changeOrigin: true,
+      pathRewrite: { "^/auth-proxy": "" },
+    })
+  );
 };

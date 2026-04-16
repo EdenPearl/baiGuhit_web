@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import axios from 'axios';
 
+const REGISTER_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:8000/auth/register'
+    : 'https://ebaybaymo-server-b084d082cda7.herokuapp.com/auth/register';
+
 const useRegister = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +39,7 @@ const useRegister = () => {
     setPassword('');
     setConfirmPassword('');
     try {
-      const response = await axios.post('https://ebaybaymo-server-b084d082cda7.herokuapp.com/auth/register', {
+      const response = await axios.post(REGISTER_URL, {
         email,
         password,
       });
