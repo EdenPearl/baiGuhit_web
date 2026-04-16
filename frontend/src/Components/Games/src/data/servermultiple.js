@@ -57,8 +57,8 @@ const multipleChoiceQuestions = {
   Medium: [
     { 
       question: "Choose the Baybayin equivalent of 'lupa'", 
-      options: ["ᜎᜓᜉᜀ", "ᜎᜅ᜔", "ᜊᜆ", "ᜊᜒᜇ᜔"], 
-      answer: "ᜎᜓᜉᜀ" 
+      options: ["ᜎᜓᜉ", "ᜎᜅ᜔", "ᜊᜆ", "ᜊᜒᜇ᜔"], 
+      answer: "ᜎᜓᜉ" 
     },
     { 
       question: "Choose the Baybayin equivalent of 'langit'", 
@@ -72,16 +72,16 @@ const multipleChoiceQuestions = {
     },
     { 
       question: "Choose the Baybayin equivalent of 'bida'", 
-      options: ["ᜊᜒᜇ᜔", "ᜊᜆ", "ᜎᜓᜉᜀ", "ᜎᜅᜒᜆ᜔"], 
-      answer: "ᜊᜒᜇ᜔" 
+      options: ["ᜊᜒᜇ", "ᜊᜆ", "ᜎᜓᜉᜀ", "ᜎᜅᜒᜆ᜔"], 
+      answer: "ᜊᜒᜇ" 
     }
   ],
 
   Hard: [
     { 
       question: "Choose the Baybayin equivalent of 'lupang'", 
-      options: ["ᜎᜓᜉᜀ ᜋᜅ᜔", "ᜊᜆ ᜎᜅᜒᜆ᜔", "ᜎᜓᜉᜀ ᜎᜓᜎᜒᜐ᜔"], 
-      answer: "ᜎᜓᜉᜀ ᜋᜅ᜔" 
+      options: ["ᜎᜓᜉᜅ᜔", "ᜊᜆ ᜎᜅᜒᜆ᜔", "ᜎᜓᜉᜀ ᜎᜓᜎᜒᜐ᜔"], 
+      answer: "ᜎᜓᜉᜅ᜔" 
     },
     { 
       question: "Choose the Baybayin equivalent of 'bata langit'", 
@@ -90,8 +90,8 @@ const multipleChoiceQuestions = {
     },
     { 
       question: "Choose the Baybayin equivalent of 'lupa ulit'", 
-      options: ["ᜎᜓᜉᜀ ᜎᜓᜎᜒᜐ᜔", "ᜊᜆ ᜎᜅᜒᜆ᜔", "ᜎᜓᜉᜀ ᜋᜅ᜔"], 
-      answer: "ᜎᜓᜉᜀ ᜎᜓᜎᜒᜐ᜔" 
+      options: ["ᜎᜓᜉ ᜂᜎᜒᜆ᜔ ", "ᜊᜆ ᜎᜅᜒᜆ᜔", "ᜎᜓᜉᜀ ᜋᜅ᜔"], 
+      answer: "ᜎᜓᜉ ᜂᜎᜒᜆ᜔" 
     }
   ]
 };

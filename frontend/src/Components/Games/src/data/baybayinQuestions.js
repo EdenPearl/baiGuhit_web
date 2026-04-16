@@ -37,19 +37,19 @@ const baybayinQuestions = [
   {
     difficulty: "Medium",
     question: "Choose the correct Baybayin translation for 'Mahirap' ",
-    options: ["ᜋᜑᜒᜇ᜔ᜇ᜔", "ᜎᜇᜓ", "ᜋᜐᜌ", "ᜆᜄᜓᜋ᜔ᜉᜌ"],
-    answer: "ᜋᜑᜒᜇ᜔ᜇ᜔",
+    options: ["ᜋᜑᜒᜇᜉ᜔", "ᜎᜇᜓ", "ᜋᜐᜌ", "ᜆᜄᜓᜋ᜔ᜉᜌ"],
+    answer: "ᜋᜑᜒᜇᜉ᜔",
   },
   {
     difficulty: "Medium",
     question: "Choose the correct Baybayin translation for 'Masaya' ",
-    options: ["ᜋᜐᜌ", "ᜎᜇᜓ", "ᜋᜑᜒᜇ᜔ᜇ᜔", "ᜆᜄᜓᜋ᜔ᜉᜌ"],
+    options: ["ᜎᜇᜓ", "ᜋᜐᜌ", "ᜋᜑᜒᜇ᜔ᜇ᜔", "ᜆᜄᜓᜋ᜔ᜉᜌ"],
     answer: "ᜋᜐᜌ",
   },
   {
     difficulty: "Medium",
     question: "Choose the correct Baybayin translation for 'Laban' ",
-    options: ["ᜎᜊᜈ᜔", "ᜋᜐᜌ", "ᜋᜑᜒᜇ᜔ᜇ᜔", "ᜆᜄᜓᜋ᜔ᜉᜌ"],
+    options: ["ᜋᜐᜌ", "ᜋᜑᜒᜇ᜔ᜇ᜔", "ᜆᜄᜓᜋ᜔ᜉᜌ", "ᜎᜊᜈ᜔"],
     answer: "ᜎᜊᜈ᜔",
   },
 
@@ -57,8 +57,8 @@ const baybayinQuestions = [
   {
     difficulty: "Hard",
     question: "Choose the correct Baybayin translation for 'Laro Mahirap' (Hard Game)",
-    options: ["ᜎᜇᜓ ᜋᜑᜒᜇ᜔ᜇ᜔", "ᜉᜄ᜔ᜐᜓᜊᜓᜃ᜔ ᜎᜇᜓ", "ᜎᜊᜈ᜔ ᜋᜎᜒᜐ᜔ᜌ", "ᜋᜐᜌ ᜋᜑᜒᜇ᜔ᜇ᜔"],
-    answer: "ᜎᜇᜓ ᜋᜑᜒᜇ᜔ᜇ᜔",
+    options: ["ᜎᜇᜓ ᜋᜑᜒᜇᜉ᜔", "ᜉᜄ᜔ᜐᜓᜊᜓᜃ᜔ ᜎᜇᜓ", "ᜎᜊᜈ᜔ ᜋᜎᜒᜐ᜔ᜌ", "ᜋᜐᜌ ᜋᜑᜒᜇ᜔ᜇ᜔"],
+    answer: "ᜎᜇᜓ ᜋᜑᜒᜇᜉ᜔",
   },
   {
     difficulty: "Hard",

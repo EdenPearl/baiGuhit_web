@@ -130,7 +130,7 @@
     "difficulty": "Medium",
     "question": "Choose the correct Baybayin translation for 'Mahal'",
     "options": ["ᜋᜑᜎ", "ᜎᜇᜓ", "ᜋᜐᜌ", "ᜆᜄᜓᜋ᜔"],
-    "answer": "ᜋᜑᜎ"
+    "answer": "ᜋᜑᜎ᜔"
   },
   {
     "id": "q20",
@@ -150,8 +150,8 @@
     "id": "q22",
     "difficulty": "Medium",
     "question": "Choose the correct Baybayin translation for 'Bahay'",
-    "options": ["ᜊᜌ᜔ᜇ", "ᜆᜄᜓᜋ᜔", "ᜋᜐᜌ", "ᜋᜑᜎ"],
-    "answer": "ᜊᜌ᜔ᜇ"
+    "options": ["ᜊᜑᜌ᜔", "ᜆᜄᜓᜋ᜔", "ᜋᜐᜌ", "ᜋᜑᜎ"],
+    "answer": "ᜊᜑᜌ᜔"
   },
   {
     "id": "q23",
