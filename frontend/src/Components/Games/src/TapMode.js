@@ -8,6 +8,8 @@ import stoneClick from "../../../Assests/stone.mp3";
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
 import back from "../../../Assests/back.png";
+import soundIcon from "../../../Assests/sound.png";
+import muteIcon from "../../../Assests/mute.png";
 
 /* ─────────────────────── CONSTANTS ─────────────────────── */
 
@@ -38,6 +40,7 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
   const [tileVibrate, setTileVibrate]   = useState(false);
   const [isCorrectAnim, setIsCorrectAnim] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   const { imageUrl, baybayinWord, loading, refetch } = useGameDataByCategory(selectedDifficulty);
 
@@ -49,7 +52,7 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
   }, []);
 
   const playClick = () => {
-    if (!stoneClickRef.current) return;
+    if (!soundEnabled || !stoneClickRef.current) return;
     try { stoneClickRef.current.currentTime = 0; stoneClickRef.current.play().catch(() => {}); } catch {}
   };
 
@@ -240,8 +243,11 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
             </ScoreRow>
           </HeaderCenter>
 
-          {/* spacer to balance layout */}
-          <div style={{ width: 195 }} />
+          <RightControlSlot>
+            <SoundBtn onClick={() => { playClick(); setSoundEnabled(p => !p); }}>
+              <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt="sound" />
+            </SoundBtn>
+          </RightControlSlot>
         </Header>
 
         {/* ── SIDE ART ── */}
@@ -448,6 +454,21 @@ const BackBtn = styled.button`
   &:hover { transform: scale(.9); }
 `;
 const BackBtnIcon = styled.img`
+  width: 205px; display: block; margin-top: -30px;
+
+  @media (max-width: 900px) {
+    width: 170px;
+    margin-top: -22px;
+  }
+
+  @media (max-width: 720px) {
+    width: 150px;
+    margin-top: -16px;
+  }
+`;
+const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;`;
+const SoundBtn = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}`;
+const SoundBtnImg = styled.img`
   width: 205px; display: block; margin-top: -30px;
 
   @media (max-width: 900px) {

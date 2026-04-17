@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
 import back from "../../../Assests/back.png";
+import soundIcon from "../../../Assests/sound.png";
+import muteIcon from "../../../Assests/mute.png";
 import confetti from "canvas-confetti";
 import bgMusicFile from "../../../Assests/Tap.mp3"; // Background music
 import stoneClick from "../../../Assests/stone.mp3"; // Button click sound
@@ -103,6 +105,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
   const [isCorrectAnim, setIsCorrectAnim] = useState(false);
   const [streak, setStreak] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const feedbackTimeoutRef = useRef(null);
 
   const choiceLabels = ["A", "B", "C", "D"];
@@ -216,19 +219,18 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
     if (!audioRef.current) return;
     const audio = audioRef.current;
     audio.loop = true;
-    if (isPlaying && !gameOver) {
+    if (soundEnabled && isPlaying && !gameOver) {
       audio.play().catch((err) => console.log("Audio play error:", err));
     } else {
       audio.pause();
     }
-  }, [isPlaying, gameOver]);
+  }, [isPlaying, gameOver, soundEnabled]);
 
   // ---------------- PLAY BUTTON SOUND ----------------
   const playClickSound = () => {
-    if (clickRef.current) {
-      clickRef.current.currentTime = 0;
-      clickRef.current.play().catch((err) => console.log("Click audio error:", err));
-    }
+    if (!soundEnabled || !clickRef.current) return;
+    clickRef.current.currentTime = 0;
+    clickRef.current.play().catch((err) => console.log("Click audio error:", err));
   };
 
   const setTransientFeedback = (message, duration = 1000) => {
@@ -427,7 +429,11 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
           </ScoreRow>
         </HeaderCenter>
 
-        <div style={{ width: 195 }} />
+        <RightControlSlot>
+          <SoundBtn onClick={() => { playClickSound(); setSoundEnabled(p => !p); }}>
+            <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt="sound" />
+          </SoundBtn>
+        </RightControlSlot>
       </Header>
 
       <GameBody>
@@ -723,6 +729,21 @@ const TimerText = styled.div`
 
 const LeftArt = styled.img`position:absolute;top:0;left:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
 const RightArt = styled.img`position:absolute;top:0;right:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
+const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;`;
+const SoundBtn = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}`;
+const SoundBtnImg = styled.img`
+  width: 205px; display: block; margin-top: -30px;
+
+  @media (max-width: 900px) {
+    width: 170px;
+    margin-top: -22px;
+  }
+
+  @media (max-width: 720px) {
+    width: 150px;
+    margin-top: -16px;
+  }
+`;
 
 const GameBody = styled.main`
   position: relative; z-index: 10;

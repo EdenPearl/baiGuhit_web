@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import write1 from '../../../Assests/write1.png';
 import write2 from '../../../Assests/write2.png';
 import back from '../../../Assests/back.png';
+import soundIcon from "../../../Assests/sound.png";
+import muteIcon from "../../../Assests/mute.png";
 import confetti from "canvas-confetti";
 import bgMusicFile from "../../../Assests/Tap.mp3";
 import stoneClick from "../../../Assests/stone.mp3";
@@ -99,6 +101,7 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   const [streak,        setStreak]        = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [showHint,      setShowHint]      = useState(false);
+  const [soundEnabled,  setSoundEnabled]  = useState(true);
 
   const normalizeAnswerText = (value) => String(value ?? "").trim().toUpperCase();
 
@@ -166,15 +169,15 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
     const audio = new Audio(bgMusicFile);
     audio.loop = true; audio.volume = 0.5;
     audioRef.current = audio;
-    audio.play().catch(() => {});
+    if (soundEnabled) audio.play().catch(() => {});
     return () => { audio.pause(); audio.currentTime = 0; };
-  }, []);
+  }, [soundEnabled]);
 
   useEffect(() => {
     if (!audioRef.current) return;
-    if (isPlaying && !gameOver) audioRef.current.play().catch(() => {});
+    if (soundEnabled && isPlaying && !gameOver) audioRef.current.play().catch(() => {});
     else audioRef.current.pause();
-  }, [isPlaying, gameOver]);
+  }, [isPlaying, gameOver, soundEnabled]);
 
   /* ── Init ── */
   useEffect(() => {
@@ -208,7 +211,8 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
 
   /* ── Helpers ── */
   const playClick = () => {
-    if (clickRef.current) { clickRef.current.currentTime = 0; clickRef.current.play().catch(() => {}); }
+    if (!soundEnabled || !clickRef.current) return;
+    clickRef.current.currentTime = 0; clickRef.current.play().catch(() => {});
   };
 
   const setTransientFeedback = (msg, ok, ms = 1000) => {
@@ -316,7 +320,11 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
               </StatPill>
             </ScoreRow>
           </HeaderCenter>
-          <div style={{ width: 205 }} />
+          <RightControlSlot>
+            <SoundBtn onClick={() => { playClick(); setSoundEnabled(p => !p); }}>
+              <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt="sound" />
+            </SoundBtn>
+          </RightControlSlot>
         </Header>
 
         {/* ── GAME BODY ── */}
@@ -566,9 +574,54 @@ const Header = styled.header`
     justify-content: center;
   }
 `;
-const BackBtn      = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}`;
+const BackBtn      = styled.button`
+  background: linear-gradient(180deg, rgba(34,197,94,.24) 0%, rgba(5,46,22,.18) 100%);
+  border: 1px solid rgba(34,197,94,.42);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 10px 24px rgba(0,0,0,.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover { transform: scale(.96); border-color: rgba(74,222,128,.55); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.22); }
+`;
 const BackBtnIcon  = styled.img`
   width:205px;display:block;margin-top:-30px;
+
+  @media (max-width: 900px) {
+    width: 170px;
+    margin-top: -22px;
+  }
+
+  @media (max-width: 720px) {
+    width: 150px;
+    margin-top: -16px;
+  }
+`;
+const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;`;
+const SoundBtn = styled.button`
+  background: linear-gradient(180deg, rgba(34,197,94,.24) 0%, rgba(5,46,22,.18) 100%);
+  border: 1px solid rgba(34,197,94,.42);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 10px 24px rgba(0,0,0,.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover { transform: scale(.96); border-color: rgba(74,222,128,.55); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.22); }
+`;
+const SoundBtnImg = styled.img`
+  width: 205px; display: block; margin-top: -30px;
 
   @media (max-width: 900px) {
     width: 170px;
@@ -665,28 +718,25 @@ const GameBody = styled.main`
 
 const PromptLabel = styled.div`
   font-family: sans-serif; font-size: 11px; font-weight: 700;
-  letter-spacing: 1.6px; text-transform: uppercase;
-  color: rgba(255,248,231,.55);
-  padding-top: 2px;
-  animation: ${floatUp} .4s ease;
-
-  @media (max-width: 720px) {
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-align: center;
-  }
+  text-transform: uppercase; letter-spacing: 1.6px;
+  color: rgba(255,242,210,.45);
 `;
-
-/* Loading */
-const dotAnim = keyframes`0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}`;
-const LoadRow  = styled.div`display:flex;gap:6px;align-items:center;margin-top:40px;`;
-const LoadDot  = styled.span`
-  width:8px;height:8px;border-radius:50%;background:#fbc417;
-  animation:${dotAnim} 1.2s ease-in-out infinite;
-  animation-delay:${({ $d }) => $d || "0s"};
+const LoadRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
 `;
-
-/* ── QUESTION CARD ── */
+const LoadDot = styled.span`
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #fbc417;
+  opacity: .35;
+  animation: ${dotPulse} 1.1s ease-in-out infinite;
+  animation-delay: ${({ $d }) => $d || "0s"};
+`;
 const QuestionCard = styled.div`
   position: relative;
   width: min(520px, 92vw);
