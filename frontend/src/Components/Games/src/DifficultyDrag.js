@@ -267,7 +267,6 @@ export default function DifficultyDrag() {
 
       if (result.success) {
         console.log("🏆 Score saved to Leaderboard!");
-        showToast("🏆 Score saved successfully!", "success");
       } else {
         console.error("Failed to save score:", result.message);
         showToast("❌ Failed to save score: " + result.message, "error");
