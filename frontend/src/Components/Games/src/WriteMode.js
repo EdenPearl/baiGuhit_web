@@ -643,13 +643,15 @@ const WriteModeV2 = () => {
             )}
           </HeaderCenter>
 
-          <SoundBtn
-            onClick={() => { ensureAudioContext(); playStoneClick(); setSoundEnabled((p) => !p); }}
-            $active={soundEnabled}
-            title={soundEnabled ? "Mute" : "Unmute"}
-          >
-            {soundEnabled ? "🔊" : "🔇"}
-          </SoundBtn>
+          <RightControlSlot>
+            <SoundBtn
+              onClick={() => { ensureAudioContext(); playStoneClick(); setSoundEnabled((p) => !p); }}
+              $active={soundEnabled}
+              title={soundEnabled ? "Mute" : "Unmute"}
+            >
+              {soundEnabled ? "🔊" : "🔇"}
+            </SoundBtn>
+          </RightControlSlot>
         </Header>
 
         {/* ── DECORATIVE SIDE IMAGES ── */}
@@ -965,7 +967,7 @@ const BackBtn = styled.button`
 `;
 
 const BackBtnIcon = styled.img`
-  width: 140px;
+  width: 205px;
   display: block;
   margin-top: -30px;
 `;
@@ -1079,6 +1081,12 @@ const SoundBtn = styled.button`
   transition: all 0.2s;
   color: white;
   &:hover { transform: translateY(-1px); }
+`;
+
+const RightControlSlot = styled.div`
+  width: 205px;
+  display: flex;
+  justify-content: flex-end;
 `;
 
 /* ── Side art ── */

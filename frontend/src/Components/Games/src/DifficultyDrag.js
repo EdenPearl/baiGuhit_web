@@ -13,7 +13,7 @@ const styles = {
   modalTopBar: { height: "4px", background: "linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fbc417, #fde68a)", backgroundSize: "300% 100%", animation: "shimmerGold 3s linear infinite" },
   modalCardBody: { padding: "18px 22px 26px", textAlign: "center" },
   headerRow: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 22px 12px" },
-  titleRow: { display: "flex", alignItems: "center", gap: "10px" },
+  titleRow: { display: "flex", alignItems: "center", gap: "50px" },
   titleIcon: { fontSize: "22px" },
   title: { margin: 0, fontSize: "20px", letterSpacing: "0.2px", color: "#fde68a", fontFamily: "Georgia, serif", fontWeight: 900, textShadow: "0 4px 14px rgba(0,0,0,0.45)" },
   closeBtn: { width: "34px", height: "34px", borderRadius: "50%", border: "1.5px solid rgba(251,196,23,0.35)", background: "rgba(251,196,23,0.1)", color: "#fff", fontSize: "13px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s ease" },
