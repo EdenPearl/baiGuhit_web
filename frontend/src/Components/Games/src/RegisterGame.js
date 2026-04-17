@@ -155,8 +155,8 @@ const RightContainer = styled.div`
   align-items: center;
   width: 280px;
   flex-shrink: 0;
-  background: linear-gradient(155deg,#7a2100 0%,#9a3000 40%,#c24010 100%);
-  color: white;
+  background: linear-gradient(160deg,#fff8ee 0%,#fffdf8 100%);
+  color: #7a2100;
   padding: 36px 28px;
   position: relative; 
 
@@ -317,8 +317,8 @@ const LogoImage = styled.img`
   border-radius: 50%;
   object-fit: cover;
   display: block;
-  border: 2px solid rgba(251,196,23,.45);
-  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  border: 2px solid rgba(122,33,0,.18);
+  box-shadow: 0 8px 28px rgba(122,33,0,.12);
 `;
 
 const BrandName = styled.div`
@@ -331,7 +331,7 @@ const B1 = styled.span`
   font-family: 'Cinzel', serif;
   font-size: 30px;
   font-weight: 900;
-  color: #fff8ee;
+  color: #7a2100;
 `;
 
 const B2 = styled.span`
@@ -348,13 +348,13 @@ const B3 = styled.span`
   font-family: 'Cinzel', serif;
   font-size: 30px;
   font-weight: 900;
-  color: rgba(255,245,220,.55);
+  color: rgba(122,33,0,.55);
 `;
 
 const BrandLine = styled.div`
   width: 50px;
   height: 1px;
-  background: rgba(251,196,23,.35);
+  background: rgba(122,33,0,.18);
 `;
 
 const BrandTag = styled.p`
@@ -364,7 +364,7 @@ const BrandTag = styled.p`
   font-size: 12px;
   font-style: italic;
   line-height: 1.7;
-  color: rgba(255,245,215,.65);
+  color: rgba(122,33,0,.7);
 `;
 
 const ErrorText = styled.p`

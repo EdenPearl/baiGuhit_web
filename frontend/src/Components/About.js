@@ -12,9 +12,6 @@ const About = () => {
   return (
     <AboutContainer>
       <AboutNavBar>
-        <BackBtn type="button" onClick={() => navigate('/')} aria-label="Go back home">
-          ← Back to Home
-        </BackBtn>
         <AboutTitle>About bAIguhit</AboutTitle>
         <Spacer />
       </AboutNavBar>

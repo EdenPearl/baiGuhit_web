@@ -574,7 +574,7 @@ const Container = styled.div`
 const BgGradient = styled.div`
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, #7a2100 0%, #9a3000 30%, #c24010 65%, #a83008 100%);
+  background: #6b1f00;
   z-index: 0;
 `;
 
@@ -585,9 +585,9 @@ const BgTexture = styled.div`
     repeating-linear-gradient(
       45deg,
       transparent,
-      transparent 55px,
-      rgba(0,0,0,0.04) 55px,
-      rgba(0,0,0,0.04) 56px
+      transparent 60px,
+      rgba(0,0,0,0.04) 60px,
+      rgba(0,0,0,0.04) 61px
     );
   z-index: 1;
   pointer-events: none;
@@ -595,15 +595,15 @@ const BgTexture = styled.div`
 
 const BgRadial = styled.div`
   position: absolute;
-  top: -20%;
+  top: -30%;
   left: 50%;
   transform: translateX(-50%);
-  width: 90vw;
-  height: 90vw;
-  max-width: 800px;
-  max-height: 800px;
+  width: 80vw;
+  height: 80vw;
+  max-width: 700px;
+  max-height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(251,196,23,0.12) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(251,196,23,0.10) 0%, transparent 70%);
   z-index: 1;
   pointer-events: none;
 `;

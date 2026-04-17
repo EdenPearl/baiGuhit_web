@@ -132,7 +132,7 @@ const Card = styled.div`
 /* ── Brand side ── */
 const BrandSide = styled.div`
   width:280px;flex-shrink:0;
-  background:linear-gradient(155deg,#7a2100 0%,#9a3000 40%,#c24010 100%);
+  background:linear-gradient(160deg,#fff8ee 0%,#fffdf8 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:14px;padding:36px 28px;
   @media(max-width:560px){display:none;}
@@ -140,14 +140,14 @@ const BrandSide = styled.div`
 
 const LogoCircle = styled.div`
   width:88px;height:88px;border-radius:50%;overflow:hidden;
-  border:2px solid rgba(251,196,23,.45);
-  box-shadow:0 8px 28px rgba(0,0,0,.35);
+  border:2px solid rgba(122,33,0,.18);
+  box-shadow:0 8px 28px rgba(122,33,0,.12);
   animation:${float} 4s ease-in-out infinite;
 `;
 const LogoImg = styled.img`width:100%;height:100%;object-fit:cover;display:block;`;
 
 const BrandName = styled.div`display:flex;align-items:baseline;line-height:1;`;
-const B1 = styled.span`font-family:'Cinzel',serif;font-size:30px;font-weight:900;color:#fff8ee;`;
+const B1 = styled.span`font-family:'Cinzel',serif;font-size:30px;font-weight:900;color:#7a2100;`;
 const B2 = styled.span`
   font-family:'Cinzel',serif;font-size:30px;font-weight:900;
   background:linear-gradient(90deg,#fde68a,#fbc417,#fde68a);
@@ -155,13 +155,13 @@ const B2 = styled.span`
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   animation:${shimmer} 3s linear infinite;
 `;
-const B3 = styled.span`font-family:'Cinzel',serif;font-size:30px;font-weight:900;color:rgba(255,245,220,.55);`;
+const B3 = styled.span`font-family:'Cinzel',serif;font-size:30px;font-weight:900;color:rgba(122,33,0,.55);`;
 
-const BrandLine = styled.div`width:50px;height:1px;background:rgba(251,196,23,.35);`;
+const BrandLine = styled.div`width:50px;height:1px;background:rgba(122,33,0,.18);`;
 const BrandTag  = styled.p`
   margin:0;text-align:center;font-family:'Georgia',serif;
   font-size:12px;font-style:italic;line-height:1.7;
-  color:rgba(255,245,215,.65);
+  color:rgba(122,33,0,.7);
 `;
 
 /* ── Form side ── */
