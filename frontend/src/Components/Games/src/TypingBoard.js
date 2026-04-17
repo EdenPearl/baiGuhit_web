@@ -252,7 +252,7 @@ const pulse = keyframes`
 const Container = styled.div`
     min-height: 100vh;
     max-height: 100vh;
-    background: linear-gradient(160deg, #7a2100 0%, #9a3000 30%, #c24010 65%, #a83008 100%);
+    background: #6b1f00;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -277,9 +277,9 @@ const BackgroundPattern = styled.div`
         repeating-linear-gradient(
             45deg,
             transparent,
-            transparent 55px,
-            rgba(0,0,0,0.04) 55px,
-            rgba(0,0,0,0.04) 56px
+            transparent 60px,
+            rgba(0,0,0,0.04) 60px,
+            rgba(0,0,0,0.04) 61px
         ),
         radial-gradient(circle at 50% -25%, rgba(251,196,23,0.11) 0%, transparent 68%);
     pointer-events: none;
@@ -297,15 +297,15 @@ const ButtonText = styled.span`
 `;
 
 const BackButton = styled.button`
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(251,196,23,0.35);
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255,255,255,0.18);
     border-radius: 12px;
     padding: 12px 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #fde68a;
+    color: #7a2100;
     font-size: 14px;
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -313,9 +313,9 @@ const BackButton = styled.button`
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
     
     &:hover {
-        background: rgba(251,196,23,0.12);
+        background: rgba(255,255,255,1);
         transform: translateX(-2px);
-        border-color: rgba(251,196,23,0.6);
+        border-color: rgba(122,33,0,0.22);
         box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
     }
     
@@ -331,18 +331,18 @@ const ButtonIcon = styled.span`
 `;
 
 const LeaderboardCard = styled.div`
-    background: linear-gradient(155deg, #2c1204 0%, #3d1a06 50%, #1e0d03 100%);
-    backdrop-filter: blur(16px);
+    background: #ffffff;
+    backdrop-filter: none;
     border-radius: 22px;
     padding: 0;
     width: 100%;
     max-width: 1180px;
     max-height: calc(100vh - 40px);
-    color: #fff4df;
-    border: 1px solid rgba(251,196,23,0.22);
+    color: #7a2100;
+    border: 1px solid rgba(122,33,0,0.14);
     box-shadow: 
-        0 32px 80px rgba(0,0,0,0.6),
-        inset 0 1px 0 rgba(255,220,120,0.1);
+        0 32px 80px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.7);
     position: relative;
     z-index: 1;
     animation: ${slideIn} 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -378,14 +378,14 @@ const LeftPanel = styled.div`
     align-items: center;
     gap: 18px;
     padding: 28px 22px;
-    border-right: 1px solid rgba(251,196,23,0.12);
-    background: rgba(0,0,0,0.18);
+    border-right: 1px solid rgba(251,196,23,0.14);
+    background: linear-gradient(180deg, #7a2100 0%, #6b1f00 100%);
     animation: ${slideIn} 0.5s 0.1s ease both;
     
     @media (max-width: 860px) {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid rgba(251,196,23,0.12);
+        border-bottom: 1px solid rgba(251,196,23,0.14);
         padding: 20px;
     }
 `;
@@ -604,7 +604,7 @@ const TableContainer = styled.div`
     flex: 1;
     overflow-y: auto;
     border-radius: 16px;
-    background: rgba(0,0,0,0.2);
+    background: #ffffff;
     border: 1px solid rgba(251,196,23,0.14);
     position: relative;
 
@@ -639,7 +639,7 @@ const LoadingState = styled.div`
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    color: rgba(255,255,255,0.45);
+    color: rgba(122,33,0,0.62);
     gap: 16px;
     height: 100%;
 `;
@@ -707,7 +707,7 @@ const RetryButton = styled.button`
 const EmptyState = styled.div`
     text-align: center;
     padding: 60px 20px;
-    color: rgba(255,255,255,0.45);
+    color: rgba(122,33,0,0.62);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -730,7 +730,7 @@ const EmptyTitle = styled.p`
 
 const EmptyText = styled.p`
     font-size: 14px;
-    color: rgba(255,255,255,0.45);
+    color: rgba(122,33,0,0.62);
     margin: 0 0 24px 0;
 `;
 
@@ -767,12 +767,12 @@ const Table = styled.table`
 const Th = styled.th`
     padding: 16px;
     text-align: ${props => props.align || 'left'};
-    color: rgba(253,230,138,0.45);
+    color: rgba(122,33,0,0.55);
     font-weight: 700;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    background: rgba(0,0,0,0.35);
+    background: rgba(255,248,238,0.96);
     border-bottom: 1px solid rgba(251,196,23,0.12);
     
     &:first-child {
@@ -796,14 +796,14 @@ const TableRow = styled.tr`
     &:hover {
         background: ${props => props.$isCurrentUser 
             ? "rgba(251,196,23,0.12)" 
-            : "rgba(251,196,23,0.06)"};
+            : "rgba(122,33,0,0.03)"};
         transform: scale(1.005);
         z-index: 1;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     
     &:not(:last-child) {
-        border-bottom: 1px solid rgba(255,255,255,0.04);
+        border-bottom: 1px solid rgba(122,33,0,0.05);
     }
 `;
 
@@ -822,7 +822,7 @@ const RankBadge = styled.div`
     font-size: ${props => props.$isTop3 ? '18px' : '13px'};
     font-weight: 800;
     background: ${props => props.$bg};
-    color: ${props => props.$isTop3 ? 'white' : 'rgba(255,255,255,0.55)'};
+    color: ${props => props.$isTop3 ? '#fffdf8' : 'rgba(122,33,0,0.62)'};
     box-shadow: ${props => props.$isTop3 
         ? '0 4px 12px rgba(0,0,0,0.15)' 
         : '0 2px 4px rgba(0,0,0,0.05)'};
@@ -842,7 +842,7 @@ const PlayerInfo = styled.div`
 
 const PlayerName = styled.div`
     font-weight: 700;
-    color: ${props => props.$isCurrentUser ? "#fbc417" : "#fff4df"};
+    color: ${props => props.$isCurrentUser ? "#fbc417" : "#7a2100"};
     font-size: 15px;
     letter-spacing: -0.2px;
 `;
@@ -862,7 +862,7 @@ const YouTag = styled.span`
 const DateCell = styled.td`
     padding: 14px 12px;
     font-size: 13px;
-    color: rgba(255,255,255,0.35);
+    color: rgba(122,33,0,0.45);
     font-weight: 500;
 `;
 
@@ -874,14 +874,14 @@ const ScoreCell = styled.td`
 const ScoreValue = styled.div`
     font-size: 20px;
     font-weight: 800;
-    color: #fde68a;
+    color: #fbc417;
     line-height: 1;
     letter-spacing: -0.5px;
 `;
 
 const ScoreLabel = styled.div`
     font-size: 11px;
-    color: rgba(255,255,255,0.25);
+    color: rgba(122,33,0,0.36);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 4px;

@@ -10,11 +10,11 @@ import useGetLeaderboardByStatus from "../../../Hooks/GameHooks/useGetLeaderboar
 const TABS = ["easy", "medium", "hard", "expert", "master"];
 
 const TAB_META = {
-  easy:   { icon: "🌱", color: "#4ade80", label: "Easy" },
-  medium: { icon: "🌿", color: "#facc15", label: "Medium" },
-  hard:   { icon: "🔥", color: "#fb923c", label: "Hard" },
-  expert: { icon: "⚡", color: "#f87171", label: "Expert" },
-  master: { icon: "💎", color: "#c084fc", label: "Master" },
+  easy:   { icon: "🌱", color: "#fbc417", label: "Easy" },
+  medium: { icon: "🌿", color: "#fbc417", label: "Medium" },
+  hard:   { icon: "🔥", color: "#fbc417", label: "Hard" },
+  expert: { icon: "⚡", color: "#fbc417", label: "Expert" },
+  master: { icon: "💎", color: "#fbc417", label: "Master" },
 };
 
 const WriteLeaderboard = () => {
@@ -57,10 +57,10 @@ const WriteLeaderboard = () => {
   };
 
   const getRankMeta = (index) => {
-    if (index === 0) return { icon: "👑", label: "1st", glow: "rgba(255,215,0,0.5)",  ring: "#FFD700", bg: "linear-gradient(135deg,#fde68a,#f59e0b)" };
-    if (index === 1) return { icon: "🥈", label: "2nd", glow: "rgba(192,192,192,0.5)", ring: "#C0C0C0", bg: "linear-gradient(135deg,#e2e8f0,#94a3b8)" };
-    if (index === 2) return { icon: "🥉", label: "3rd", glow: "rgba(205,127,50,0.5)",  ring: "#CD7F32", bg: "linear-gradient(135deg,#d4a574,#a06030)" };
-    return { icon: `${index + 1}`, label: `#${index + 1}`, glow: "transparent", ring: "rgba(255,255,255,0.1)", bg: "rgba(255,255,255,0.07)" };
+    if (index === 0) return { icon: "👑", label: "1st", glow: "rgba(251,196,23,0.5)", ring: "#fbc417", bg: "linear-gradient(135deg,#fbc417,#fffdf8)" };
+    if (index === 1) return { icon: "🥈", label: "2nd", glow: "rgba(122,33,0,0.35)", ring: "#7a2100", bg: "linear-gradient(135deg,#fffdf8,#fbc417)" };
+    if (index === 2) return { icon: "🥉", label: "3rd", glow: "rgba(251,196,23,0.35)", ring: "#fbc417", bg: "linear-gradient(135deg,#7a2100,#fbc417)" };
+    return { icon: `${index + 1}`, label: `#${index + 1}`, glow: "transparent", ring: "rgba(122,33,0,0.12)", bg: "rgba(255,253,248,0.9)" };
   };
 
   const stats = {
@@ -355,30 +355,30 @@ const PageRoot = styled.div`
 const BgBase = styled.div`
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, #7a2100 0%, #9a3000 30%, #c24010 65%, #a83008 100%);
+  background: #6b1f00;
 `;
 
 const BgTexture = styled.div`
   position: absolute;
   inset: 0;
   background: repeating-linear-gradient(
-    45deg, transparent, transparent 55px,
-    rgba(0,0,0,0.04) 55px, rgba(0,0,0,0.04) 56px
+    45deg, transparent, transparent 60px,
+    rgba(0,0,0,0.04) 60px, rgba(0,0,0,0.04) 61px
   );
   pointer-events: none;
 `;
 
 const BgRadial = styled.div`
   position: absolute;
-  top: -25%;
+  top: -30%;
   left: 50%;
   transform: translateX(-50%);
-  width: 90vw;
-  height: 90vw;
-  max-width: 800px;
-  max-height: 800px;
+  width: 80vw;
+  height: 80vw;
+  max-width: 700px;
+  max-height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(251,196,23,0.11) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(251,196,23,0.1) 0%, transparent 70%);
   pointer-events: none;
 `;
 
@@ -402,9 +402,9 @@ const BackBtn = styled.button`
   gap: 8px;
   padding: 9px 18px;
   border-radius: 12px;
-  border: 1px solid rgba(251,196,23,0.35);
-  background: rgba(0,0,0,0.3);
-  color: #fde68a;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.9);
+  color: #7a2100;
   font-family: 'Georgia', serif;
   font-size: 14px;
   font-weight: 700;
@@ -412,8 +412,8 @@ const BackBtn = styled.button`
   backdrop-filter: blur(8px);
   transition: all 0.2s ease;
   &:hover {
-    background: rgba(251,196,23,0.12);
-    border-color: rgba(251,196,23,0.6);
+    background: rgba(255,255,255,1);
+    border-color: rgba(122,33,0,0.22);
     transform: translateX(-3px);
   }
 `;
@@ -427,9 +427,9 @@ const Card = styled.div`
   max-height: calc(100vh - 40px);
   border-radius: 22px;
   overflow: hidden;
-  background: linear-gradient(155deg, #2c1204 0%, #3d1a06 50%, #1e0d03 100%);
-  border: 1px solid rgba(251,196,23,0.22);
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,120,0.1);
+  background: linear-gradient(180deg, #fffdf8 0%, #fff8ee 100%);
+  border: 1px solid rgba(122,33,0,0.14);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.7);
   animation: ${popIn} 0.5s cubic-bezier(0.34,1.2,0.64,1) forwards;
   display: flex;
   flex-direction: column;
@@ -469,14 +469,14 @@ const LeftPanel = styled.div`
   align-items: center;
   gap: 18px;
   padding: 28px 22px;
-  border-right: 1px solid rgba(251,196,23,0.12);
-  background: rgba(0,0,0,0.18);
+  border-right: 1px solid rgba(251,196,23,0.14);
+  background: linear-gradient(180deg, #7a2100 0%, #6b1f00 100%);
   animation: ${slideUp} 0.5s 0.1s ease both;
 
   @media (max-width: 860px) {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid rgba(251,196,23,0.12);
+    border-bottom: 1px solid rgba(251,196,23,0.14);
     padding: 20px;
   }
 `;
@@ -519,7 +519,7 @@ const PanelTitle = styled.h1`
   font-family: 'Georgia', serif;
   font-size: 24px;
   font-weight: 900;
-  color: #fde68a;
+  color: #fffdf8;
   letter-spacing: 0.3px;
   text-align: center;
 `;
@@ -529,7 +529,7 @@ const PanelSubtitle = styled.p`
   font-family: sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,253,248,0.78);
   letter-spacing: 0.8px;
   text-transform: uppercase;
 `;
@@ -541,14 +541,14 @@ const ChampionBadge = styled.div`
   margin-top: 6px;
   padding: 5px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(251,196,23,0.35);
-  background: rgba(251,196,23,0.1);
+  border: 1px solid rgba(251,196,23,0.32);
+  background: rgba(251,196,23,0.12);
   font-family: sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  color: #fde68a;
+  color: #fffdf8;
 `;
 
 const BadgeDot = styled.span`
@@ -575,7 +575,7 @@ const TabsLabel = styled.div`
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(253,230,138,0.45);
+  color: rgba(255,253,248,0.7);
 `;
 
 const TabList = styled.div`
@@ -595,9 +595,9 @@ const TabBtn = styled.button`
   gap: 10px;
   padding: 11px 14px;
   border-radius: 12px;
-  border: 1px solid ${({ $active, $color }) => $active ? `${$color}55` : 'rgba(255,255,255,0.07)'};
-  background: ${({ $active, $color }) => $active ? `${$color}18` : 'rgba(255,255,255,0.04)'};
-  color: ${({ $active }) => $active ? '#fff4df' : 'rgba(255,255,255,0.5)'};
+  border: 1px solid ${({ $active, $color }) => $active ? `${$color}60` : 'rgba(251,196,23,0.18)'};
+  background: ${({ $active, $color }) => $active ? `${$color}22` : 'rgba(255,253,248,0.05)'};
+  color: ${({ $active }) => $active ? '#fffdf8' : 'rgba(255,253,248,0.78)'};
   cursor: pointer;
   text-align: left;
   transition: all 0.2s ease;
@@ -605,7 +605,7 @@ const TabBtn = styled.button`
   &:hover {
     background: ${({ $color }) => `${$color}14`};
     border-color: ${({ $color }) => `${$color}44`};
-    color: #fff;
+    color: #fffdf8;
     transform: translateX(3px);
   }
 `;
@@ -638,8 +638,8 @@ const StatsRow = styled.div`
   gap: 0;
   padding: 16px;
   border-radius: 14px;
-  background: rgba(251,196,23,0.07);
-  border: 1px solid rgba(251,196,23,0.15);
+  background: rgba(255,253,248,0.08);
+  border: 1px solid rgba(251,196,23,0.16);
 `;
 
 const StatBox = styled.div`
@@ -669,13 +669,13 @@ const StatBoxLabel = styled.div`
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,253,248,0.65);
 `;
 
 const StatSep = styled.div`
   width: 1px;
   height: 38px;
-  background: rgba(251,196,23,0.15);
+  background: rgba(251,196,23,0.18);
 `;
 
 /* ── Action buttons ── */
@@ -724,13 +724,13 @@ const GhostBtn = styled.button`
   flex: 1;
   height: 46px;
   border-radius: 12px;
-  border: 1.5px solid rgba(251,196,23,0.35);
-  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(251,196,23,0.28);
+  background: rgba(255,253,248,0.06);
   cursor: pointer;
   transition: all 0.18s ease;
-  &:hover { background: rgba(251,196,23,0.1); border-color: rgba(251,196,23,0.6); transform: translateY(-1px); }
+  &:hover { background: rgba(251,196,23,0.1); border-color: rgba(251,196,23,0.5); transform: translateY(-1px); }
   &:active { transform: translateY(1px); }
-  ${BtnContent} { font-size: 13px; color: #fde68a; }
+  ${BtnContent} { font-size: 13px; color: #fffdf8; }
 `;
 
 /* ── Right Panel ── */
@@ -742,6 +742,7 @@ const RightPanel = styled.div`
   padding: 24px;
   gap: 14px;
   overflow: hidden;
+  background: rgba(255,253,248,0.96);
   animation: ${slideUp} 0.5s 0.18s ease both;
 
   @media (max-width: 860px) {
@@ -762,7 +763,7 @@ const RightPanelTitle = styled.h2`
   font-family: 'Georgia', serif;
   font-size: 18px;
   font-weight: 900;
-  color: #fde68a;
+  color: #7a2100;
   letter-spacing: 0.2px;
 `;
 
@@ -785,14 +786,14 @@ const TableWrap = styled.div`
   min-height: 0;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(251,196,23,0.14);
-  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(122,33,0,0.08);
+  background: #fff;
   display: flex;
   flex-direction: column;
 
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: rgba(251,196,23,0.25); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(122,33,0,0.25); border-radius: 4px; }
   overflow-y: auto;
 
   @media (max-width: 860px) {
@@ -821,13 +822,13 @@ const StateTitle = styled.div`
   font-family: 'Georgia', serif;
   font-size: 18px;
   font-weight: 900;
-  color: #fde68a;
+  color: #7a2100;
 `;
 
 const StateText = styled.div`
   font-family: sans-serif;
   font-size: 13px;
-  color: rgba(255,255,255,0.45);
+  color: rgba(122,33,0,0.62);
   text-align: center;
 `;
 
@@ -850,7 +851,7 @@ const RingSpinner = styled.div`
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 3px solid rgba(251,196,23,0.15);
+  border: 3px solid rgba(122,33,0,0.15);
   border-top-color: #fbc417;
   animation: ${spinRing} 0.9s linear infinite;
 `;
@@ -876,9 +877,9 @@ const HeadCell = styled.th`
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(253,230,138,0.45);
-  background: rgba(0,0,0,0.35);
-  border-bottom: 1px solid rgba(251,196,23,0.12);
+  color: rgba(122,33,0,0.55);
+  background: rgba(255,248,238,0.96);
+  border-bottom: 1px solid rgba(122,33,0,0.08);
   width: ${({ $w }) => $w || 'auto'};
 
   @media (max-width: 600px) {
@@ -890,17 +891,17 @@ const ScoreRow = styled.tr`
   border-left: 3px solid ${({ $isMe }) => $isMe ? '#fbc417' : 'transparent'};
   background: ${({ $isMe, $isTop3 }) =>
     $isMe ? 'rgba(251,196,23,0.08)' :
-    $isTop3 ? 'rgba(255,255,255,0.03)' :
+    $isTop3 ? 'rgba(251,196,23,0.04)' :
     'transparent'};
   transition: background 0.18s ease;
   animation: ${rowIn} 0.35s ease both;
 
   &:hover {
-    background: rgba(251,196,23,0.06);
+    background: rgba(122,33,0,0.03);
   }
 
   &:not(:last-child) td {
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(122,33,0,0.05);
   }
 `;
 
@@ -927,7 +928,7 @@ const RankNum = styled.span`
   font-family: sans-serif;
   font-size: 12px;
   font-weight: 800;
-  color: rgba(255,255,255,0.55);
+  color: rgba(122,33,0,0.6);
 `;
 
 const PlayerTd = styled.td`
@@ -953,9 +954,9 @@ const PlayerAvatar = styled.div`
   font-weight: 900;
   background: ${({ $isMe }) => $isMe
     ? 'linear-gradient(135deg, #fde68a, #f59e0b)'
-    : 'rgba(255,255,255,0.1)'};
-  color: ${({ $isMe }) => $isMe ? '#3d2401' : 'rgba(255,255,255,0.6)'};
-  border: 1.5px solid ${({ $isMe }) => $isMe ? 'rgba(251,196,23,0.5)' : 'rgba(255,255,255,0.1)'};
+    : 'rgba(122,33,0,0.05)'};
+  color: ${({ $isMe }) => $isMe ? '#3d2401' : '#7a2100'};
+  border: 1.5px solid ${({ $isMe }) => $isMe ? 'rgba(251,196,23,0.5)' : 'rgba(122,33,0,0.08)'};
 `;
 
 const PlayerMeta = styled.div`
@@ -969,7 +970,7 @@ const PlayerNameText = styled.div`
   font-family: 'Georgia', serif;
   font-size: 14px;
   font-weight: 700;
-  color: ${({ $isMe }) => $isMe ? '#fbc417' : '#fff4df'};
+  color: ${({ $isMe }) => $isMe ? '#fbc417' : '#7a2100'};
   letter-spacing: 0.1px;
 `;
 
@@ -989,7 +990,7 @@ const DateTd = styled.td`
   padding: 12px 10px;
   font-family: sans-serif;
   font-size: 12px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(122,33,0,0.45);
   font-weight: 500;
 
   @media (max-width: 600px) { display: none; }
@@ -1004,7 +1005,7 @@ const ScoreNum = styled.div`
   font-family: 'Georgia', serif;
   font-size: ${({ $isTop3 }) => $isTop3 ? '22px' : '18px'};
   font-weight: 900;
-  color: ${({ $isTop3 }) => $isTop3 ? '#fbc417' : '#fff4df'};
+  color: ${({ $isTop3 }) => $isTop3 ? '#fbc417' : '#7a2100'};
   line-height: 1;
   letter-spacing: -0.5px;
 `;
@@ -1015,6 +1016,6 @@ const ScoreUnit = styled.div`
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: rgba(255,255,255,0.25);
+  color: rgba(122,33,0,0.36);
   margin-top: 3px;
 `;
