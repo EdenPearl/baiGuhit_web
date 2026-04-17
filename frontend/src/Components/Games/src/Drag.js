@@ -556,8 +556,8 @@ const Header = styled.header`
   }
 
   @media (max-width: 720px) {
-    flex-wrap: wrap;
-    justify-content: center;
+    padding: 10px 10px 6px;
+    gap: 6px;
   }
 `;
 const BackBtn      = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}@media (max-width:720px){display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid rgba(251,196,23,.35);border-radius:12px;background:rgba(0,0,0,.25);&:hover{transform:none;}}`;
@@ -576,11 +576,7 @@ const BackBtnIcon  = styled.img`
 const ControlText = styled.span`display:none;@media (max-width:720px){display:inline-block;font-family:sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff1cf;line-height:1;}`;
 const HeaderCenter = styled.div`
   flex:1;display:flex;justify-content:center;
-
-  @media (max-width: 720px) {
-    order: 3;
-    flex: 0 0 100%;
-  }
+  min-width:0;
 `;
 const ScoreRow     = styled.div`
   display:flex;align-items:center;gap:10px;

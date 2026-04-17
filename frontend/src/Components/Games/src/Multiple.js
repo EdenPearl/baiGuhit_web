@@ -629,8 +629,8 @@ const Header = styled.header`
   }
 
   @media (max-width: 720px) {
-    flex-wrap: wrap;
-    justify-content: center;
+    padding: 10px 10px 6px;
+    gap: 6px;
   }
 `;
 
@@ -665,11 +665,7 @@ const BackBtnIcon = styled.img`
 `;
 const HeaderCenter = styled.div`
   flex: 1; display: flex; justify-content: center;
-
-  @media (max-width: 720px) {
-    order: 3;
-    flex: 0 0 100%;
-  }
+  min-width: 0;
 `;
 const ScoreRow = styled.div`
   display: flex; align-items: center; gap: 10px;

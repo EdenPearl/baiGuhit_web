@@ -446,8 +446,8 @@ const Header = styled.header`
   }
 
   @media (max-width: 720px) {
-    flex-wrap: wrap;
-    justify-content: center;
+    padding: 10px 10px 6px;
+    gap: 6px;
   }
 `;
 const BackBtn = styled.button`
@@ -495,11 +495,7 @@ const SoundBtnImg = styled.img`
 const ControlText = styled.span`display:none;@media (max-width:720px){display:inline-block;font-family:sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff1cf;line-height:1;}`;
 const HeaderCenter = styled.div`
   flex: 1; display: flex; justify-content: center;
-
-  @media (max-width: 720px) {
-    order: 3;
-    flex: 0 0 100%;
-  }
+  min-width: 0;
 `;
 const ScoreRow = styled.div`
   display: flex; align-items: center; gap: 10px;
