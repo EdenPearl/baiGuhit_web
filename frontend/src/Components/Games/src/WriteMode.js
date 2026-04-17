@@ -446,6 +446,7 @@ const WriteModeV2 = () => {
                 {/* ── HINT ICON BUTTON ── */}
                 {!showTutorial && hintVisible && (
                   <HintIconBtn
+                    $mobile={false}
                     $open={hintPanelOpen}
                     onClick={() => setHintPanelOpen(p => !p)}
                     title="Show hint"
@@ -457,7 +458,7 @@ const WriteModeV2 = () => {
 
                 {/* ── HINT SLIDE PANEL ── */}
                 {!showTutorial && hintVisible && (
-                  <HintSlidePanel $open={hintPanelOpen}>
+                  <HintSlidePanel $mobile={false} $open={hintPanelOpen}>
                     <HintSlidePanelInner>
                       <HintSlideLabel>
                         <HintSlideDot />Quick Hint
@@ -497,6 +498,35 @@ const WriteModeV2 = () => {
               </ActionBtn>
               <ActionBtn $variant="ghost" onClick={handleSkip}><BtnIcon>⏭</BtnIcon> Skip</ActionBtn>
             </GameActions>
+          )}
+
+          {!showTutorial && hintVisible && (
+            <MobileHintDock>
+              <HintIconBtn
+                $mobile
+                $open={hintPanelOpen}
+                onClick={() => setHintPanelOpen(p => !p)}
+                title="Show hint"
+              >
+                <HintIconBtnPulse $open={hintPanelOpen} />
+                {hintPanelOpen ? "✕" : "?"}
+              </HintIconBtn>
+
+              <HintSlidePanel $mobile $open={hintPanelOpen}>
+                <HintSlidePanelInner>
+                  <HintSlideLabel>
+                    <HintSlideDot />Quick Hint
+                  </HintSlideLabel>
+                  <HintSlideOrbs>
+                    {currentLevelData.chars.map(({ latin, img }) => (
+                      <HintSlideOrb key={latin}>
+                        <HintSlideOrbImg src={img} alt={latin} />
+                      </HintSlideOrb>
+                    ))}
+                  </HintSlideOrbs>
+                </HintSlidePanelInner>
+              </HintSlidePanel>
+            </MobileHintDock>
           )}
         </GameBody>
       </PageRoot>
@@ -715,10 +745,31 @@ const HintIconBtn = styled.button`
   &:hover { transform: scale(1.1); }
   &:active { transform: scale(0.93); }
 
+  ${({ $mobile }) =>
+    $mobile &&
+    css`
+      display: none;
+      position: relative;
+      left: auto;
+      right: auto;
+      bottom: auto;
+    `}
+
   @media (max-width: 980px) {
     left: auto;
     right: 0;
     bottom: -52px;
+  }
+
+  @media (max-width: 720px) {
+    ${({ $mobile }) =>
+      $mobile
+        ? css`
+            display: flex;
+          `
+        : css`
+            display: none;
+          `}
   }
 `;
 
@@ -733,6 +784,20 @@ const HintIconBtnPulse = styled.span`
     css`animation: ${hintBtnPulseAnim} 1.9s ease-out infinite;`}
 `;
 
+const MobileHintDock = styled.div`
+  display: none;
+  position: relative;
+
+  @media (max-width: 720px) {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: min(420px, 84vw);
+    margin-top: 4px;
+    z-index: 25;
+  }
+`;
+
 const HintSlidePanel = styled.div`
   position: absolute;
   bottom: 0;
@@ -741,14 +806,38 @@ const HintSlidePanel = styled.div`
   z-index: 19;
   pointer-events: ${({ $open }) => ($open ? "auto" : "none")};
   opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transform: ${({ $open }) =>
-    $open ? "translateX(0) scale(1)" : "translateX(12px) scale(0.92)"};
+  transform: ${({ $open, $mobile }) =>
+    $mobile
+      ? ($open ? "translate(-50%, 0) scale(1)" : "translate(-50%, 10px) scale(0.92)")
+      : ($open ? "translateX(0) scale(1)" : "translateX(12px) scale(0.92)")};
   transition: opacity 0.24s ease, transform 0.24s cubic-bezier(0.34,1.56,0.64,1);
+
+  ${({ $mobile }) =>
+    $mobile &&
+    css`
+      display: none;
+    `}
 
   @media (max-width: 980px) {
     left: auto;
     right: 46px;
     bottom: -52px;
+  }
+
+  @media (max-width: 720px) {
+    ${({ $mobile }) =>
+      $mobile
+        ? css`
+            display: block;
+            left: 50%;
+            right: auto;
+            top: 50px;
+            bottom: auto;
+            z-index: 30;
+          `
+        : css`
+            display: none;
+          `}
   }
 `;
 
