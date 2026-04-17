@@ -105,6 +105,7 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   const getAcceptedAnswers = (rawAnswer) => {
     if (Array.isArray(rawAnswer)) {
       const list = rawAnswer.map(normalizeAnswerText).filter(Boolean);
+
       return list.length ? list : [""];
     }
 
@@ -471,36 +472,86 @@ export default Typing;
 ═══════════════════════════════════ */
 
 const PageRoot = styled.div`
-  position: relative; width: 100%; min-height: 100vh; height: 100vh;
-  background: linear-gradient(160deg, #7a2100 0%, #9a3000 30%, #c24010 65%, #a83008 100%);
-  overflow: hidden; font-family: 'Georgia', serif; color: #fff;
-  display: flex; flex-direction: column; align-items: center;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  background: #6b1f00;
+  overflow: hidden;
+  font-family: 'Georgia', serif;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
+
 const BgTexture = styled.div`
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background: repeating-linear-gradient(45deg,transparent,transparent 60px,rgba(0,0,0,.04) 60px,rgba(0,0,0,.04) 61px);
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 60px,
+      rgba(0,0,0,0.04) 60px,
+      rgba(0,0,0,0.04) 61px
+    );
+  pointer-events: none;
 `;
+
 const BgGlow = styled.div`
-  position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
-  width: 80vw; height: 80vw; max-width: 700px; max-height: 700px;
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  height: 80vw;
+  max-width: 700px;
+  max-height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(251,196,23,.10) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
+  background: radial-gradient(circle, rgba(251,196,23,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 `;
+
 const DamageOverlay = styled.div`
-  position: fixed; inset: 0; pointer-events: none; z-index: 9000;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
   background: rgba(220,38,38,.38);
   animation: ${flashRed} .55s ease forwards;
 `;
+
 const CorrectBurst = styled.div`
-  position: fixed; inset: 0; pointer-events: none; z-index: 9000;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
   background: rgba(251,196,23,.18);
   animation: ${correctPop} .8s ease forwards;
 `;
-const LeftArt  = styled.img`position:absolute;top:0;left:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
-const RightArt = styled.img`position:absolute;top:0;right:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
 
-/* ── HEADER ── */
+const LeftArt = styled.img`
+  position: absolute;
+  top: 0;
+  left: -40px;
+  width: 290px;
+  opacity: .85;
+  pointer-events: none;
+  z-index: 1;
+`;
+
+const RightArt = styled.img`
+  position: absolute;
+  top: 0;
+  right: -40px;
+  width: 290px;
+  opacity: .85;
+  pointer-events: none;
+  z-index: 1;
+`;
+
 const Header = styled.header`
   position: relative; z-index: 100; width: 100%; padding: 12px 16px 8px;
   display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0;

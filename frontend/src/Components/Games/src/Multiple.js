@@ -558,7 +558,7 @@ const PageRoot = styled.div`
   width: 100%;
   min-height: 100vh;
   height: 100vh;
-  background: linear-gradient(160deg, #7a2100 0%, #9a3000 30%, #c24010 65%, #a83008 100%);
+  background: #6b1f00;
   overflow: hidden;
   font-family: 'Georgia', serif;
   color: #fff;
@@ -568,16 +568,33 @@ const PageRoot = styled.div`
 `;
 
 const BgTexture = styled.div`
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background: repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(0,0,0,.04) 60px, rgba(0,0,0,.04) 61px);
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 60px,
+      rgba(0,0,0,0.04) 60px,
+      rgba(0,0,0,0.04) 61px
+    );
+  pointer-events: none;
+  z-index: 0;
 `;
 
 const BgGlow = styled.div`
-  position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
-  width: 80vw; height: 80vw; max-width: 700px; max-height: 700px;
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  height: 80vw;
+  max-width: 700px;
+  max-height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(251,196,23,.10) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
+  background: radial-gradient(circle, rgba(251,196,23,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 `;
 
 const DamageOverlay = styled.div`

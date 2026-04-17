@@ -82,7 +82,7 @@ const WriteModeV2 = () => {
   const [level, setLevel] = useState("Easy");
   const [roundNumber, setRoundNumber] = useState(1);
 
-  const [score, setScore] = useState(100);
+  const [score, setScore] = useState(0);
   const [time, setTime] = useState(GAME_DURATION_SECONDS);
   const [gameOver, setGameOver] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -510,9 +510,6 @@ const WriteModeV2 = () => {
       if (data.success) {
         const pred = data.prediction;
         setPrediction(pred);
-        try {
-          await submitWriteResult({ targetCharacter: sendTarget, predictedCharacter: pred?.predicted || "", isCorrect: !!pred?.is_correct, confidence: pred?.confidence, imageBase64: imageData });
-        } catch { }
 
         if (pred.is_correct) {
           playCorrectSound();
@@ -527,6 +524,15 @@ const WriteModeV2 = () => {
           setIsWrong(true);
           wrongFlashTimerRef.current = setTimeout(() => { setFlash(false); setIsWrong(false); handleClear(); wrongFlashTimerRef.current = null; }, 600);
         }
+
+        // Save analytics in the background so UI feedback appears immediately.
+        submitWriteResult({
+          targetCharacter: sendTarget,
+          predictedCharacter: pred?.predicted || "",
+          isCorrect: !!pred?.is_correct,
+          confidence: pred?.confidence,
+          imageBase64: imageData,
+        }).catch(() => {});
       }
     } catch (e) {
       if (e.name !== "AbortError") { console.error(e); setPrediction({ retry_message: "Network error" }); }
