@@ -671,6 +671,7 @@ const CanvasWrapper = styled.div`
   position: relative;
   display: inline-flex;
   align-items: flex-start;
+  overflow: visible;
 `;
 
 const CanvasFrame     = styled.div`position:relative;border-radius:20px;padding:10px;background:linear-gradient(135deg,rgba(139,90,43,.5) 0%,rgba(80,40,10,.6) 100%);border:1px solid rgba(251,196,23,.25);box-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,220,150,.15),inset 0 -1px 0 rgba(0,0,0,.3);${({$shake})=>$shake&&css`animation:${centeredShake} .4s ease;`}${({$correct})=>$correct&&css`border-color:rgba(34,197,94,.6);box-shadow:0 0 20px rgba(34,197,94,.3);`}`;
@@ -687,8 +688,9 @@ const SpinnerDot      = styled.span`display:inline-block;width:7px;height:7px;bo
 /* ═══════════════════════════════════ HINT BUTTON & SLIDE PANEL ═══════════════════════════════════ */
 const HintIconBtn = styled.button`
   position: absolute;
-  bottom: -6px;
-  right: -6px;
+  bottom: 0;
+  left: calc(100% + 10px);
+  right: auto;
   z-index: 20;
   width: 40px;
   height: 40px;
@@ -712,6 +714,12 @@ const HintIconBtn = styled.button`
               box-shadow 0.22s ease, transform 0.15s ease;
   &:hover { transform: scale(1.1); }
   &:active { transform: scale(0.93); }
+
+  @media (max-width: 980px) {
+    left: auto;
+    right: 0;
+    bottom: -52px;
+  }
 `;
 
 const HintIconBtnPulse = styled.span`
@@ -727,14 +735,21 @@ const HintIconBtnPulse = styled.span`
 
 const HintSlidePanel = styled.div`
   position: absolute;
-  bottom: -6px;
-  right: 46px;
+  bottom: 0;
+  left: calc(100% + 58px);
+  right: auto;
   z-index: 19;
   pointer-events: ${({ $open }) => ($open ? "auto" : "none")};
   opacity: ${({ $open }) => ($open ? 1 : 0)};
   transform: ${({ $open }) =>
-    $open ? "translateX(0) scale(1)" : "translateX(16px) scale(0.92)"};
+    $open ? "translateX(0) scale(1)" : "translateX(12px) scale(0.92)"};
   transition: opacity 0.24s ease, transform 0.24s cubic-bezier(0.34,1.56,0.64,1);
+
+  @media (max-width: 980px) {
+    left: auto;
+    right: 46px;
+    bottom: -52px;
+  }
 `;
 
 const HintSlidePanelInner = styled.div`
