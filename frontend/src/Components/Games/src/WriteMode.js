@@ -335,7 +335,10 @@ const WriteModeV2 = () => {
         {isCorrectAnim && <CorrectBurst />}
 
         <Header>
-          <BackBtn onClick={handleBackClick}><BackBtnIcon src={back} /></BackBtn>
+          <BackBtn onClick={handleBackClick}>
+            <BackBtnIcon src={back} alt="Back" />
+            <ControlText>Back</ControlText>
+          </BackBtn>
           <HeaderCenter>
             {showTutorial ? (
               <TutorialBadge><TutorialBadgeDot />Tutorial Mode</TutorialBadge>
@@ -355,7 +358,8 @@ const WriteModeV2 = () => {
           </HeaderCenter>
           <RightControlSlot>
             <SoundBtn onClick={()=>{ensureAudioContext();playStoneClick();setSoundEnabled(p=>!p);}} $active={soundEnabled}>
-              <SoundBtnImg src={soundEnabled?soundIcon:muteIcon} alt="sound" />
+              <SoundBtnImg src={soundEnabled?soundIcon:muteIcon} alt={soundEnabled?"Sound on":"Sound off"} />
+              <ControlText>{soundEnabled?"Sound":"Mute"}</ControlText>
             </SoundBtn>
           </RightControlSlot>
         </Header>
@@ -555,8 +559,8 @@ const BgGlow      = styled.div`position:absolute;top:-30%;left:50%;transform:tra
 const DamageOverlay = styled.div`position:fixed;inset:0;background:rgba(220,38,38,.38);pointer-events:none;z-index:9000;animation:${flashRed} .55s ease forwards;`;
 const CorrectBurst  = styled.div`position:fixed;inset:0;background:rgba(251,196,23,.18);pointer-events:none;z-index:9000;animation:${correctPop} .8s ease forwards;`;
 const Header          = styled.header`position:relative;z-index:100;width:100%;padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;`;
-const BackBtn         = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}`;
-const BackBtnIcon     = styled.img`width:205px;display:block;margin-top:-30px;`;
+const BackBtn         = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}@media(max-width:720px){display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid rgba(251,196,23,.35);border-radius:12px;background:rgba(0,0,0,.25);&:hover{transform:none;}}`;
+const BackBtnIcon     = styled.img`width:205px;display:block;margin-top:-30px;@media(max-width:720px){display:none;}`;
 const HeaderCenter    = styled.div`flex:1;display:flex;justify-content:center;`;
 const TutorialBadge   = styled.div`display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(251,196,23,.15);border:1px solid rgba(251,196,23,.4);font-size:15px;font-weight:700;color:#fde68a;`;
 const TutorialBadgeDot= styled.span`width:8px;height:8px;border-radius:50%;background:#fbc417;box-shadow:0 0 6px rgba(251,196,23,.8);animation:${blink} 1.4s ease-in-out infinite;`;
@@ -569,9 +573,10 @@ const StatVal         = styled.div`font-family:'Georgia',serif;font-size:15px;fo
 const TimerPill       = styled.div`position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center;`;
 const TimerSvg        = styled.svg`position:absolute;inset:0;width:100%;height:100%;`;
 const TimerText       = styled.div`font-family:'Georgia',serif;font-size:16px;font-weight:900;position:relative;z-index:1;color:${({$danger})=>$danger?"#ff6b6b":"#fff"};${({$danger})=>$danger&&css`animation:${timerDanger} .7s ease-in-out infinite;`}`;
-const SoundBtn        = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}`;
-const SoundBtnImg     = styled.img`width:205px;display:block;margin-top:-30px;`;
-const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;`;
+const SoundBtn        = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}@media(max-width:720px){display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid ${({$active})=>$active?"rgba(251,196,23,.5)":"rgba(255,255,255,.25)"};border-radius:12px;background:rgba(0,0,0,.25);&:hover{transform:none;}}`;
+const SoundBtnImg     = styled.img`width:205px;display:block;margin-top:-30px;@media(max-width:720px){display:none;}`;
+const ControlText     = styled.span`display:none;@media(max-width:720px){display:inline-block;font-family:sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff1cf;line-height:1;}`;
+const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;@media(max-width:720px){width:auto;}`;
 const LeftArt         = styled.img`position:absolute;top:0;left:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
 const RightArt        = styled.img`position:absolute;top:0;right:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
 
