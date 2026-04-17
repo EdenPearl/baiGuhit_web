@@ -389,7 +389,8 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
 
       <Header>
         <BackBtn onClick={handleBackClick} title="Exit">
-          <BackBtnIcon src={back} />
+          <BackBtnIcon src={back} alt="Back" />
+          <ControlText>Back</ControlText>
         </BackBtn>
 
         <HeaderCenter>
@@ -431,7 +432,8 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
 
         <RightControlSlot>
           <SoundBtn onClick={() => { playClickSound(); setSoundEnabled(p => !p); }}>
-            <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt="sound" />
+            <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt={soundEnabled ? "Sound on" : "Sound off"} />
+            <ControlText>{soundEnabled ? "Sound" : "Mute"}</ControlText>
           </SoundBtn>
         </RightControlSlot>
       </Header>
@@ -636,6 +638,17 @@ const BackBtn = styled.button`
   background: none; border: none; padding: 0; cursor: pointer;
   flex-shrink: 0; transition: transform .2s;
   &:hover { transform: scale(.9); }
+
+  @media (max-width: 720px) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px solid rgba(251,196,23,.35);
+    border-radius: 12px;
+    background: rgba(0,0,0,.25);
+    &:hover { transform: none; }
+  }
 `;
 
 const BackBtnIcon = styled.img`
@@ -647,8 +660,7 @@ const BackBtnIcon = styled.img`
   }
 
   @media (max-width: 720px) {
-    width: 150px;
-    margin-top: -16px;
+    display: none;
   }
 `;
 const HeaderCenter = styled.div`
@@ -729,8 +741,8 @@ const TimerText = styled.div`
 
 const LeftArt = styled.img`position:absolute;top:0;left:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
 const RightArt = styled.img`position:absolute;top:0;right:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
-const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;`;
-const SoundBtn = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}`;
+const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;@media (max-width:720px){width:auto;}`;
+const SoundBtn = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}@media (max-width:720px){display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid rgba(251,196,23,.35);border-radius:12px;background:rgba(0,0,0,.25);&:hover{transform:none;}}`;
 const SoundBtnImg = styled.img`
   width: 205px; display: block; margin-top: -30px;
 
@@ -740,10 +752,10 @@ const SoundBtnImg = styled.img`
   }
 
   @media (max-width: 720px) {
-    width: 150px;
-    margin-top: -16px;
+    display: none;
   }
 `;
+const ControlText = styled.span`display:none;@media (max-width:720px){display:inline-block;font-family:sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff1cf;line-height:1;}`;
 
 const GameBody = styled.main`
   position: relative; z-index: 10;

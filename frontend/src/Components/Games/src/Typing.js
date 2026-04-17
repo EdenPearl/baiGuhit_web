@@ -296,7 +296,7 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
 
         {/* ── HEADER ── */}
         <Header>
-          <BackBtn onClick={handleBackClick}><BackBtnIcon src={back} /></BackBtn>
+          <BackBtn onClick={handleBackClick}><BackBtnIcon src={back} alt="Back" /><ControlText>Back</ControlText></BackBtn>
           <HeaderCenter>
             <ScoreRow>
               <StatPill>
@@ -322,7 +322,8 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
           </HeaderCenter>
           <RightControlSlot>
             <SoundBtn onClick={() => { playClick(); setSoundEnabled(p => !p); }}>
-              <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt="sound" />
+              <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt={soundEnabled ? "Sound on" : "Sound off"} />
+              <ControlText>{soundEnabled ? "Sound" : "Mute"}</ControlText>
             </SoundBtn>
           </RightControlSlot>
         </Header>
@@ -589,6 +590,12 @@ const BackBtn      = styled.button`
   align-items: center;
   justify-content: center;
   &:hover { transform: scale(.96); border-color: rgba(74,222,128,.55); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.22); }
+
+  @media (max-width: 720px) {
+    padding: 8px 12px;
+    border-radius: 12px;
+    &:hover { transform: none; }
+  }
 `;
 const BackBtnIcon  = styled.img`
   width:205px;display:block;margin-top:-30px;
@@ -599,11 +606,10 @@ const BackBtnIcon  = styled.img`
   }
 
   @media (max-width: 720px) {
-    width: 150px;
-    margin-top: -16px;
+    display: none;
   }
 `;
-const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;`;
+const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;@media (max-width:720px){width:auto;}`;
 const SoundBtn = styled.button`
   background: linear-gradient(180deg, rgba(34,197,94,.24) 0%, rgba(5,46,22,.18) 100%);
   border: 1px solid rgba(34,197,94,.42);
@@ -619,6 +625,12 @@ const SoundBtn = styled.button`
   align-items: center;
   justify-content: center;
   &:hover { transform: scale(.96); border-color: rgba(74,222,128,.55); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.22); }
+
+  @media (max-width: 720px) {
+    padding: 8px 12px;
+    border-radius: 12px;
+    &:hover { transform: none; }
+  }
 `;
 const SoundBtnImg = styled.img`
   width: 205px; display: block; margin-top: -30px;
@@ -629,10 +641,10 @@ const SoundBtnImg = styled.img`
   }
 
   @media (max-width: 720px) {
-    width: 150px;
-    margin-top: -16px;
+    display: none;
   }
 `;
+const ControlText = styled.span`display:none;@media (max-width:720px){display:inline-block;font-family:sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff1cf;line-height:1;}`;
 const HeaderCenter = styled.div`
   flex:1;display:flex;justify-content:center;
 
