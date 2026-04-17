@@ -48,6 +48,16 @@ const timerDanger = keyframes`
   50% { transform: scale(1.2); }
 `;
 
+const dotPulse = keyframes`
+  0%,100% { opacity: .35; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.3); }
+`;
+
+const dotAnim = keyframes`
+  0%,80%,100% { transform: scale(.6); opacity: .3; }
+  40%          { transform: scale(1);  opacity: 1;  }
+`;
+
 /* ---------------- MAIN COMPONENT ---------------- */
 const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple Choice", onGameOver }) => {
   const navigate = useNavigate();
@@ -59,13 +69,13 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
     const normalizedDiff = diff?.toLowerCase() || "easy";
     switch (normalizedDiff) {
       case "easy":
-        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy" };
+        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy", color: "#22c55e" };
       case "medium":
-        return { timeLimit: 40, pointsPerCorrect: 3, label: "Medium" };
+        return { timeLimit: 40, pointsPerCorrect: 3, label: "Medium", color: "#fbc417" };
       case "hard":
-        return { timeLimit: 30, pointsPerCorrect: 2, label: "Hard" };
+        return { timeLimit: 30, pointsPerCorrect: 2, label: "Hard", color: "#ef4444" };
       default:
-        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy" };
+        return { timeLimit: 60, pointsPerCorrect: 5, label: "Easy", color: "#22c55e" };
     }
   };
 
@@ -91,6 +101,8 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
   const [usedQuestionIndices, setUsedQuestionIndices] = useState([]); // FIXED: Track used questions
   const [flash, setFlash] = useState(false);
   const [isCorrectAnim, setIsCorrectAnim] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [totalAnswered, setTotalAnswered] = useState(0);
   const feedbackTimeoutRef = useRef(null);
 
   const choiceLabels = ["A", "B", "C", "D"];
@@ -277,10 +289,12 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
     playClickSound();
     if (selectedIndex === null) return;
 
+    setTotalAnswered((t) => t + 1);
     // FIXED: Check against the tracked correct answer index
     if (selectedIndex === correctAnswerIndex) {
       setTransientFeedback("✅ Correct!");
       setScore((s) => s + pointsPerCorrect);
+      setStreak((s) => s + 1);
       setPointsGained(pointsPerCorrect);
       setShowPlusPoints(true);
       setIsCorrectAnim(true);
@@ -296,6 +310,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
 
   const handleWrongAnswer = () => {
     setTransientFeedback("❌ Wrong!");
+    setStreak(0);
     setFlash(true);
     setShakeOption(true);
     setTimeout(() => {
@@ -329,6 +344,8 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
     setFeedback("");
     setSkipsLeft(3);
     setShowPlusPoints(false);
+    setStreak(0);
+    setTotalAnswered(0);
   };
 
   const handleSkip = () => {
@@ -450,6 +467,40 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
                 <BtnIcon>⏭</BtnIcon> Skip ({skipsLeft})
               </ActionBtn>
             </GameActions>
+
+            {/* ── BOTTOM INFO STRIP ── */}
+            <InfoStrip>
+              <InfoBlock>
+                <InfoBlockLabel>Streak</InfoBlockLabel>
+                <StreakRow>
+                  {[...Array(5)].map((_, i) => (
+                    <StreakDot key={i} $active={i < streak} $current={i === streak - 1} />
+                  ))}
+                  {streak > 5 && <StreakExtra>+{streak - 5}</StreakExtra>}
+                </StreakRow>
+              </InfoBlock>
+
+              <InfoDivider />
+
+              <InfoBlock $right>
+                <InfoBlockLabel>Progress</InfoBlockLabel>
+                <ProgressRow>
+                  <ProgressTrack>
+                    <ProgressFill
+                      style={{ width: `${Math.min((currentQuestionIndex / Math.max(questions.length, 1)) * 100, 100)}%` }}
+                    />
+                  </ProgressTrack>
+                  <ProgressNum>{currentQuestionIndex}/{questions.length}</ProgressNum>
+                </ProgressRow>
+              </InfoBlock>
+            </InfoStrip>
+
+            {/* ── BOTTOM META ── */}
+            <BottomMeta>
+              <DiffBadge $color={config.color}>{config.label}</DiffBadge>
+              <PointsNote>+{pointsPerCorrect} pts per correct · +1s time bonus</PointsNote>
+              <SkipNote>{skipsLeft} skip{skipsLeft !== 1 ? "s" : ""} remaining</SkipNote>
+            </BottomMeta>
 
             {feedback && <FeedbackTag>{feedback}</FeedbackTag>}
           </>
@@ -749,3 +800,39 @@ const ModalBtn = styled.button`
     return css`background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;`;
   }}
 `;
+
+/* ── BOTTOM INFO STRIP ── */
+const InfoStrip = styled.div`
+  width: min(560px, 92vw);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; border-radius: 14px;
+  background: rgba(0,0,0,.22); border: 1px solid rgba(251,196,23,.12);
+  backdrop-filter: blur(8px);
+  animation: ${floatUp} .5s .1s ease both;
+`;
+const InfoBlock      = styled.div`display:flex;flex-direction:column;gap:5px;align-items:${({ $right }) => $right ? "flex-end" : "flex-start"};flex:1;`;
+const InfoBlockLabel = styled.div`font-family:sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,242,210,.4);`;
+const InfoDivider    = styled.div`width:1px;height:36px;background:rgba(255,255,255,.1);flex-shrink:0;`;
+
+/* Streak */
+const StreakRow   = styled.div`display:flex;align-items:center;gap:5px;`;
+const StreakDot   = styled.span`
+  width:${({ $current }) => $current ? "18px" : "10px"};height:10px;border-radius:999px;
+  background:${({ $active }) => $active ? "#fbc417" : "rgba(255,255,255,.18)"};
+  box-shadow:${({ $active }) => $active ? "0 0 6px rgba(251,196,23,.7)" : "none"};
+  transition:all .3s ease;
+  ${({ $current, $active }) => $current && $active && css`animation:${dotPulse} 1.4s ease-in-out infinite;`}
+`;
+const StreakExtra = styled.span`font-family:sans-serif;font-size:10px;font-weight:700;color:#fbc417;`;
+
+/* Progress */
+const ProgressRow   = styled.div`display:flex;align-items:center;gap:6px;`;
+const ProgressTrack = styled.div`width:80px;height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden;`;
+const ProgressFill  = styled.div`height:100%;border-radius:3px;background:linear-gradient(90deg,#fbc417,#f59e0b);transition:width .4s ease;`;
+const ProgressNum   = styled.span`font-family:sans-serif;font-size:10px;color:rgba(255,242,210,.55);font-weight:600;`;
+
+/* ── BOTTOM META ── */
+const BottomMeta  = styled.div`display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;animation:${floatUp} .5s .2s ease both;`;
+const DiffBadge   = styled.div`padding:3px 12px;border-radius:20px;font-family:sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:${({ $color }) => `${$color}22`};border:1px solid ${({ $color }) => `${$color}55`};color:${({ $color }) => $color};`;
+const PointsNote  = styled.span`font-family:sans-serif;font-size:10px;color:rgba(255,242,210,.4);`;
+const SkipNote    = styled.span`font-family:sans-serif;font-size:10px;color:rgba(255,242,210,.4);`;
