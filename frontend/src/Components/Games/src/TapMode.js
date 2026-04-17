@@ -431,34 +431,109 @@ const Header = styled.header`
   width: 100%; padding: 12px 16px 8px;
   display: flex; align-items: center; justify-content: space-between;
   gap: 8px; flex-shrink: 0;
+
+  @media (max-width: 900px) {
+    padding: 10px 12px 6px;
+    gap: 6px;
+  }
+
+  @media (max-width: 720px) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 `;
 const BackBtn = styled.button`
   background: none; border: none; padding: 0; cursor: pointer;
   flex-shrink: 0; transition: transform .2s;
   &:hover { transform: scale(.9); }
 `;
-const BackBtnIcon = styled.img`width: 205px; display: block; margin-top: -30px;`;
-const HeaderCenter = styled.div`flex: 1; display: flex; justify-content: center;`;
-const ScoreRow = styled.div`display: flex; align-items: center; gap: 10px;`;
+const BackBtnIcon = styled.img`
+  width: 205px; display: block; margin-top: -30px;
+
+  @media (max-width: 900px) {
+    width: 170px;
+    margin-top: -22px;
+  }
+
+  @media (max-width: 720px) {
+    width: 150px;
+    margin-top: -16px;
+  }
+`;
+const HeaderCenter = styled.div`
+  flex: 1; display: flex; justify-content: center;
+
+  @media (max-width: 720px) {
+    order: 3;
+    flex: 0 0 100%;
+  }
+`;
+const ScoreRow = styled.div`
+  display: flex; align-items: center; gap: 10px;
+
+  @media (max-width: 900px) {
+    gap: 8px;
+  }
+
+  @media (max-width: 720px) {
+    gap: 6px;
+    transform: scale(0.92);
+  }
+`;
 
 const StatPill = styled.div`
   display: flex; align-items: center; gap: 8px;
   padding: 5px 12px 5px 10px; border-radius: 12px;
   background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.1);
   backdrop-filter: blur(8px);
-`;
-const StatIcon  = styled.span`font-size: 13px; opacity: .55; color: #fbc417;`;
-const StatBody  = styled.div``;
-const StatLabel = styled.div`font-family: sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,242,210,.55);`;
-const StatVal   = styled.div`font-family: 'Georgia',serif; font-size: 15px; font-weight: 900; line-height: 1.1; color: ${({ $gold }) => $gold ? "#fbc417" : "#fff4df"};`;
 
-const TimerPill = styled.div`position: relative; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;`;
+  @media (max-width: 720px) {
+    padding: 4px 10px 4px 8px;
+    gap: 6px;
+  }
+`;
+const StatIcon  = styled.span`
+  font-size: 13px; opacity: .55; color: #fbc417;
+
+  @media (max-width: 720px) {
+    font-size: 12px;
+  }
+`;
+const StatBody  = styled.div``;
+const StatLabel = styled.div`
+  font-family: sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,242,210,.55);
+
+  @media (max-width: 720px) {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+`;
+const StatVal   = styled.div`
+  font-family: 'Georgia',serif; font-size: 15px; font-weight: 900; line-height: 1.1; color: ${({ $gold }) => $gold ? "#fbc417" : "#fff4df"};
+
+  @media (max-width: 720px) {
+    font-size: 14px;
+  }
+`;
+
+const TimerPill = styled.div`
+  position: relative; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
+
+  @media (max-width: 720px) {
+    width: 46px;
+    height: 46px;
+  }
+`;
 const TimerSvg  = styled.svg`position: absolute; inset: 0; width: 100%; height: 100%;`;
 const TimerText = styled.div`
   font-family: 'Georgia',serif; font-size: 16px; font-weight: 900;
   position: relative; z-index: 1;
   color: ${({ $danger }) => $danger ? "#ff6b6b" : "#fff"};
   ${({ $danger }) => $danger && css`animation: ${timerDanger} .7s ease-in-out infinite;`}
+
+  @media (max-width: 720px) {
+    font-size: 14px;
+  }
 `;
 
 /* ── SIDE ART ── */
@@ -472,17 +547,32 @@ const GameBody = styled.main`
   display: flex; flex-direction: column; align-items: center;
   gap: 14px; padding: 0 16px 16px;
   overflow-y: auto;
+
+  @media (max-width: 720px) {
+    padding: 0 12px 12px;
+    gap: 10px;
+  }
 `;
 
 const PromptStrip = styled.div`
   display: flex; flex-direction: column; align-items: center;
   padding: 6px 0 0;
   animation: ${floatUp} .4s ease;
+
+  @media (max-width: 720px) {
+    padding-top: 2px;
+  }
 `;
 const PromptLabel = styled.div`
   font-family: sans-serif; font-size: 15px; font-weight: 700;
   letter-spacing: 1.4px; text-transform: uppercase;
   color: rgba(255,248,231,.6);
+
+  @media (max-width: 720px) {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-align: center;
+  }
 `;
 
 /* ── IMAGE FRAME ── */

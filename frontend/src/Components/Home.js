@@ -15,8 +15,6 @@ import bay9 from '../Assests/bay9.png';
 import LoginGame from './Games/src/LoginGame';
 
 const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap');
-
   @font-face {
     font-family: 'NotoSansTagalog';
     src: url(${notoSansTagalog}) format('truetype');

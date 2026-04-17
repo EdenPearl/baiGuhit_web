@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { useNavigate } from "react-router-dom";
-import CustomButton from "./CustomButton.js";
 import confetti from "canvas-confetti";
 import useWriteSubmission from "../../../Hooks/GameHooks/useWriteSubmission.js";
 import useInsertLeaderboard from "../../../Hooks/GameHooks/useInsertLeaderboard.js";
@@ -13,6 +12,23 @@ import back from "../../../Assests/back.png";
 import preGameMusic from "../../../Assests/drag.mp3";
 import dragMusic from "../../../Assests/Tap.mp3";
 import stoneClick from "../../../Assests/stone.mp3";
+import baybayinA from "../../../Assests/baybayin_a.png";
+import baybayinBa from "../../../Assests/baybayin_ba.png";
+import baybayinNa from "../../../Assests/baybayin_na.png";
+import baybayinKa from "../../../Assests/baybayin_ka.png";
+import baybayinEi from "../../../Assests/baybayin_ei.png";
+import baybayinNga from "../../../Assests/baybayin_nga.png";
+import baybayinWa from "../../../Assests/baybayin_wa.png";
+import baybayinPa from "../../../Assests/baybayin_pa.png";
+import baybayinGa from "../../../Assests/baybayin_ga.png";
+import baybayinHa from "../../../Assests/baybayin_ha.png";
+import baybayinMa from "../../../Assests/baybayin_ma.png";
+import baybayinDa from "../../../Assests/baybayin_da.png";
+import baybayinTa from "../../../Assests/baybayin_ta.png";
+import baybayinSa from "../../../Assests/baybayin_sa.png";
+import baybayinYa from "../../../Assests/baybayin_ya.png";
+import baybayinOu from "../../../Assests/baybayin_ou.png";
+import baybayinLa from "../../../Assests/baybayin_la.png";
 
 /* ─────────────────────── CONSTANTS ─────────────────────── */
 
@@ -46,7 +62,37 @@ const TUTORIAL_TRACE_PATHS = {
 
 const LEVEL_SEQUENCE = ["Easy", "Medium", "Hard", "Expert", "Master"];
 
+const ROUND_HINT_KEYS = {
+  easy: ["a", "ba", "na", "ka"],
+  medium: ["e/i", "nga", "wa"],
+  hard: ["pa", "ga", "ha"],
+  expert: ["ma", "da", "ta", "sa"],
+  master: ["ya", "o/u", "la"],
+};
+
+const HINT_IMAGE_BY_KEY = {
+  a: baybayinA,
+  ba: baybayinBa,
+  na: baybayinNa,
+  ka: baybayinKa,
+  "e/i": baybayinEi,
+  nga: baybayinNga,
+  wa: baybayinWa,
+  pa: baybayinPa,
+  ga: baybayinGa,
+  ha: baybayinHa,
+  ma: baybayinMa,
+  da: baybayinDa,
+  ta: baybayinTa,
+  sa: baybayinSa,
+  ya: baybayinYa,
+  "o/u": baybayinOu,
+  la: baybayinLa,
+};
+
 const normalizeLevel = (levelName) => String(levelName || "").trim().toLowerCase();
+
+const getRoundHintKeys = (levelName) => ROUND_HINT_KEYS[normalizeLevel(levelName)] || ROUND_HINT_KEYS.easy;
 
 /* ─────────────────────── COMPONENT ─────────────────────── */
 
@@ -294,6 +340,7 @@ const WriteModeV2 = () => {
     return () => clearInterval(timer);
   }, [showTutorial, gameOver]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (gameOver) playTimeUpSound(); }, [gameOver]);
 
   useEffect(() => {
@@ -336,7 +383,6 @@ const WriteModeV2 = () => {
         if (!loginData) return;
         const user = JSON.parse(loginData);
         const userId = user?.id;
-        const username = user?.username || user?.email?.split("@")[0] || "Unknown";
         if (!userId) return;
         const status = normalizeLevel(level);
         const points = score;
@@ -585,6 +631,12 @@ const WriteModeV2 = () => {
   const circumference = 2 * Math.PI * 22;
   const strokeDashoffset = circumference * (1 - timerProgress);
 
+  const hintKeys = getRoundHintKeys(level);
+  const showRoundHints =
+    !showTutorial &&
+    !gameOver &&
+    ((time > GAME_DURATION_SECONDS - 5) || (time <= 10 && time > 5));
+
   /* ─────────────── RENDER ─────────────── */
   return (
     <>
@@ -663,6 +715,37 @@ const WriteModeV2 = () => {
         {/* ── DECORATIVE SIDE IMAGES ── */}
         <LeftArt src={write1} />
         <RightArt src={write2} />
+
+        {!showTutorial && showRoundHints && (
+          <FloatingHintsLayer>
+            {hintKeys.map((key, index) => {
+              const src = HINT_IMAGE_BY_KEY[key];
+              const xList = [12, 27, 42, 58, 73, 88];
+              const yList = [26, 20, 30, 19, 31, 24];
+              const rotList = [-8, 6, -5, 7, -6, 5];
+              const scaleList = [0.92, 1.03, 0.97, 1.02, 0.95, 1.0];
+              const x = xList[index % xList.length];
+              const y = yList[index % yList.length];
+              const rot = rotList[index % rotList.length];
+              const scale = scaleList[index % scaleList.length];
+              return (
+                <HintFloatCard
+                  key={key}
+                  style={{
+                    "--hint-left": `${x}%`,
+                    "--hint-top": `${y}%`,
+                    "--hint-rot": `${rot}deg`,
+                    "--hint-scale": `${scale}`,
+                    animationDelay: `${index * 0.12}s`,
+                  }}
+                >
+                  {src ? <HintImg src={src} alt={`Baybayin ${key}`} /> : <HintImgFallback>?</HintImgFallback>}
+                  <HintLatin>{key.toUpperCase()}</HintLatin>
+                </HintFloatCard>
+              );
+            })}
+          </FloatingHintsLayer>
+        )}
 
         {/* ── MAIN GAME CONTENT ── */}
         <GameBody>
@@ -824,11 +907,6 @@ export default WriteModeV2;
    ANIMATIONS
 ═══════════════════════════════════ */
 
-const pulse = keyframes`
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.18); }
-`;
-
 const floatUp = keyframes`
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -878,6 +956,11 @@ const ringPop = keyframes`
   0%   { transform: scale(0.7); opacity: 0; }
   60%  { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
+`;
+
+const floatHint = keyframes`
+  0%, 100% { left: calc(var(--hint-left) - 4.5%); }
+  50% { left: calc(var(--hint-left) + 4.5%); }
 `;
 
 /* ═══════════════════════════════════
@@ -960,6 +1043,16 @@ const Header = styled.header`
   justify-content: space-between;
   gap: 8px;
   flex-shrink: 0;
+
+  @media (max-width: 900px) {
+    padding: 10px 12px 6px;
+    gap: 6px;
+  }
+
+  @media (max-width: 720px) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 `;
 
 const BackBtn = styled.button`
@@ -976,12 +1069,27 @@ const BackBtnIcon = styled.img`
   width: 205px;
   display: block;
   margin-top: -30px;
+
+  @media (max-width: 900px) {
+    width: 170px;
+    margin-top: -22px;
+  }
+
+  @media (max-width: 720px) {
+    width: 150px;
+    margin-top: -16px;
+  }
 `;
 
 const HeaderCenter = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
+
+  @media (max-width: 720px) {
+    order: 3;
+    flex: 0 0 100%;
+  }
 `;
 
 const TutorialBadge = styled.div`
@@ -1011,6 +1119,15 @@ const ScoreRow = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+
+  @media (max-width: 900px) {
+    gap: 8px;
+  }
+
+  @media (max-width: 720px) {
+    gap: 6px;
+    transform: scale(0.92);
+  }
 `;
 
 const StatPill = styled.div`
@@ -1022,12 +1139,21 @@ const StatPill = styled.div`
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
+
+  @media (max-width: 720px) {
+    padding: 4px 10px 4px 8px;
+    gap: 6px;
+  }
 `;
 
 const StatIcon = styled.span`
   font-size: 13px;
   opacity: 0.55;
   color: #fbc417;
+
+  @media (max-width: 720px) {
+    font-size: 12px;
+  }
 `;
 
 const StatBody = styled.div``;
@@ -1039,6 +1165,11 @@ const StatLabel = styled.div`
   text-transform: uppercase;
   letter-spacing: 1.2px;
   color: rgba(255, 242, 210, 0.55);
+
+  @media (max-width: 720px) {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
 `;
 
 const StatVal = styled.div`
@@ -1047,6 +1178,10 @@ const StatVal = styled.div`
   font-weight: 900;
   line-height: 1.1;
   color: ${({ $gold }) => ($gold ? "#fbc417" : "#fff4df")};
+
+  @media (max-width: 720px) {
+    font-size: 14px;
+  }
 `;
 
 /* Timer ring */
@@ -1057,6 +1192,11 @@ const TimerPill = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 720px) {
+    width: 46px;
+    height: 46px;
+  }
 `;
 
 const TimerSvg = styled.svg`
@@ -1074,6 +1214,10 @@ const TimerText = styled.div`
   z-index: 1;
   color: ${({ $danger }) => ($danger ? "#ff6b6b" : "#fff")};
   ${({ $danger }) => $danger && css`animation: ${timerDanger} 0.7s ease-in-out infinite;`}
+
+  @media (max-width: 720px) {
+    font-size: 14px;
+  }
 `;
 
 const SoundBtn = styled.button`
@@ -1093,6 +1237,16 @@ const RightControlSlot = styled.div`
   width: 205px;
   display: flex;
   justify-content: flex-end;
+
+  @media (max-width: 900px) {
+    width: 170px;
+  }
+
+  @media (max-width: 720px) {
+    order: 2;
+    width: auto;
+    flex: 1 1 auto;
+  }
 `;
 
 /* ── Side art ── */
@@ -1128,6 +1282,11 @@ const GameBody = styled.main`
   gap: 10px;
   padding: 0 16px 16px;
   overflow-y: auto;
+
+  @media (max-width: 720px) {
+    padding: 0 12px 12px;
+    gap: 8px;
+  }
 `;
 
 /* ── Prompt strip ── */
@@ -1138,6 +1297,10 @@ const PromptStrip = styled.div`
   gap: 2px;
   padding: 10px 0 2px;
   animation: ${floatUp} 0.4s ease;
+
+  @media (max-width: 720px) {
+    padding: 6px 0 0;
+  }
 `;
 
 const PromptLabel = styled.div`
@@ -1147,6 +1310,12 @@ const PromptLabel = styled.div`
   letter-spacing: 1.4px;
   text-transform: uppercase;
   color: rgba(255, 248, 231, 0.6);
+
+  @media (max-width: 720px) {
+    font-size: 10px;
+    letter-spacing: 1.1px;
+    text-align: center;
+  }
 `;
 
 const PromptTarget = styled.div`
@@ -1158,46 +1327,84 @@ const PromptTarget = styled.div`
   text-shadow: 0 4px 18px rgba(251,196,23,0.35), 0 0 40px rgba(251,196,23,0.15);
   letter-spacing: 1px;
   ${({ $pulse }) => $pulse && css`animation: ${glowPulse} 0.6s ease;`}
+
+  @media (max-width: 900px) {
+    font-size: 46px;
+  }
+
+  @media (max-width: 720px) {
+    font-size: 38px;
+    letter-spacing: 0.5px;
+  }
 `;
 
 /* ── Tutorial panel ── */
 const TutorialPanel = styled.div`
   width: 100%;
-  max-width: 520px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   padding: 8px 0;
   animation: ${floatUp} 0.4s ease;
+
+  @media (max-width: 720px) {
+    max-width: 92vw;
+    gap: 10px;
+    padding: 4px 0 0;
+  }
 `;
 
 const TutorialHeading = styled.h2`
   font-family: 'Georgia', serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   margin: 0;
   color: #fde68a;
   letter-spacing: 0.3px;
+
+  @media (max-width: 720px) {
+    font-size: 16px;
+    text-align: center;
+  }
 `;
 
 const CaptionBubble = styled.div`
   width: 100%;
-  padding: 14px 20px;
+  padding: 12px 18px;
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 220, 150, 0.25);
   backdrop-filter: blur(8px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+
+  @media (max-width: 720px) {
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
 `;
 
 const CaptionText = styled.p`
   margin: 0;
   font-family: 'Georgia', serif;
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: clamp(11.5px, 2.1vw, 14px);
+  line-height: 1.45;
   color: #fff8e8;
   min-height: 22px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-wrap: pretty;
+
+  @media (max-width: 720px) {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 420px) {
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
 `;
 
 const CaptionCursor = styled.span`
@@ -1214,6 +1421,12 @@ const ProgressDots = styled.div`
   display: flex;
   gap: 7px;
   align-items: center;
+
+  @media (max-width: 720px) {
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 `;
 
 const Dot = styled.span`
@@ -1224,6 +1437,11 @@ const Dot = styled.span`
   box-shadow: ${({ $active }) => ($active ? "0 0 8px rgba(251,196,23,0.7)" : "none")};
   transition: all 0.3s ease;
   ${({ $current }) => $current && css`animation: ${dotPop} 1.4s ease-in-out infinite;`}
+
+  @media (max-width: 720px) {
+    height: 8px;
+    width: ${({ $current }) => ($current ? "20px" : "8px")};
+  }
 `;
 
 /* ── Canvas section ── */
@@ -1534,4 +1752,55 @@ const ModalBtn = styled.button`
     if ($variant === "red")   return css`background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff;`;
     return css`background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;`;
   }}
+`;
+
+const FloatingHintsLayer = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+`;
+
+const HintFloatCard = styled.div`
+  position: absolute;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(122, 33, 0, 0.16);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 9px 8px;
+  width: 90px;
+  animation: ${floatHint} 4.2s ease-in-out infinite;
+  left: var(--hint-left);
+  top: var(--hint-top);
+  transform: translate(-50%, -50%) rotate(var(--hint-rot)) scale(var(--hint-scale));
+`;
+
+const HintImg = styled.img`
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  display: block;
+`;
+
+const HintImgFallback = styled.div`
+  width: 62px;
+  height: 62px;
+  border-radius: 8px;
+  background: #fff8ee;
+  color: #7a2100;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+`;
+
+const HintLatin = styled.div`
+  margin-top: 5px;
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #7a2100;
 `;
