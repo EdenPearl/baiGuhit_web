@@ -43,10 +43,6 @@ const dotPulse = keyframes`
   0%,100% { opacity: .35; transform: scale(1); }
   50%      { opacity: 1;   transform: scale(1.3); }
 `;
-const keyTap = keyframes`
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(2px); }
-`;
 const correctFeedback = keyframes`
   0%   { opacity: 0; transform: translateY(6px) scale(.9); }
   20%  { opacity: 1; transform: translateY(0) scale(1); }
@@ -401,10 +397,9 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
 
                 {/* Keyboard hint */}
                 <InfoBlock $center>
-                  <InfoBlockLabel>Press to submit</InfoBlockLabel>
+                  <InfoBlockLabel>Keyboard shortcut</InfoBlockLabel>
                   <KeyHint>
-                    <KeyCap>Enter</KeyCap>
-                    <KeyCapSmall>↵</KeyCapSmall>
+                    <KeyCap>Submit with Enter key</KeyCap>
                   </KeyHint>
                 </InfoBlock>
 
@@ -922,16 +917,11 @@ const StreakExtra  = styled.span`font-family:sans-serif;font-size:10px;font-weig
 /* Keyboard hint */
 const KeyHint      = styled.div`display:flex;align-items:center;gap:4px;`;
 const KeyCap       = styled.span`
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 3px 10px; border-radius: 6px;
-  background: rgba(255,255,255,.9); color: #3d1a06;
-  font-family: sans-serif; font-size: 11px; font-weight: 700;
-  border-bottom: 3px solid rgba(0,0,0,.18);
-  box-shadow: 0 2px 4px rgba(0,0,0,.2);
-  animation: ${keyTap} 2s ease-in-out infinite;
-`;
-const KeyCapSmall  = styled.span`
-  font-size: 13px; color: rgba(255,242,210,.55);
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,242,210,.78);
+  letter-spacing: .2px;
 `;
 
 /* Progress bar */
