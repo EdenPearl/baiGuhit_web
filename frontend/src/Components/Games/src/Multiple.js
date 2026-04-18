@@ -431,7 +431,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
         </HeaderCenter>
 
         <RightControlSlot>
-          <SoundBtn onClick={() => { playClickSound(); setSoundEnabled(p => !p); }}>
+          <SoundBtn onClick={() => { playClickSound(); setSoundEnabled(p => !p); }} $active={soundEnabled}>
             <SoundBtnImg src={soundEnabled ? soundIcon : muteIcon} alt={soundEnabled ? "Sound on" : "Sound off"} />
             <ControlText>{soundEnabled ? "Sound" : "Mute"}</ControlText>
           </SoundBtn>
@@ -635,33 +635,51 @@ const Header = styled.header`
 `;
 
 const BackBtn = styled.button`
-  background: none; border: none; padding: 0; cursor: pointer;
-  flex-shrink: 0; transition: transform .2s;
-  &:hover { transform: scale(.9); }
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:transform .2s, box-shadow .2s, border-color .2s, background .2s;
 
-  @media (max-width: 720px) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
-    border: 1px solid rgba(251,196,23,.35);
-    border-radius: 12px;
-    background: rgba(0,0,0,.25);
-    &:hover { transform: none; }
+  &:hover{transform:translateY(-1px);}
+
+  @media(min-width:721px){
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:205px;
+    height:74px;
+    background:linear-gradient(135deg,rgba(251,196,23,.24),rgba(245,158,11,.18));
+    border:1px solid rgba(251,196,23,.42);
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
+    overflow:hidden;
+  }
+
+  @media(max-width:720px){
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px 12px;
+    border:1px solid rgba(251,196,23,.35);
+    border-radius:12px;
+    background:rgba(0,0,0,.25);
+    &:hover{transform:none;}
   }
 `;
 
 const BackBtnIcon = styled.img`
-  width: 205px; display: block; margin-top: -30px;
+  width:205px;
+  display:block;
 
-  @media (max-width: 900px) {
-    width: 170px;
-    margin-top: -22px;
+  @media(min-width:721px){
+    width:180px;
+    margin:0 auto;
+    object-fit:contain;
   }
 
-  @media (max-width: 720px) {
-    display: none;
-  }
+  @media(max-width:720px){display:none;}
 `;
 const HeaderCenter = styled.div`
   flex: 1; display: flex; justify-content: center;
@@ -738,18 +756,51 @@ const TimerText = styled.div`
 const LeftArt = styled.img`position:absolute;top:0;left:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
 const RightArt = styled.img`position:absolute;top:0;right:-40px;width:290px;opacity:.85;pointer-events:none;z-index:1;`;
 const RightControlSlot= styled.div`width:205px;display:flex;justify-content:flex-end;@media (max-width:720px){width:auto;}`;
-const SoundBtn = styled.button`background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;transition:transform .2s;&:hover{transform:scale(.9);}@media (max-width:720px){display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid rgba(251,196,23,.35);border-radius:12px;background:rgba(0,0,0,.25);&:hover{transform:none;}}`;
+const SoundBtn = styled.button`
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:transform .2s, box-shadow .2s, border-color .2s, background .2s;
+
+  &:hover{transform:translateY(-1px);}
+
+  @media(min-width:721px){
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:205px;
+    height:74px;
+    background:linear-gradient(135deg,rgba(251,196,23,.24),rgba(245,158,11,.18));
+    border:1px solid ${({$active})=>$active?"rgba(251,196,23,.55)":"rgba(251,196,23,.34)"};
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
+    overflow:hidden;
+  }
+
+  @media(max-width:720px){
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px 12px;
+    border:1px solid ${({$active})=>$active?"rgba(251,196,23,.5)":"rgba(255,255,255,.25)"};
+    border-radius:12px;
+    background:rgba(0,0,0,.25);
+    &:hover{transform:none;}
+  }
+`;
 const SoundBtnImg = styled.img`
-  width: 205px; display: block; margin-top: -30px;
+  width:205px;
+  display:block;
 
-  @media (max-width: 900px) {
-    width: 170px;
-    margin-top: -22px;
+  @media(min-width:721px){
+    width:180px;
+    margin:0 auto;
+    object-fit:contain;
   }
 
-  @media (max-width: 720px) {
-    display: none;
-  }
+  @media(max-width:720px){display:none;}
 `;
 const ControlText = styled.span`display:none;@media (max-width:720px){display:inline-block;font-family:sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff1cf;line-height:1;}`;
 
