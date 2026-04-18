@@ -143,35 +143,17 @@ const AboutNavBar = styled.nav`
   backdrop-filter: blur(10px);
 `;
 
-const BackBtn = styled.button`
-  background: none;
-  border: 1px solid rgba(251, 196, 23, 0.3);
-  color: #fbc417;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: rgba(251, 196, 23, 0.1);
-    border-color: rgba(251, 196, 23, 0.6);
-  }
-
-  &:focus-visible {
-    outline: 2px solid rgba(251, 196, 23, 0.6);
-    outline-offset: 2px;
-  }
-`;
-
 const AboutTitle = styled.h1`
   margin: 0;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 20px;
   font-weight: 700;
   text-align: center;
   flex: 1;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const Spacer = styled.div`
@@ -195,9 +177,13 @@ const Section = styled.section`
 
 const SectionHeading = styled.h2`
   margin: 0 0 16px;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 28px;
   font-weight: 700;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
   background: linear-gradient(90deg, #fbc417, #f59e0b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -243,9 +229,14 @@ const ModeInfo = styled.div`
 
 const ModeName = styled.h3`
   margin: 0 0 4px;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 16px;
   font-weight: 600;
   color: #fbc417;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const ModeDesc = styled.p`
@@ -281,10 +272,14 @@ const FeatureItem = styled.li`
 const StartBtn = styled.button`
   margin-top: 24px;
   padding: 16px 32px;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 16px;
   font-weight: 700;
   color: #fff;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
   background: linear-gradient(135deg, #fbc417 0%, #f59e0b 100%);
   border: none;
   border-radius: 12px;
