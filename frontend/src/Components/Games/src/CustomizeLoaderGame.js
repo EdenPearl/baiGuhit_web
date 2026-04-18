@@ -33,7 +33,7 @@ const LoaderOverlay = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(43, 16, 4, 0.55);
+    background-color: rgba(255, 255, 255, 0.7); 
     z-index: 2000; 
 `;
 
@@ -44,9 +44,8 @@ const LogoContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle, rgba(253, 230, 138, 0.95) 0%, rgba(251, 196, 23, 0.88) 52%, rgba(245, 158, 11, 0.74) 100%);
+    background-color: #ffffff;
     border-radius: 50%; 
-    box-shadow: 0 0 0 4px rgba(251, 196, 23, 0.14), 0 10px 24px rgba(0, 0, 0, 0.24);
 `;
 
 const LogoImage = styled.img`
@@ -62,11 +61,8 @@ const Spinner = styled.div`
     justify-content: center;
     width: 100%;
     height: 100%;
-    border: 5px solid rgba(255, 246, 235, 0.16);
-    border-top: 5px solid #fbc417;
-    border-right: 5px solid #f59e0b;
-    border-bottom: 5px solid rgba(194, 64, 16, 0.45);
-    border-left: 5px solid rgba(255, 246, 235, 0.16);
+    border: 5px solid transparent;
+    border-top: 5px solid #990000;
     border-radius: 50%;
     animation: ${spin} 2s linear infinite;
 `;
