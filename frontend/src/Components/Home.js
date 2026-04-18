@@ -423,7 +423,7 @@ const NavBar = styled.nav`
 `;
 
 const NavBrand = styled.div`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 22px;
   font-weight: 900;
   background: linear-gradient(90deg, #fbc417, #f59e0b);
@@ -431,6 +431,8 @@ const NavBrand = styled.div`
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: 0.5px;
+  text-transform: none;
+  font-variant-caps: normal;
 `;
 
 const HamburgerBtn = styled.button`
@@ -803,14 +805,16 @@ const Title = styled.div`
 `;
 
 const TB = styled.span`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: clamp(48px, 8vw, 84px);
   font-weight: 900;
   color: #fde68a;
+  text-transform: none;
+  font-variant-caps: normal;
 `;
 
 const TAI = styled.span`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: clamp(48px, 8vw, 84px);
   font-weight: 900;
   background: linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fbc417, #fde68a);
@@ -819,13 +823,17 @@ const TAI = styled.span`
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: ${shimmer} 3s linear infinite;
+  text-transform: none;
+  font-variant-caps: normal;
 `;
 
 const TRest = styled.span`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: clamp(48px, 8vw, 84px);
   font-weight: 900;
   color: rgba(255,246,235,.92);
+  text-transform: none;
+  font-variant-caps: normal;
 `;
 
 const TitleRule = styled.div`
