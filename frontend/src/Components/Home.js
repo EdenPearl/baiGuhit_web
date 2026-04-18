@@ -713,15 +713,23 @@ const HeroLogoPanel = styled.div`
   position: relative;
   z-index: 1;
   flex: 0 0 min(36vw, 360px);
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
   min-height: 420px;
   padding: 44px 0 40px;
 
   @media (max-width: 900px) {
     width: 100%;
-    min-height: 0;
-    padding: 12px 0 0;
+    min-height: clamp(250px, 62vw, 350px);
+    padding: 14px 0 8px;
+  }
+
+  @media (max-width: 480px) {
+    min-height: clamp(220px, 72vw, 320px);
+    padding: 10px 0 6px;
   }
 `;
 
@@ -752,19 +760,28 @@ const LogoImg = styled.img`
   position: relative;
   z-index: 1;
   width: min(100%, 320px);
+  max-width: 84vw;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
   filter: drop-shadow(0 20px 44px rgba(0, 0, 0, 0.35));
   animation: ${floatImg} 14s ease-in-out infinite;
+
+  @media (max-width: 480px) {
+    max-width: 78vw;
+  }
 `;
 
 const LogoCaption = styled.div`
-  margin-top: 10px;
+  margin-top: 22px;
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: rgba(255,255,255,.72);
+
+  @media (max-width: 480px) {
+    margin-top: 18px;
+  }
 `;
 
 /* Shimmer top bar */
