@@ -62,7 +62,8 @@ const Spinner = styled.div`
     width: 100%;
     height: 100%;
     border: 5px solid transparent;
-    border-top: 5px solid #990000;
+    border-top: 5px solid #d4a64a;
+    border-right: 5px solid #f1d07e;
     border-radius: 50%;
     animation: ${spin} 2s linear infinite;
 `;
