@@ -1068,10 +1068,14 @@ const ModesEyebrow = styled.p`
 
 const ModesHeading = styled.h2`
   margin: 0;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: clamp(20px, 2.7vw, 30px);
   font-weight: 900;
   text-align: center;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 
   background: linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fde68a);
   background-size: 220% 100%;
@@ -1159,11 +1163,15 @@ const ModeIconBox = styled.div`
 `;
 
 const ModeTitle = styled.div`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 14px;
   font-weight: 900;
   color: rgba(255,246,235,0.92);
   letter-spacing: 0.2px;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const ModeDesc = styled.div`
@@ -1217,9 +1225,13 @@ const AboutEyebrow = styled.p`
 
 const AboutHeading = styled.h2`
   margin: 0;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: clamp(24px, 2.5vw, 36px);
   font-weight: 900;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
   background: linear-gradient(90deg, #fde68a, #fbc417, #f59e0b, #fbc417, #fde68a);
   background-size: 220% 100%;
   -webkit-background-clip: text;
@@ -1239,10 +1251,14 @@ const AboutDescription = styled.p`
 const MoreBtn = styled.button`
   margin-top: 16px;
   padding: 14px 36px;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.3px;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
   color: #fff6eb;
   background: linear-gradient(135deg, rgba(251, 196, 23, 0.3), rgba(245, 158, 11, 0.2));
   border: 1.5px solid rgba(251, 196, 23, 0.5);
