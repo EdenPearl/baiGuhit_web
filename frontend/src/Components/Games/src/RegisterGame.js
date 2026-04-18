@@ -3,12 +3,10 @@ import styled from 'styled-components';
 import Logo from '../../../Assests/logo1.png';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import useRegister from '../../../Hooks/RegisterHooks/useRegister';
-import useToggleRegister from '../../../Hooks/RegisterHooks/useToggleRegister';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const RegisterModal = ({ isOpen, openLoginModal }) => {
-  const { toggleModal } = useToggleRegister();
   const {
     email,
     setEmail,
@@ -53,7 +51,7 @@ const RegisterModal = ({ isOpen, openLoginModal }) => {
           </LogoContainer>
         </RightContainer>
         <LeftContainer>
-          <CloseButton onClick={toggleModal}>&times;</CloseButton>
+          <CloseButton onClick={openLoginModal}>&times;</CloseButton>
           <SignInForm>
             <FormLabel>Create new account</FormLabel>
             <FormField>
