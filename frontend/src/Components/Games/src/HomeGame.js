@@ -1,10 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes, css } from 'styled-components';
 
-import green1 from '../../../Assests/green1.png';
-import green2 from '../../../Assests/green2.png';
-import green3 from '../../../Assests/green3.png';
+import bay1 from '../../../Assests/bay1.png';
+import bay2 from '../../../Assests/bay2.png';
+import bay3 from '../../../Assests/bay3.png';
+import bay4 from '../../../Assests/bay4.png';
+import bay5 from '../../../Assests/bay5.png';
+import bay6 from '../../../Assests/bay6.png';
+import bay7 from '../../../Assests/bay7.png';
+import bay8 from '../../../Assests/bay8.png';
+import bay9 from '../../../Assests/bay9.png';
 import plate1 from '../../../Assests/plate1.png';
 import plate2 from '../../../Assests/plate2.png';
 import plate3 from '../../../Assests/plate3.png';
@@ -34,7 +40,7 @@ const HomeGame = () => {
   const [isTranslateModalOpen, setIsTranslateModalOpen] = useState(false);
 
   const [sequence, setSequence] = useState({
-    green1: false, green2: false, green3: false, write: false,
+    write: false,
     girl9: false, sound: false, home: false, plate2: false,
     startGame: false, leaderboard: false, plate3: false,
     quit: false, gameName: false, leaderboardIcon: false,
@@ -60,6 +66,18 @@ const HomeGame = () => {
       duration: 4 + Math.random() * 6,
     }))
   );
+
+  const floatingBaybayin = useMemo(() => ([
+    { id: 'bay-a', src: bay1, top: '10%', left: '9%',  widthPx: 78, rotDeg: -5, floatDur: 11,  floatDelay: 0.2, fadeDur: 5.4, fadeDelay: 0.5, opacity: 0.2,  blur: 0.2 },
+    { id: 'bay-b', src: bay2, top: '18%', left: '86%', widthPx: 84, rotDeg: 4,  floatDur: 12.6, floatDelay: 0.8, fadeDur: 6.2, fadeDelay: 0.8, opacity: 0.18, blur: 0.3 },
+    { id: 'bay-c', src: bay3, top: '34%', left: '12%', widthPx: 72, rotDeg: -3, floatDur: 9.8,  floatDelay: 1.1, fadeDur: 5.6, fadeDelay: 0.2, opacity: 0.18, blur: 0.1 },
+    { id: 'bay-d', src: bay4, top: '42%', left: '90%', widthPx: 90, rotDeg: 5,  floatDur: 13.1, floatDelay: 0.3, fadeDur: 6.4, fadeDelay: 0.7, opacity: 0.2,  blur: 0.25 },
+    { id: 'bay-e', src: bay5, top: '56%', left: '16%', widthPx: 76, rotDeg: -4, floatDur: 10.7, floatDelay: 1.4, fadeDur: 5.8, fadeDelay: 0.6, opacity: 0.16, blur: 0.15 },
+    { id: 'bay-f', src: bay6, top: '64%', left: '84%', widthPx: 86, rotDeg: 3,  floatDur: 12.2, floatDelay: 0.5, fadeDur: 6.1, fadeDelay: 1.0, opacity: 0.18, blur: 0.2 },
+    { id: 'bay-g', src: bay7, top: '76%', left: '10%', widthPx: 80, rotDeg: -2, floatDur: 11.4, floatDelay: 0.9, fadeDur: 5.7, fadeDelay: 0.3, opacity: 0.16, blur: 0.2 },
+    { id: 'bay-h', src: bay8, top: '82%', left: '70%', widthPx: 82, rotDeg: 2,  floatDur: 10.2, floatDelay: 0.4, fadeDur: 5.3, fadeDelay: 0.9, opacity: 0.16, blur: 0.2 },
+    { id: 'bay-i', src: bay9, top: '92%', left: '28%', widthPx: 74, rotDeg: -6, floatDur: 9.6,  floatDelay: 1.2, fadeDur: 5.1, fadeDelay: 1.2, opacity: 0.14, blur: 0.15 },
+  ]), []);
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -113,9 +131,6 @@ const HomeGame = () => {
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setSequence(p => ({ ...p, green1: true })), 200),
-      setTimeout(() => setSequence(p => ({ ...p, green2: true })), 380),
-      setTimeout(() => setSequence(p => ({ ...p, green3: true })), 480),
       setTimeout(() => setSequence(p => ({ ...p, write: true })), 500),
       setTimeout(() => setSequence(p => ({ ...p, girl9: true })), 600),
       setTimeout(() => setSequence(p => ({ ...p, sound: true })), 600),
@@ -176,6 +191,26 @@ const HomeGame = () => {
       <BgTexture />
       <BgRadial />
 
+      <FloatingBaybayinLayer aria-hidden="true">
+        {floatingBaybayin.map((img) => (
+          <FloatingBaybayinImg
+            key={img.id}
+            src={img.src}
+            alt=""
+            $top={img.top}
+            $left={img.left}
+            $w={img.widthPx}
+            $rot={img.rotDeg}
+            $floatDur={img.floatDur}
+            $floatDelay={img.floatDelay}
+            $fadeDur={img.fadeDur}
+            $fadeDelay={img.fadeDelay}
+            $opacity={img.opacity}
+            $blur={img.blur}
+          />
+        ))}
+      </FloatingBaybayinLayer>
+
       {/* Floating gold particles */}
       {particles.map(p => (
         <Particle
@@ -185,11 +220,6 @@ const HomeGame = () => {
           $duration={p.duration}
         />
       ))}
-
-      {/* ── Decorative foliage images ── */}
-      {sequence.green1 && <LeftImage src={green1} />}
-      {sequence.green2 && <BottomImage src={green2} />}
-      {sequence.green3 && <RightImage src={green3} />}
 
       {/* ── Mode plates ── */}
       {sequence.write && (
@@ -465,21 +495,6 @@ export default HomeGame;
    KEYFRAMES
 ═══════════════════════════════════ */
 
-const translateInLeft = keyframes`
-  from { transform: translateX(-200px); opacity: 0; }
-  to   { transform: translateX(0);      opacity: 1; }
-`;
-
-const translateInBottom = keyframes`
-  from { transform: translateY(200px); opacity: 0; }
-  to   { transform: translateY(0);     opacity: 1; }
-`;
-
-const translateInRight = keyframes`
-  from { transform: translateX(200px); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
-`;
-
 const slideFromTop = keyframes`
   from { transform: translateY(-150px); opacity: 0; }
   to   { transform: translateY(0);      opacity: 1; }
@@ -546,6 +561,16 @@ const floatParticle = keyframes`
   20%  { opacity: 0.7; }
   80%  { opacity: 0.4; }
   100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+`;
+
+const bayFade = keyframes`
+  0%, 100% { opacity: 0.12; }
+  50%      { opacity: 0.36; }
+`;
+
+const bayDrift = keyframes`
+  0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(var(--rot)); }
+  50%      { transform: translate(-50%, -50%) translateY(-12px) rotate(var(--rot)); }
 `;
 
 const shimmerGold = keyframes`
@@ -630,43 +655,33 @@ const Particle = styled.span`
   animation: ${floatParticle} ${({ $duration }) => $duration}s ${({ $delay }) => $delay}s ease-in infinite;
 `;
 
-/* ── Foliage images ── */
-const LeftImage = styled.img`
+/* ── Floating Baybayin background ── */
+const FloatingBaybayinLayer = styled.div`
   position: absolute;
-  left: 0; top: 0;
-  width: clamp(180px, 28vw, 410px);
-  height: auto;
-  z-index: 3;
-  animation: ${translateInLeft} 0.55s ease-out forwards;
-
-  @media (max-width: 700px) {
-    display: none;
-  }
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
 `;
 
-const BottomImage = styled.img`
+const FloatingBaybayinImg = styled.img`
   position: absolute;
-  bottom: -20%; left: 0;
-  width: clamp(800px, 120vw, 1530px);
+  top: ${({ $top }) => $top};
+  left: ${({ $left }) => $left};
+  width: ${({ $w }) => `${$w}px`};
   height: auto;
-  z-index: 3;
-  animation: ${translateInBottom} 0.55s ease-out forwards;
+  transform: translate(-50%, -50%);
+  opacity: ${({ $opacity }) => $opacity};
+  filter: ${({ $blur }) => `blur(${$blur}px) drop-shadow(0 6px 14px rgba(0,0,0,.35)) brightness(1.12) contrast(1.12)`};
+  mix-blend-mode: lighten;
+  --rot: ${({ $rot }) => `${$rot}deg`};
+  animation:
+    ${bayFade} ${({ $fadeDur }) => $fadeDur}s ${({ $fadeDelay }) => $fadeDelay}s ease-in-out infinite,
+    ${bayDrift} ${({ $floatDur }) => $floatDur}s ${({ $floatDelay }) => $floatDelay}s ease-in-out infinite;
+  will-change: transform, opacity;
 
   @media (max-width: 700px) {
-    display: none;
-  }
-`;
-
-const RightImage = styled.img`
-  position: absolute;
-  right: -3%; top: 0;
-  width: clamp(180px, 28vw, 410px);
-  height: auto;
-  z-index: 3;
-  animation: ${translateInRight} 0.55s ease-out forwards;
-
-  @media (max-width: 700px) {
-    display: none;
+    opacity: ${({ $opacity }) => Math.min(0.14, $opacity)};
+    width: ${({ $w }) => `${Math.max(54, Math.round($w * 0.7))}px`};
   }
 `;
 
@@ -843,6 +858,16 @@ const GameName = styled.img`
   z-index: 15;
   filter: drop-shadow(0 6px 24px rgba(0,0,0,0.4));
   animation: ${waveZoom} 1.2s ease-out forwards, ${waveIdle} 5s 1.2s ease-in-out infinite;
+
+  @media (max-width: 700px) {
+    top: 74px;
+    width: min(88vw, 460px);
+  }
+
+  @media (max-width: 420px) {
+    top: 82px;
+    width: min(90vw, 420px);
+  }
 `;
 
 /* ── Icon buttons (sound, leaderboard, home) ── */
