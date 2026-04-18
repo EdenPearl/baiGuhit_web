@@ -166,7 +166,6 @@ const HomeGame = () => {
 
   /* ─── Mode label for active plate ─── */
   const modeLabels = { write: 'Write Mode', plate2: 'Translate Mode', plate3: 'Tap Mode' };
-  const modeIcons  = { write: '✍️', plate2: '🔄', plate3: '👆' };
 
   return (
     <Container>
@@ -228,13 +227,13 @@ const HomeGame = () => {
       {sequence.startGame && (
         <MobileModePicker>
           <MobileModeBtn $active={activePlate === 'write'} onClick={() => selectMode('write')}>
-            ✍️ Write
+            Write
           </MobileModeBtn>
           <MobileModeBtn $active={activePlate === 'plate2'} onClick={() => selectMode('plate2')}>
-            🔄 Translate
+            Translate
           </MobileModeBtn>
           <MobileModeBtn $active={activePlate === 'plate3'} onClick={() => selectMode('plate3')}>
-            👆 Tap
+            Tap
           </MobileModeBtn>
         </MobileModePicker>
       )}
@@ -306,7 +305,6 @@ const HomeGame = () => {
       {sequence.startGame && (
         <ModeChip>
           <ModeChipDot />
-          <span>{modeIcons[activePlate]}</span>
           <ModeChipLabel>{modeLabels[activePlate]}</ModeChipLabel>
         </ModeChip>
       )}
