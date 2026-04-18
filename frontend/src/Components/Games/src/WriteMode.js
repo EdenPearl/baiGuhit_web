@@ -315,7 +315,13 @@ const WriteModeV2 = () => {
 
   const handleSkip=()=>{if(showTutorial||gameOver||showPreview)return;playStoneClick();if(nextRoundTimerRef.current){clearTimeout(nextRoundTimerRef.current);nextRoundTimerRef.current=null;}if(wrongFlashTimerRef.current){clearTimeout(wrongFlashTimerRef.current);wrongFlashTimerRef.current=null;}getRandomCharacter(level);handleClear();};
   const handleBackClick=()=>setShowExitConfirm(true);
-  const confirmExit=(yes)=>{setShowExitConfirm(false);if(yes)navigate("/homegame");};
+  const confirmExit=(yes)=>{
+    setShowExitConfirm(false);
+    if(yes){
+      try{ localStorage.setItem('homeGameActivePlate','write'); }catch{}
+      navigate("/homegame");
+    }
+  };
   const resetRound=(lvl=level)=>{if(nextRoundTimerRef.current){clearTimeout(nextRoundTimerRef.current);nextRoundTimerRef.current=null;}if(wrongFlashTimerRef.current){clearTimeout(wrongFlashTimerRef.current);wrongFlashTimerRef.current=null;}setPrediction(null);handleClear();setLevel(lvl);setRoundNumber(levelToRound(lvl));setScore(0);setTime(GAME_DURATION_SECONDS);setGameOver(false);setHintVisible(false);setHintPanelOpen(false);setPreviewDismissed(false);leaderboardSaveLockRef.current=false;startPreview();getRandomCharacter(lvl);};
   const handleRestart=()=>resetRound(level);
   const handleNextRound=()=>{const nl=getNextLevel(level);if(nl)resetRound(nl);};

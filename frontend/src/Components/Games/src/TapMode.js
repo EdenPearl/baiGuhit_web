@@ -181,9 +181,14 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
     refetch();
   };
 
+  const goHomeWithTapMode = () => {
+    try { localStorage.setItem('homeGameActivePlate', 'plate3'); } catch {}
+    navigate("/HomeGame");
+  };
+
   const confirmExit = (confirm) => {
     setShowExitConfirm(false);
-    if (confirm) navigate("/HomeGame");
+    if (confirm) goHomeWithTapMode();
   };
 
   /* ── Timer ring ── */
@@ -338,7 +343,7 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
             </ModalStats>
             <ModalActions>
               <ModalBtn $variant="amber" onClick={handleRestart}>↺ Restart</ModalBtn>
-              <ModalBtn $variant="red" onClick={() => navigate("/HomeGame")}>✕ Exit</ModalBtn>
+              <ModalBtn $variant="red" onClick={goHomeWithTapMode}>✕ Exit</ModalBtn>
             </ModalActions>
           </GameOverModal>
         </ModalOverlay>

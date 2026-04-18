@@ -19,6 +19,8 @@ import bounceMusic from '../../../Assests/home.mp3';
 import mute from '../../../Assests/mute.png';
 import leaderboard from '../../../Assests/Leaderboard.png';
 
+const LAST_ACTIVE_MODE_KEY = 'homeGameActivePlate';
+
 /* ═══════════════════════════════════
    COMPONENT
 ═══════════════════════════════════ */
@@ -75,6 +77,7 @@ const HomeGame = () => {
   const selectMode = (mode) => {
     setActivePlate(mode);
     setReplaceWriteWithPlate1(mode !== 'write');
+    try { localStorage.setItem(LAST_ACTIVE_MODE_KEY, mode); } catch {}
   };
 
   const goToMode = (mode) => {
@@ -88,6 +91,16 @@ const HomeGame = () => {
       audioRef.current.volume = 0.5;
       audioRef.current.play().catch(() => setIsPlaying(false));
     }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const lastMode = localStorage.getItem(LAST_ACTIVE_MODE_KEY);
+      if (lastMode === 'write' || lastMode === 'plate2' || lastMode === 'plate3') {
+        setActivePlate(lastMode);
+        setReplaceWriteWithPlate1(lastMode !== 'write');
+      }
+    } catch {}
   }, []);
 
   useEffect(() => {

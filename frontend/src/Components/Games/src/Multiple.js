@@ -364,10 +364,15 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
     setShowExitConfirm(true);
   };
 
+  const goHomeWithTranslateMode = () => {
+    try { localStorage.setItem('homeGameActivePlate', 'plate2'); } catch {}
+    navigate("/HomeGame");
+  };
+
   const confirmExit = (confirm) => {
     playClickSound();
     setShowExitConfirm(false);
-    if (confirm) navigate("/HomeGame");
+    if (confirm) goHomeWithTranslateMode();
   };
 
   // Get current question
@@ -536,7 +541,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
             </ModalStats>
             <ModalActions>
               <ModalBtn $variant="amber" onClick={handleRestart}>↺ Restart</ModalBtn>
-              <ModalBtn $variant="red" onClick={() => navigate("/HomeGame")}>✕ Exit</ModalBtn>
+              <ModalBtn $variant="red" onClick={goHomeWithTranslateMode}>✕ Exit</ModalBtn>
             </ModalActions>
           </GameOverModal>
         </ModalOverlay>

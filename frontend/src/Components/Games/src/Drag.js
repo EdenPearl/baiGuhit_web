@@ -274,7 +274,11 @@ const Drag = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   };
 
   const handleBackClick = () => { playClick(); setShowExitConfirm(true); };
-  const confirmExit = (yes) => { playClick(); setShowExitConfirm(false); if (yes) navigate("/HomeGame"); };
+  const goHomeWithTranslateMode = () => {
+    try { localStorage.setItem('homeGameActivePlate', 'plate2'); } catch {}
+    navigate("/HomeGame");
+  };
+  const confirmExit = (yes) => { playClick(); setShowExitConfirm(false); if (yes) goHomeWithTranslateMode(); };
 
   /* ─────────────── RENDER ─────────────── */
   return (
@@ -449,7 +453,7 @@ const Drag = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
             </ModalStats>
             <ModalActions>
               <ModalBtn $variant="amber" onClick={handleRestart}>↺ Restart</ModalBtn>
-              <ModalBtn $variant="red" onClick={() => navigate("/HomeGame")}>✕ Exit</ModalBtn>
+              <ModalBtn $variant="red" onClick={goHomeWithTranslateMode}>✕ Exit</ModalBtn>
             </ModalActions>
           </GameOverModal>
         </ModalOverlay>
