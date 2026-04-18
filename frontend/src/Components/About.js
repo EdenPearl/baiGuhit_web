@@ -1,9 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
+import bay1 from '../Assests/bay1.png';
+import bay2 from '../Assests/bay2.png';
+import bay3 from '../Assests/bay3.png';
+import bay4 from '../Assests/bay4.png';
+import bay5 from '../Assests/bay5.png';
+import bay6 from '../Assests/bay6.png';
+import bay7 from '../Assests/bay7.png';
+import bay8 from '../Assests/bay8.png';
+import bay9 from '../Assests/bay9.png';
 
 const About = () => {
   const navigate = useNavigate();
+
+  const floatingImages = useMemo(() => ([
+    { id: 'bay-a', src: bay1, top: '10%', left: '8%', widthPx: 132, rotDeg: -4, floatDur: 10, floatDelay: 0.2, fadeDur: 5.6, fadeDelay: 0.4, opacity: 0.24, blur: 0.2 },
+    { id: 'bay-b', src: bay2, top: '28%', left: '90%', widthPx: 148, rotDeg: 5, floatDur: 12, floatDelay: 0.8, fadeDur: 6.1, fadeDelay: 1.1, opacity: 0.22, blur: 0.3 },
+    { id: 'bay-c', src: bay3, top: '52%', left: '12%', widthPx: 142, rotDeg: -6, floatDur: 9.5, floatDelay: 1.2, fadeDur: 5.4, fadeDelay: 0.2, opacity: 0.2, blur: 0.1 },
+    { id: 'bay-d', src: bay4, top: '68%', left: '88%', widthPx: 156, rotDeg: 4, floatDur: 11.3, floatDelay: 0.4, fadeDur: 6.6, fadeDelay: 0.7, opacity: 0.22, blur: 0.4 },
+    { id: 'bay-e', src: bay5, top: '84%', left: '24%', widthPx: 136, rotDeg: -2, floatDur: 10.8, floatDelay: 1.5, fadeDur: 5.8, fadeDelay: 0.6, opacity: 0.2, blur: 0.2 },
+    { id: 'bay-f', src: bay6, top: '16%', left: '72%', widthPx: 146, rotDeg: 3, floatDur: 12.4, floatDelay: 0.1, fadeDur: 6.2, fadeDelay: 1.0, opacity: 0.21, blur: 0.2 },
+    { id: 'bay-g', src: bay7, top: '40%', left: '42%', widthPx: 128, rotDeg: -3, floatDur: 9.8, floatDelay: 0.9, fadeDur: 5.2, fadeDelay: 0.9, opacity: 0.18, blur: 0.15 },
+    { id: 'bay-h', src: bay8, top: '74%', left: '56%', widthPx: 150, rotDeg: 2, floatDur: 11.8, floatDelay: 0.5, fadeDur: 6.0, fadeDelay: 0.3, opacity: 0.2, blur: 0.3 },
+    { id: 'bay-i', src: bay9, top: '92%', left: '78%', widthPx: 134, rotDeg: -5, floatDur: 10.2, floatDelay: 1.1, fadeDur: 5.7, fadeDelay: 1.2, opacity: 0.18, blur: 0.2 },
+  ]), []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -11,6 +32,26 @@ const About = () => {
 
   return (
     <AboutContainer>
+      <FloatingLayer aria-hidden="true">
+        {floatingImages.map((img) => (
+          <FloatingImage
+            key={img.id}
+            src={img.src}
+            alt=""
+            $top={img.top}
+            $left={img.left}
+            $w={img.widthPx}
+            $rot={img.rotDeg}
+            $floatDur={img.floatDur}
+            $floatDelay={img.floatDelay}
+            $fadeDur={img.fadeDur}
+            $fadeDelay={img.fadeDelay}
+            $opacity={img.opacity}
+            $blur={img.blur}
+          />
+        ))}
+      </FloatingLayer>
+
       <AboutNavBar>
         <AboutTitle>About bAIguhit</AboutTitle>
         <Spacer />
@@ -118,16 +159,57 @@ const slideInLeft = keyframes`
   }
 `;
 
+const bayFade = keyframes`
+  0%, 100% { opacity: 0.16; }
+  50%      { opacity: 0.42; }
+`;
+
+const bayDrift = keyframes`
+  0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(var(--rot)); }
+  50%      { transform: translate(-50%, -50%) translateY(-14px) rotate(var(--rot)); }
+`;
+
 /* ═══════════════════════════
    STYLED COMPONENTS
 ═══════════════════════════ */
 
 const AboutContainer = styled.div`
+  position: relative;
   width: 100%;
   min-height: 100vh;
   background: linear-gradient(160deg, #2b1004 0%, #4a1706 46%, #8a2a08 100%);
   color: #fff6eb;
   font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
+`;
+
+const FloatingLayer = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+`;
+
+const FloatingImage = styled.img`
+  position: absolute;
+  top: ${({ $top }) => $top};
+  left: ${({ $left }) => $left};
+  width: ${({ $w }) => `${$w}px`};
+  height: auto;
+  transform: translate(-50%, -50%);
+  opacity: ${({ $opacity }) => $opacity};
+  filter: ${({ $blur }) => `blur(${$blur}px) drop-shadow(0 10px 22px rgba(0,0,0,0.35)) brightness(1.14) contrast(1.18)`};
+  mix-blend-mode: lighten;
+  --rot: ${({ $rot }) => `${$rot}deg`};
+  animation:
+    ${bayFade} ${({ $fadeDur }) => $fadeDur}s ${({ $fadeDelay }) => $fadeDelay}s ease-in-out infinite,
+    ${bayDrift} ${({ $floatDur }) => $floatDur}s ${({ $floatDelay }) => $floatDelay}s ease-in-out infinite;
+  will-change: transform, opacity;
+
+  @media (max-width: 720px) {
+    opacity: ${({ $opacity }) => Math.min(0.16, $opacity)};
+    width: ${({ $w }) => `${Math.max(78, Math.round($w * 0.68))}px`};
+  }
 `;
 
 const AboutNavBar = styled.nav`
@@ -161,6 +243,8 @@ const Spacer = styled.div`
 `;
 
 const AboutContent = styled.main`
+  position: relative;
+  z-index: 1;
   max-width: 800px;
   margin: 0 auto;
   padding: 60px 24px;
