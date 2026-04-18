@@ -147,15 +147,43 @@ const LogoCircle = styled.div`
 const LogoImg = styled.img`width:100%;height:100%;object-fit:cover;display:block;`;
 
 const BrandName = styled.div`display:flex;align-items:baseline;line-height:1;`;
-const B1 = styled.span`font-family:'Cinzel',serif;font-size:30px;font-weight:900;color:#7a2100;`;
-const B2 = styled.span`
-  font-family:'Cinzel',serif;font-size:30px;font-weight:900;
-  background:linear-gradient(90deg,#fde68a,#fbc417,#fde68a);
-  background-size:300% 100%;
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:${shimmer} 3s linear infinite;
+const B1 = styled.span`
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: 900;
+  color: #7a2100;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
-const B3 = styled.span`font-family:'Cinzel',serif;font-size:30px;font-weight:900;color:rgba(122,33,0,.55);`;
+
+const B2 = styled.span`
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: 900;
+  background: linear-gradient(90deg,#fde68a,#fbc417,#fde68a);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ${shimmer} 3s linear infinite;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
+`;
+
+const B3 = styled.span`
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: 900;
+  color: rgba(122,33,0,.55);
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
+`;
 
 const BrandLine = styled.div`width:50px;height:1px;background:rgba(122,33,0,.18);`;
 const BrandTag  = styled.p`
@@ -181,8 +209,12 @@ const CloseBtn = styled.button`
 `;
 
 const FormTitle = styled.h2`
-  margin:0 0 4px;font-family:'Cinzel',serif;
+  margin:0 0 4px;font-family:'Cormorant Garamond', 'Times New Roman', serif;
   font-size:20px;font-weight:900;color:#fff6eb;
+  text-transform:none;
+  font-variant:normal;
+  font-variant-caps:normal;
+  font-feature-settings:'smcp' 0, 'c2sc' 0;
 `;
 const FormSub = styled.p`
   margin:0 0 20px;font-family:sans-serif;
@@ -228,7 +260,11 @@ const SubmitBtn = styled.button`
   position:relative;width:100%;height:46px;overflow:hidden;
   border:none;border-radius:10px;cursor:pointer;
   background:linear-gradient(135deg,#c24010,#9a3000);
-  color:#fff;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:.3px;
+  color:#fff;font-family:'Cormorant Garamond', 'Times New Roman', serif;font-size:13px;font-weight:700;letter-spacing:.3px;
+  text-transform:none;
+  font-variant:normal;
+  font-variant-caps:normal;
+  font-feature-settings:'smcp' 0, 'c2sc' 0;
   box-shadow:0 4px 16px rgba(194,64,12,.28);
   transition:transform .15s,box-shadow .15s;
   &:hover{transform:translateY(-2px);box-shadow:0 7px 22px rgba(194,64,12,.38);}

@@ -183,10 +183,15 @@ const SignInForm = styled.form`
 `;
 
 const FormLabel = styled.h2`
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 1.2rem;
   text-align: center;
   margin-bottom: 20px;
   color: #fff6eb;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const FormField = styled.div`
@@ -199,10 +204,15 @@ const FormField = styled.div`
 
 const InputLabel = styled.label`
   align-self: flex-start;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 0.9rem;
   font-weight: bold;
   margin-bottom: 5px;
   color: #fde68a;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const Input = styled.input`
@@ -232,7 +242,7 @@ const Input = styled.input`
 const SubmitButton = styled.button`
   align-self: center;
   width: 100%;
-  font-family: 'Poppins';
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   padding: 10px;
   background: linear-gradient(135deg,#c24010,#9a3000);
   color: white;
@@ -243,6 +253,10 @@ const SubmitButton = styled.button`
   font-size: 0.8rem;
   box-shadow:0 4px 16px rgba(194,64,12,.28);
   transition:transform .15s,box-shadow .15s;
+  text-transform:none;
+  font-variant:normal;
+  font-variant-caps:normal;
+  font-feature-settings:'smcp' 0, 'c2sc' 0;
   &:hover {
     transform:translateY(-2px);
     box-shadow:0 7px 22px rgba(194,64,12,.38);
@@ -267,38 +281,6 @@ const SignUpLink = styled.a`
   &:hover {
     text-decoration: underline;
   }
-`;
-
-const OtherWaysToSignIn = styled.div`
-  margin-top: 20px;
-  text-align: center;
-`;
-
-const OtherWaysText = styled.p`
-  font-size: 0.7rem;
-  color: rgba(255,246,235,.5);
-`;
-
-const IconsContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-`;
-
-const IconLink = styled.a`
-  margin: 0 10px;
-  cursor: pointer;
-  text-decoration: none;
-  transition:all .15s;
-  &:hover{
-    opacity:.8;
-    transform:translateY(-2px);
-  }
-`;
-
-const Icon = styled.img`
-  width: 30px;
-  height: 30px;
 `;
 
 const LogoContainer = styled.div`
@@ -328,27 +310,39 @@ const BrandName = styled.div`
 `;
 
 const B1 = styled.span`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 30px;
   font-weight: 900;
   color: #7a2100;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const B2 = styled.span`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 30px;
   font-weight: 900;
   background: linear-gradient(90deg,#fde68a,#fbc417,#fde68a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const B3 = styled.span`
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 30px;
   font-weight: 900;
   color: rgba(122,33,0,.55);
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const BrandLine = styled.div`
