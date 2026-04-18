@@ -909,11 +909,15 @@ const BtnGlow = styled.span`
 
 const BtnLabel = styled.span`
   position: relative;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: .3px;
   color: #3d2401;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
 const ExploreBtn = styled.button`
@@ -924,11 +928,15 @@ const ExploreBtn = styled.button`
   background: rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(10px);
   cursor: pointer;
-  font-family: 'Cinzel', serif;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: .3px;
   color: rgba(255,246,235,.92);
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
   transition: all .18s ease;
 
   &:hover { background: rgba(0,0,0,.26); border-color: rgba(251,196,23,.7); transform: translateY(-2px); }
