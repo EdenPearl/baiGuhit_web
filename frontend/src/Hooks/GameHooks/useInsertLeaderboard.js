@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-const DEFAULT_INSERT_ENDPOINT = "http://localhost:8000/game/leaderboard/insert";
+const DEFAULT_INSERT_ENDPOINT = "https://ebaybaymo-server.onrender.com/game/leaderboard/insert";
 
 const useInsertLeaderboard = (customEndpoint = DEFAULT_INSERT_ENDPOINT) => {
   const [loading, setLoading] = useState(false);

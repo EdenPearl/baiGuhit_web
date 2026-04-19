@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 const DEFAULT_GET_ALL_ENDPOINT = (limit = 10) =>
-  `http://localhost:8000/game/leaderboard?limit=${limit}`;
+  `https://ebaybaymo-server.onrender.com/game/leaderboard?limit=${limit}`;
 
 const STATUS_KEYS = ["easy", "medium", "hard", "expert", "master"];
 

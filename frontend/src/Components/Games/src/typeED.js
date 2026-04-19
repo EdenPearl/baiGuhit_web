@@ -209,7 +209,7 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
   const fetchQuestion = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/game/question/${difficulty}`);
+      const res = await fetch(`https://ebaybaymo-server.onrender.com/game/question/${difficulty}`);
       if (!res.ok) throw new Error("Failed to fetch question");
       const data = await res.json();
       setCurrentQuestion(data.question || "No question available");
@@ -226,7 +226,7 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
 
   const checkWithGrok = async (question, userAnswer) => {
     try {
-      const res = await fetch("http://localhost:8000/game/check", {
+      const res = await fetch("https://ebaybaymo-server.onrender.com/game/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question, userAnswer })

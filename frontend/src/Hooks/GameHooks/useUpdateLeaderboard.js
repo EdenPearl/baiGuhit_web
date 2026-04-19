@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-const DEFAULT_UPDATE_ENDPOINT = "http://localhost:8000/game/leaderboard/update";
+const DEFAULT_UPDATE_ENDPOINT = "https://ebaybaymo-server.onrender.com/game/leaderboard/update";
 
 const useUpdateLeaderboard = (customEndpoint = DEFAULT_UPDATE_ENDPOINT) => {
   const [loading, setLoading] = useState(false);

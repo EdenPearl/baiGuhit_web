@@ -65,7 +65,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
   const fetchQuestion = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/game/multiple/${difficulty}`);
+      const res = await fetch(`https://ebaybaymo-server.onrender.com/game/multiple/${difficulty}`);
       if (!res.ok) throw new Error("Failed to fetch question");
       const data = await res.json();
 
@@ -87,7 +87,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
     if (!selected || !currentQuestion) return;
 
     try {
-      const res = await fetch("http://localhost:8000/game/check", {
+      const res = await fetch("https://ebaybaymo-server.onrender.com/game/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: currentQuestion.question, userAnswer: selected }),

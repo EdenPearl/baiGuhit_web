@@ -146,7 +146,7 @@ const Typing = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   const fetchQuestions = useCallback(async () => {
     setLoading(true);
     try {
-      const res  = await fetch("http://localhost:8000/game/questions/typing");
+      const res  = await fetch("https://ebaybaymo-server.onrender.com/game/questions/typing");
       if (!res.ok) throw new Error();
       const data = await res.json();
       setShuffledQuestions(shuffleArray(data[difficulty] || []));

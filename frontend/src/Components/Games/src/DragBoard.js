@@ -30,7 +30,7 @@ const DragLeaderboard = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch("http://localhost:8000/drag/top10");
+            const response = await fetch("https://ebaybaymo-server.onrender.com/drag/top10");
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const json = await response.json();
             if (json.success) {

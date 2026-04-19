@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const REGISTER_URL =
   window.location.hostname === 'localhost'
-    ? 'http://localhost:8000/auth/register'
+    ? 'https://ebaybaymo-server.onrender.com/auth/register'
     : 'https://ebaybaymo-server-b084d082cda7.herokuapp.com/auth/register';
 
 const useRegister = () => {

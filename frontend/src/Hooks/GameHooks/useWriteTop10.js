@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 const DEFAULT_WRITE_TOP10_ENDPOINTS = [
-  "http://localhost:8000/game/write/top10",
+  "https://ebaybaymo-server.onrender.com/game/write/top10",
 ];
 
 const EMPTY_ROUND_DATA = {

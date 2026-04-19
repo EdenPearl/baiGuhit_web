@@ -148,7 +148,7 @@ const Drag = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
   useEffect(() => {
     scoreSaved.current = false;
     setLoading(true);
-    fetch("http://localhost:8000/game/questions/drag")
+    fetch("https://ebaybaymo-server.onrender.com/game/questions/drag")
       .then((r) => r.json())
       .then((data) => {
         const filtered = data.filter((q) => q.difficulty === difficulty);

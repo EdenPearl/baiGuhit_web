@@ -357,7 +357,7 @@ export default function DifficultyTap() {
     console.log("Category:", selected);
 
     try {
-      const response = await fetch("http://localhost:8000/tap/insert", {
+      const response = await fetch("https://ebaybaymo-server.onrender.com/tap/insert", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

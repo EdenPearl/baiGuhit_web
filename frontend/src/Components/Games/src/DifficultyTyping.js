@@ -220,7 +220,7 @@ export default function DifficultyTyping() {
     const userEmail = userData.email;
 
     try {
-      const response = await fetch("http://localhost:8000/typing/insert-typing", {
+      const response = await fetch("https://ebaybaymo-server.onrender.com/typing/insert-typing", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

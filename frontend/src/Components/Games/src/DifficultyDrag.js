@@ -246,7 +246,7 @@ export default function DifficultyDrag() {
     console.log("Difficulty status:", selected.toLowerCase());
 
     try {
-      const response = await fetch("http://localhost:8000/drag/insert-drag", {
+      const response = await fetch("https://ebaybaymo-server.onrender.com/drag/insert-drag", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

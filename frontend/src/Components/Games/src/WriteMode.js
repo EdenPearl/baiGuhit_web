@@ -270,7 +270,7 @@ const WriteModeV2 = () => {
 
   const getRandomCharacter=async(diffLevel=level)=>{
     const apply=(key)=>{setTargetKey(key);setTargetLetter(key.includes("_")?key.replace(/_/g,"/"):key);};
-    try{const res=await fetch(`http://localhost:5000/get_random_character?difficulty=${diffLevel.toLowerCase()}`);const data=await res.json();if(data.success)apply(data.character);}
+    try{const res=await fetch(`https://web-production-5d36.up.railway.app//get_random_character?difficulty=${diffLevel.toLowerCase()}`);const data=await res.json();if(data.success)apply(data.character);}
     catch{const pool=FALLBACK_CHARACTERS[diffLevel.toLowerCase()]||FALLBACK_CHARACTERS.easy;apply(pool[Math.floor(Math.random()*pool.length)]);}
   };
 
@@ -301,7 +301,7 @@ const WriteModeV2 = () => {
       const imageData=off.toDataURL("image/png"),sendTarget=targetKey.toLowerCase().replace(/_/g,"/");
       const fallback=async()=>{const b64=imageData.split(",")[1],bc=atob(b64),ba=new Uint8Array(bc.length);for(let i=0;i<bc.length;i++)ba[i]=bc.charCodeAt(i);const fd=new FormData();fd.append("baybayin_photo",new Blob([ba],{type:"image/png"}),"drawing.png");const r=await fetch("/heroku-proxy/check_image/",{method:"POST",body:fd,signal:controller.signal});const t=await r.text();let p;try{p=JSON.parse(t);}catch{p=t.trim().replace(/"/g,"");}return{success:true,prediction:{predicted:p,is_correct:p.toLowerCase()===sendTarget.toLowerCase(),confidence:null}};};
       let data=null;
-      try{const r=await fetch("http://localhost:5000/submit_drawing",{method:"POST",headers:{"Content-Type":"application/json"},signal:controller.signal,body:JSON.stringify({image:imageData,target_character:sendTarget,difficulty:level.toLowerCase(),round:roundNumber})});data=await r.json();if(!data.success||data.prediction?.retry_message)data=await fallback();}
+      try{const r=await fetch("https://web-production-5d36.up.railway.app/submit_drawing",{method:"POST",headers:{"Content-Type":"application/json"},signal:controller.signal,body:JSON.stringify({image:imageData,target_character:sendTarget,difficulty:level.toLowerCase(),round:roundNumber})});data=await r.json();if(!data.success||data.prediction?.retry_message)data=await fallback();}
       catch(e){if(e.name==="AbortError")throw e;data=await fallback();}
       if(data.success){
         const pred=data.prediction;setPrediction(pred);
@@ -483,7 +483,7 @@ const WriteModeV2 = () => {
 
               {!showTutorial && prediction && (
                 <ResultTag $correct={!!prediction.is_correct} $error={!!prediction.retry_message}>
-                  {prediction.retry_message?`⚠ ${prediction.retry_message}`:prediction.is_correct?"✓ Correct!":`✗ Got: ${String(prediction.predicted||"").toUpperCase()}`}
+                  {prediction.retry_message?`⚠ ${prediction.retry_message}`:prediction.is_correct?"✓ Correct!":"✗ Incorrect"}
                 </ResultTag>
               )}
             </CanvasSection>
