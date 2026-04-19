@@ -37,23 +37,12 @@ const useGetLeaderboardByStatus = (
 
     try {
       const endpoint = customEndpointFn(status, limit);
-      console.log("[LEADERBOARD BY STATUS] Fetch start:", {
-        status: statusLabel,
-        limit,
-        endpoint,
-      });
+      // ...existing code...
 
       const response = await fetch(endpoint);
       const payload = await response.json().catch(() => ({}));
 
-      console.log("[LEADERBOARD BY STATUS] Raw response:", {
-        status: statusLabel,
-        httpStatus: response.status,
-        ok: response.ok,
-        success: payload?.success,
-        payloadStatus: payload?.status,
-        rows: Array.isArray(payload?.data) ? payload.data.length : 0,
-      });
+      // ...existing code...
 
       if (!response.ok || payload?.success === false) {
         throw new Error(
@@ -64,20 +53,13 @@ const useGetLeaderboardByStatus = (
 
       const rows = Array.isArray(payload?.data) ? payload.data : [];
       const rankedRows = [...rows].sort((a, b) => toPoints(b) - toPoints(a));
-      console.log("[LEADERBOARD BY STATUS] Ranked rows:", {
-        status: statusLabel,
-        rankedCount: rankedRows.length,
-        topRow: rankedRows[0] || null,
-      });
+      // ...existing code...
       setLeaderboard(rankedRows.slice(0, limit));
       setLoading(false);
     } catch (err) {
       const errorMsg =
         err?.message || `Unable to load leaderboard for ${statusLabel}.`;
-      console.error("[LEADERBOARD BY STATUS] Fetch failed:", {
-        status: statusLabel,
-        error: errorMsg,
-      });
+      // ...existing code...
       setError(errorMsg);
       setLeaderboard([]);
       setLoading(false);

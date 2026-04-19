@@ -17,7 +17,7 @@ const Leaderboard = () => {
                 const parsed = JSON.parse(loginData);
                 setCurrentUser(parsed);
             } catch (e) {
-                console.error("Failed to parse user data");
+                // ...existing code...
             }
         }
     }, []);
@@ -43,7 +43,7 @@ const Leaderboard = () => {
                 throw new Error(json.message || "Failed to fetch data");
             }
         } catch (err) {
-            console.error("Error fetching leaderboard:", err);
+            // ...existing code...
             setError(err.message);
         } finally {
             setLoading(false);

@@ -236,11 +236,11 @@ export default function DifficultyTyping() {
 
       if (!result.success) {
         showToast("Failed to save score: " + result.message, "error");
-        console.error("Failed to save score:", result.message);
+        // ...existing code...
       }
     } catch (err) {
       showToast("Error saving score: " + err.message, "error");
-      console.error("Error saving score:", err.message);
+      // ...existing code...
     }
   };
 

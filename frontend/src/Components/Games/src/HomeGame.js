@@ -314,7 +314,7 @@ const HomeGame = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loginData');
-    if (storedUser) { const user = JSON.parse(storedUser); console.log('Logged-in User ID:', user.id); }
+    if (storedUser) { JSON.parse(storedUser); }
   }, []);
 
   useEffect(() => {

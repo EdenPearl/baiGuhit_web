@@ -76,7 +76,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
       setSelected(null);
       setFeedback("");
     } catch (err) {
-      console.error(err);
+      // ...existing code...
       setFeedback("Error fetching question.");
     } finally {
       setLoading(false);
@@ -110,7 +110,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
         fetchQuestion();
       }, 800);
     } catch (err) {
-      console.error("Error checking answer:", err);
+      // ...existing code...
       setFeedback("Error checking answer.");
     }
   };

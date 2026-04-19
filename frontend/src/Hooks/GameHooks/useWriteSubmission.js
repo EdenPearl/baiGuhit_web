@@ -14,7 +14,7 @@ const parseStoredUserId = () => {
         return parsedLoginId;
       }
     } catch (error) {
-      console.warn("Unable to parse loginData for write submission:", error);
+      // ...existing code...
     }
   }
 
@@ -70,7 +70,7 @@ const useWriteSubmission = (customEndpoints = DEFAULT_WRITE_SUBMIT_ENDPOINTS) =>
           const requestEndpoint = String(endpoint || "").trim();
           if (!requestEndpoint) continue;
 
-          console.log(`[Write Submit] Attempting endpoint: ${requestEndpoint}`);
+          // ...existing code...
 
           const response = await fetch(requestEndpoint, {
             method: "POST",
@@ -80,18 +80,15 @@ const useWriteSubmission = (customEndpoints = DEFAULT_WRITE_SUBMIT_ENDPOINTS) =>
           const payload = await response.json().catch(() => ({}));
 
           if (!response.ok || payload?.success === false) {
-            console.error(`[Write Submit] Failed at ${requestEndpoint}:`, {
-              status: response.status,
-              payload,
-            });
+            // ...existing code...
             throw new Error(payload?.message || `Write submission failed at ${requestEndpoint}`);
           }
 
-          console.log(`[Write Submit] Success at ${requestEndpoint}`);
+          // ...existing code...
           setLoading(false);
           return payload;
         } catch (err) {
-          console.error(`[Write Submit] Error at endpoint:`, err);
+          // ...existing code...
           lastError = err;
         }
       }

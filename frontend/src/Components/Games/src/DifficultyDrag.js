@@ -189,22 +189,20 @@ export default function DifficultyDrag() {
   useEffect(() => {
     const getUserData = () => {
       const loginDataStr = localStorage.getItem("loginData");
-      console.log("Raw loginData from localStorage:", loginDataStr);
+      // ...existing code...
       
       if (!loginDataStr) {
-        console.error("No loginData in localStorage");
+        // ...existing code...
         setUserData(null);
         return;
       }
 
       try {
         const parsed = JSON.parse(loginDataStr);
-        console.log("Parsed loginData:", parsed);
+        // ...existing code...
         
         if (!parsed.email) {
-          console.error("⚠️ OLD LOGIN DATA DETECTED - Missing email field!");
-          console.error("Please logout and login again to fix this.");
-          console.error("Current data:", parsed);
+          // ...existing code...
           
           localStorage.removeItem("loginData");
           setUserData(null);
@@ -212,9 +210,9 @@ export default function DifficultyDrag() {
         }
         
         setUserData(parsed);
-        console.log("✅ User data loaded successfully:", parsed.email);
+        // ...existing code...
       } catch (err) {
-        console.error("Failed to parse loginData:", err);
+        // ...existing code...
         setUserData(null);
       }
     };
@@ -231,19 +229,16 @@ export default function DifficultyDrag() {
 
   /* -------------------- Insert score AFTER game ends -------------------- */
   const insertScore = async (finalScore) => {
-    console.log("=== insertScore called ===");
-    console.log("Final score received:", finalScore);
-    console.log("Current userData:", userData);
+    // ...existing code...
 
     if (!userData || !userData.email) {
-      console.error("No user data available");
+      // ...existing code...
       showToast("⚠️ Please login first to save your score!", "error");
       return;
     }
 
     const userEmail = userData.email;
-    console.log(`Sending score to DB: ${finalScore} for ${userEmail}`);
-    console.log("Difficulty status:", selected.toLowerCase());
+    // ...existing code...
 
     try {
       const response = await fetch("https://ebaybaymo-server.onrender.com/drag/insert-drag", {
@@ -263,17 +258,17 @@ export default function DifficultyDrag() {
       }
 
       const result = await response.json();
-      console.log("Server response:", result);
+      // ...existing code...
 
       if (result.success) {
-        console.log("🏆 Score saved to Leaderboard!");
+        // ...existing code...
       } else {
-        console.error("Failed to save score:", result.message);
+        // ...existing code...
         showToast("❌ Failed to save score: " + result.message, "error");
       }
 
     } catch (err) {
-      console.error("Failed to save score:", err);
+      // ...existing code...
       showToast("❌ Error saving score: " + err.message, "error");
     }
   };

@@ -216,7 +216,7 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
       setInput("");
       
     } catch (err) {
-      console.error(err);
+      // ...existing code...
       setFeedback("Error fetching question.");
       setCurrentQuestion("Unable to load question");
     } finally {
@@ -234,7 +234,7 @@ const Typing = ({ difficulty = "Medium", startGame = false }) => {
       const data = await res.json();
       return data;
     } catch (err) {
-      console.error("Grok check error:", err);
+      // ...existing code...
       return { correct: false, reason: "Error connecting to Grok." };
     }
   };

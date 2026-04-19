@@ -23,7 +23,7 @@ const TapBoard = () => {
                 const parsed = JSON.parse(loginData);
                 setCurrentUser(parsed);
             } catch (e) {
-                console.error("Failed to parse user data");
+                // ...existing code...
             }
         }
     }, []);

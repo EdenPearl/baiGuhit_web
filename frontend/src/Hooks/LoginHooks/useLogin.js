@@ -61,7 +61,7 @@ const useLogin = (mode = 'marketplace') => {  // 👈 add mode parameter
       }
 
     } catch (error) {
-      console.error('Login Error:', error.response?.data || error.message);
+      // ...existing code...
       setError(
         error.response?.data?.error ||
         error.response?.data?.message ||

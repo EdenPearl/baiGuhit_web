@@ -39,14 +39,14 @@ const useRegister = () => {
     setPassword('');
     setConfirmPassword('');
     try {
-      const response = await axios.post(REGISTER_URL, {
+      await axios.post(REGISTER_URL, {
         email,
         password,
       });
       setSuccess('Registered Successfully');
-      console.log('Registration successful:', response.data);
+      // ...existing code...
     } catch (err) {
-      console.error('Registration failed:', err);
+      // ...existing code...
       setError('Registration failed. Please try again.');
     }
   };

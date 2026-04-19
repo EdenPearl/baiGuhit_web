@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled, { keyframes, css } from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
 import useGetLeaderboardByStatus from "../../../Hooks/GameHooks/useGetLeaderboardByStatus.js";
 
@@ -27,7 +27,7 @@ const WriteLeaderboard = () => {
     const loginData = localStorage.getItem("loginData");
     if (loginData) {
       try { setCurrentUser(JSON.parse(loginData)); }
-      catch { console.error("Failed to parse user data"); }
+      catch { /* ...existing code... */ }
     }
   }, []);
 

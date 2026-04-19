@@ -11,7 +11,7 @@ export const MusicProvider = ({ children }) => {
     audioRef.current.loop = true;
     audioRef.current.volume = 0.5;
 
-    audioRef.current.play().catch(() => console.log("Autoplay blocked"));
+    audioRef.current.play().catch(() => {});
 
     // Do NOT pause on unmount, music persists across pages
   }, []);

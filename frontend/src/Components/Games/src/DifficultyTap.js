@@ -266,22 +266,20 @@ export default function DifficultyTap() {
   useEffect(() => {
     const getUserData = () => {
       const loginDataStr = localStorage.getItem("loginData");
-      console.log("Raw loginData from localStorage:", loginDataStr);
+      // ...existing code...
       
       if (!loginDataStr) {
-        console.error("No loginData in localStorage");
+        // ...existing code...
         setUserData(null);
         return;
       }
 
       try {
         const parsed = JSON.parse(loginDataStr);
-        console.log("Parsed loginData:", parsed);
+        // ...existing code...
         
         if (!parsed.email) {
-          console.error("⚠️ OLD LOGIN DATA DETECTED - Missing email field!");
-          console.error("Please logout and login again to fix this.");
-          console.error("Current data:", parsed);
+          // ...existing code...
           
           localStorage.removeItem("loginData");
           setUserData(null);
@@ -289,9 +287,9 @@ export default function DifficultyTap() {
         }
         
         setUserData(parsed);
-        console.log("✅ User data loaded successfully:", parsed.email);
+        // ...existing code...
       } catch (err) {
-        console.error("Failed to parse loginData:", err);
+        // ...existing code...
         setUserData(null);
       }
     };
@@ -338,23 +336,20 @@ export default function DifficultyTap() {
   }, [countdown]);
 
   const insertScore = async (finalScore) => {
-    console.log("=== insertScore called ===");
-    console.log("Final score received:", finalScore);
-    console.log("Current userData:", userData);
+    // ...existing code...
 
     if (!userData || !userData.email) {
-      console.error("No user data available");
+      // ...existing code...
       return;
     }
 
     if (scoreSaved.current) {
-      console.log("Score already saved, skipping...");
+      // ...existing code...
       return;
     }
 
     const userEmail = userData.email;
-    console.log(`Sending score to DB: ${finalScore} for ${userEmail}`);
-    console.log("Category:", selected);
+    // ...existing code...
 
     try {
       const response = await fetch("https://ebaybaymo-server.onrender.com/tap/insert", {
@@ -374,16 +369,16 @@ export default function DifficultyTap() {
       }
 
       const result = await response.json();
-      console.log("Server response:", result);
+      // ...existing code...
 
       if (result.success) {
         scoreSaved.current = true;
-        console.log("🏆 Score saved to Leaderboard!");
+        // ...existing code...
       } else {
-        console.error("Failed to save score:", result.error);
+        // ...existing code...
       }
     } catch (err) {
-      console.error("Failed to save score:", err);
+      // ...existing code...
     }
   };
 

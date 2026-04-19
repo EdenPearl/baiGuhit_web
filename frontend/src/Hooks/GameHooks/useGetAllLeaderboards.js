@@ -50,16 +50,11 @@ const useGetAllLeaderboards = (
 
     try {
       const endpoint = customEndpointFn(limit);
-      console.log("[WRITE LEADERBOARD] Fetch start:", endpoint);
+      // ...existing code...
       const response = await fetch(endpoint);
       const payload = await response.json().catch(() => ({}));
 
-      console.log("[WRITE LEADERBOARD] Raw response:", {
-        ok: response.ok,
-        status: response.status,
-        success: payload?.success,
-        totalRows: Array.isArray(payload?.data) ? payload.data.length : 0,
-      });
+      // ...existing code...
 
       if (!response.ok || payload?.success === false) {
         throw new Error(
@@ -68,19 +63,13 @@ const useGetAllLeaderboards = (
       }
 
       const ranked = normalizeAndRank(payload?.data, limit);
-      console.log("[WRITE LEADERBOARD] Ranked by status:", {
-        easy: ranked.easy.length,
-        medium: ranked.medium.length,
-        hard: ranked.hard.length,
-        expert: ranked.expert.length,
-        master: ranked.master.length,
-      });
+      // ...existing code...
 
       setLeaderboards(ranked);
       setLoading(false);
     } catch (err) {
       const errorMsg = err?.message || "Unable to load leaderboards.";
-      console.error("[WRITE LEADERBOARD] Fetch failed:", errorMsg);
+      // ...existing code...
       setError(errorMsg);
       setLeaderboards(createEmptyLeaderboards());
       setLoading(false);

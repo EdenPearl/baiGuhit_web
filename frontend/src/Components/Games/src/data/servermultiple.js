@@ -9,7 +9,7 @@ const GROK_API_KEY = process.env.GROK_API_KEY;
 const GROK_API_URL = process.env.GROK_API_URL || "https://api.x.ai/v1/chat/completions";
 
 if (!GROK_API_KEY) {
-  console.warn("GROK_API_KEY not set — explanations will not be generated until configured.");
+  // ...existing code...
 }
 
 // Base Baybayin → Latin dictionary
@@ -170,14 +170,14 @@ router.post("/check", async (req, res) => {
         const aiMessage = response.data?.choices?.[0]?.message?.content;
         if (aiMessage) explanation = aiMessage.trim();
       } catch (err) {
-        console.warn("Failed to generate explanation via Grok:", err.message);
+        // ...existing code...
       }
     }
 
     return res.json({ correct, reason: explanation });
 
   } catch (error) {
-    console.error("Server Error:", error);
+    // ...existing code...
     return res.status(500).json({ correct: false, reason: "Server error." });
   }
 });

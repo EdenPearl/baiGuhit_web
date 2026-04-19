@@ -162,7 +162,7 @@ const Drag = ({ difficulty = "Medium", startGame = false, onGameOver }) => {
         setIsPlaying(startGame); setIsAnswering(false);
         setStreak(0); setTotalAnswered(0);
       })
-      .catch((e) => console.error(e))
+      .catch(() => {})
       .finally(() => setLoading(false));
 
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
@@ -934,7 +934,6 @@ const GameOverModal  = styled.div`background:linear-gradient(160deg,#2c1204 0%,#
 const ExitModal      = styled(GameOverModal)``;
 const ModalOrb       = styled.div`font-size:40px;margin-bottom:8px;`;
 const ModalTitle     = styled.h2`font-family:'Georgia',serif;font-size:1.5rem;font-weight:900;margin:0 0 20px;color:#fde68a;`;
-const ModalSubtext   = styled.p`font-family:sans-serif;font-size:13px;color:rgba(255,255,255,.5);margin:-12px 0 20px;`;
 const ModalStats     = styled.div`display:flex;justify-content:center;align-items:center;gap:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 20px;margin-bottom:24px;`;
 const ModalStat      = styled.div`display:flex;flex-direction:column;gap:4px;align-items:center;`;
 const ModalStatLabel = styled.div`font-family:sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,242,210,.5);`;
