@@ -5,6 +5,7 @@ import useGameDataByCategory from "../../../Hooks/GameHooks/useGameDataByCategor
 import confetti from "canvas-confetti";
 import errorSoundFile from "../../../Assests/stone.mp3";
 import stoneClick from "../../../Assests/stone.mp3";
+import bgMusicFile from "../../../Assests/Tap.mp3"; // Background music
 import write1 from "../../../Assests/write1.png";
 import write2 from "../../../Assests/write2.png";
 import back from "../../../Assests/back.png";
@@ -25,6 +26,7 @@ const MAX_TIME = 30;
 const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver }) => {
   const navigate = useNavigate();
   const scoreSaved = useRef(false);
+  const audioRef = useRef(null); // Background music
   const stoneClickRef = useRef(null);
 
   const [score, setScore]               = useState(0);
@@ -119,6 +121,18 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
     const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(timer);
   }, [timeLeft, isGameStarted, gameOver]);
+
+  /* ── Background Music ── */
+  useEffect(() => {
+    if (!audioRef.current) return;
+    const audio = audioRef.current;
+    audio.loop = true;
+    if (soundEnabled && isGameStarted && !gameOver) {
+      audio.play().catch((err) => console.log("Audio play error:", err));
+    } else {
+      audio.pause();
+    }
+  }, [isGameStarted, gameOver, soundEnabled]);
 
   /* ── Sync correct answer ── */
   useEffect(() => { if (baybayinWord) setCorrectAnswer(baybayinWord); }, [baybayinWord]);
@@ -362,6 +376,8 @@ const TapMode = ({ selectedDifficulty = "animal", startGame = false, onGameOver 
           </ExitModal>
         </ModalOverlay>
       )}
+
+      <audio ref={audioRef} src={bgMusicFile} />
     </>
   );
 };

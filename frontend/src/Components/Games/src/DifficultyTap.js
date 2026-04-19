@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TapMode from "./TapMode";
+import bgMusicFile from "../../../Assests/drag.mp3";
 
 // FIXED: Removed BAYBAYIN_CHARS since we only use database words now
 // This prevents mismatch between generated words and database images
@@ -240,12 +241,26 @@ export default function DifficultyTap() {
   const [countdown, setCountdown] = useState(null);
   const [userData, setUserData] = useState(null);
   const scoreSaved = useRef(false);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = keyframes;
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
+  }, []);
+
+  /* 🎵 Background Music */
+  useEffect(() => {
+    const audio = new Audio(bgMusicFile);
+    audio.loop = true;
+    audio.volume = 0.5;
+    audioRef.current = audio;
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
   }, []);
 
   useEffect(() => {
@@ -291,6 +306,19 @@ export default function DifficultyTap() {
     scoreSaved.current = false;
   };
 
+  const fadeOutMusic = () => {
+    if (!audioRef.current) return;
+    const fadeInterval = setInterval(() => {
+      if (audioRef.current.volume > 0.05) {
+        audioRef.current.volume -= 0.05;
+      } else {
+        clearInterval(fadeInterval);
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }, 100);
+  };
+
   const handleCloseModal = () => {
     navigate("/HomeGame");
   };
@@ -299,6 +327,7 @@ export default function DifficultyTap() {
     if (countdown === null) return;
 
     if (countdown === 0) {
+      fadeOutMusic();
       setStartGame(true);
       setCountdown(null);
       return;
