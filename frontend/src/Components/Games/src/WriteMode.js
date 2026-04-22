@@ -64,9 +64,9 @@ const LEVEL_SEQUENCE = ["Easy","Medium","Hard","Expert","Master"];
 const normalizeLevel  = (l) => String(l||"").trim().toLowerCase();
 
 const WriteModeV2 = () => {
-  const GAME_DURATION_SECONDS  = 30;
+  const GAME_DURATION_SECONDS  = 60;
   const PREVIEW_DURATION_MS    = 5000;
-  const HINT_THRESHOLD_SECONDS = 18;
+  const HINT_THRESHOLD_SECONDS = 40;
 
   const canvasRef = useRef(null);
   const navigate  = useNavigate();

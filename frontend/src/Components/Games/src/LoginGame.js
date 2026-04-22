@@ -34,13 +34,19 @@ const LoginModal = ({ isOpen, toggleModal }) => {
 
             {/* Left — brand */}
             <BrandSide>
+              <BrandTopLine />
+              <BrandOrb />
+
               <LogoCircle>
                 <LogoImg src={Logo} alt="bAIguhit" />
               </LogoCircle>
+
               <BrandName>
                 <B1>b</B1><B2>AI</B2><B3>guhit</B3>
               </BrandName>
+
               <BrandLine />
+
               <BrandTag>Revive the Ancient Script.<br />Master Baybayin through Play.</BrandTag>
             </BrandSide>
 
@@ -104,197 +110,363 @@ const LoginModal = ({ isOpen, toggleModal }) => {
 
 export default LoginModal;
 
-/* keyframes */
-const shimmer = keyframes`0%{background-position:-200% center}100%{background-position:200% center}`;
-const popIn   = keyframes`from{opacity:0;transform:scale(.95) translateY(12px)}to{opacity:1;transform:none}`;
-const float   = keyframes`0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}`;
+/* ═══════════════════════════
+   KEYFRAMES
+═══════════════════════════ */
 
-/* Backdrop */
+const shimmer = keyframes`
+  0%   { background-position: -200% center }
+  100% { background-position:  200% center }
+`;
+const popIn = keyframes`
+  from { opacity: 0; transform: scale(.95) translateY(12px) }
+  to   { opacity: 1; transform: none }
+`;
+const float = keyframes`
+  0%, 100% { transform: translateY(0) }
+  50%       { transform: translateY(-6px) }
+`;
+const haloBreath = keyframes`
+  0%, 100% { opacity: .45 }
+  50%       { opacity: .9 }
+`;
+
+/* ═══════════════════════════
+   BACKDROP
+═══════════════════════════ */
+
 const Backdrop = styled.div`
-  position:fixed;inset:0;z-index:1000;
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(160deg,rgba(43,16,4,.85),rgba(74,23,6,.85));
-  backdrop-filter:blur(8px);
-  padding:16px;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, rgba(43,16,4,.88), rgba(74,23,6,.88));
+  backdrop-filter: blur(10px);
+  padding: 16px;
 `;
 
-/* Card */
+/* ═══════════════════════════
+   CARD
+═══════════════════════════ */
+
 const Card = styled.div`
-  display:flex;
-  width:min(760px,100%);
-  height:min(500px,90vh);
-  border-radius:20px;overflow:hidden;
-  border:1px solid rgba(251,196,23,.15);
-  box-shadow:0 24px 60px rgba(0,0,0,.45), 0 0 60px rgba(251,196,23,.1);
-  animation:${popIn} .4s cubic-bezier(.34,1.56,.64,1) both;
+  display: flex;
+  width: min(760px, 100%);
+  height: min(500px, 90vh);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(154, 48, 0, .30);
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.50),
+    0 0 60px rgba(194,64,12,.10);
+  animation: ${popIn} .4s cubic-bezier(.34,1.56,.64,1) both;
 `;
 
-/* ── Brand side ── */
+/* ═══════════════════════════
+   BRAND SIDE
+   Warm parchment/amber — no pure whites
+   Lightest tone: #f0d5a0 (toasted wheat)
+   Darkest tone:  #c8924a (antique bronze)
+═══════════════════════════ */
+
 const BrandSide = styled.div`
-  width:280px;flex-shrink:0;
-  background:linear-gradient(160deg,#fff8ee 0%,#fffdf8 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:14px;padding:36px 28px;
-  @media(max-width:560px){display:none;}
+  position: relative;
+  width: 280px;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, #f0d5a0 0%, #e4be7a 45%, #c8924a 100%);
+  border-right: 1px solid rgba(122,33,0,.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 36px 28px;
+  overflow: hidden;
+
+  @media (max-width: 560px) { display: none; }
+`;
+
+/* Rust-to-gold shimmer line at top */
+const BrandTopLine = styled.div`
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #9a3000, #c24010, #fbc417, #c24010, #9a3000);
+  background-size: 300% 100%;
+  animation: ${shimmer} 3.5s linear infinite;
+`;
+
+/* Warm rust glow behind logo */
+const BrandOrb = styled.div`
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(154,48,0,.20) 0%, transparent 68%);
+  pointer-events: none;
+  animation: ${haloBreath} 4.2s ease-in-out infinite;
 `;
 
 const LogoCircle = styled.div`
-  width:88px;height:88px;border-radius:50%;overflow:hidden;
-  border:2px solid rgba(122,33,0,.18);
-  box-shadow:0 8px 28px rgba(122,33,0,.12);
-  animation:${float} 4s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(122,33,0,.28);
+  box-shadow:
+    0 8px 28px rgba(122,33,0,.22),
+    0 0 0 6px rgba(194,64,12,.10);
+  animation: ${float} 4s ease-in-out infinite;
 `;
-const LogoImg = styled.img`width:100%;height:100%;object-fit:cover;display:block;`;
 
-const BrandName = styled.div`display:flex;align-items:baseline;line-height:1;`;
-const B1 = styled.span`
+const LogoImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+`;
+
+const BrandName = styled.div`
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+`;
+
+const sharedFont = `
   font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-size: 30px;
   font-weight: 900;
-  color: #7a2100;
   text-transform: none;
   font-variant: normal;
   font-variant-caps: normal;
   font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
+/* "b" — deep rust, strong contrast on amber bg */
+const B1 = styled.span`
+  ${sharedFont}
+  color: #7a2100;
+`;
+
+/* "AI" — animated rust-to-brown shimmer */
 const B2 = styled.span`
-  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
-  font-size: 30px;
-  font-weight: 900;
-  background: linear-gradient(90deg,#fde68a,#fbc417,#fde68a);
+  ${sharedFont}
+  background: linear-gradient(90deg, #c24010, #7a2100, #c24010);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: ${shimmer} 3s linear infinite;
-  text-transform: none;
-  font-variant: normal;
-  font-variant-caps: normal;
-  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
+/* "guhit" — muted rust */
 const B3 = styled.span`
-  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
-  font-size: 30px;
-  font-weight: 900;
-  color: rgba(122,33,0,.55);
-  text-transform: none;
-  font-variant: normal;
-  font-variant-caps: normal;
-  font-feature-settings: 'smcp' 0, 'c2sc' 0;
+  ${sharedFont}
+  color: rgba(122,33,0,.48);
 `;
 
-const BrandLine = styled.div`width:50px;height:1px;background:rgba(122,33,0,.18);`;
-const BrandTag  = styled.p`
-  margin:0;text-align:center;font-family:'Georgia',serif;
-  font-size:12px;font-style:italic;line-height:1.7;
-  color:rgba(122,33,0,.7);
+const BrandLine = styled.div`
+  position: relative;
+  z-index: 1;
+  width: 50px;
+  height: 1px;
+  background: rgba(122,33,0,.20);
 `;
 
-/* ── Form side ── */
+/* Tagline: dark rust on amber — high contrast, zero eye-strain */
+const BrandTag = styled.p`
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  text-align: center;
+  font-family: 'Georgia', serif;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.75;
+  color: rgba(90,20,0,.68);
+`;
+
+/* ═══════════════════════════
+   FORM SIDE — dark, unchanged
+═══════════════════════════ */
+
 const FormSide = styled.div`
-  flex:1;background:linear-gradient(160deg,#2b1004 0%,#4a1706 100%);
-  display:flex;flex-direction:column;justify-content:center;
-  padding:40px 36px;position:relative;
-  overflow-y:auto;
+  flex: 1;
+  background: linear-gradient(160deg, #2b1004 0%, #4a1706 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 36px;
+  position: relative;
+  overflow-y: auto;
 `;
 
 const CloseBtn = styled.button`
-  position:absolute;top:16px;right:18px;
-  background:none;border:none;cursor:pointer;
-  font-size:16px;color:rgba(255,246,235,.5);
-  transition:color .15s,transform .15s;
-  &:hover{color:#fbc417;transform:rotate(90deg);}
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: rgba(255,246,235,.45);
+  transition: color .15s, transform .15s;
+
+  &:hover { color: #fbc417; transform: rotate(90deg); }
 `;
 
 const FormTitle = styled.h2`
-  margin:0 0 4px;font-family:'Cormorant Garamond', 'Times New Roman', serif;
-  font-size:20px;font-weight:900;color:#fff6eb;
-  text-transform:none;
-  font-variant:normal;
-  font-variant-caps:normal;
-  font-feature-settings:'smcp' 0, 'c2sc' 0;
-`;
-const FormSub = styled.p`
-  margin:0 0 20px;font-family:sans-serif;
-  font-size:12px;color:rgba(255,246,235,.6);
+  margin: 0 0 4px;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff6eb;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
 `;
 
-const Form  = styled.form`display:flex;flex-direction:column;gap:12px;`;
-const Field = styled.div`display:flex;flex-direction:column;gap:5px;`;
+const FormSub = styled.p`
+  margin: 0 0 20px;
+  font-family: sans-serif;
+  font-size: 12px;
+  color: rgba(255,246,235,.55);
+`;
+
+const Form  = styled.form`display: flex; flex-direction: column; gap: 12px;`;
+const Field = styled.div`display: flex; flex-direction: column; gap: 5px;`;
+
 const Label = styled.label`
-  font-family:sans-serif;font-size:11px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.5px;color:#fde68a;
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #fde68a;
 `;
 
 const Input = styled.input`
-  width:100%;padding:11px 14px;
-  border-radius:10px;border:1.5px solid rgba(251,196,23,.25);
-  background:rgba(42,16,4,.6);font-family:sans-serif;font-size:13px;color:#fff6eb;
-  outline:none;transition:border-color .15s,box-shadow .15s;
-  &::placeholder{color:rgba(255,246,235,.3);}
-  &:focus{border-color:rgba(251,196,23,.5);box-shadow:0 0 0 3px rgba(251,196,23,.15);background:rgba(42,16,4,.8);}
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(251,196,23,.22);
+  background: rgba(27,10,2,.55);
+  font-family: sans-serif;
+  font-size: 13px;
+  color: #fff6eb;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+
+  &::placeholder { color: rgba(255,246,235,.28); }
+  &:focus {
+    border-color: rgba(251,196,23,.55);
+    box-shadow: 0 0 0 3px rgba(251,196,23,.12);
+    background: rgba(27,10,2,.75);
+  }
 `;
 
-const PwWrap = styled.div`position:relative;`;
+const PwWrap = styled.div`position: relative;`;
+
 const EyeBtn = styled.button`
-  position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;
-  color:rgba(255,246,235,.4);font-size:14px;
-  &:hover{color:#fbc417;}
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,246,235,.38);
+  font-size: 14px;
+  transition: color .15s;
+
+  &:hover { color: #fbc417; }
 `;
 
 const Forgot = styled.a`
-  font-family:sans-serif;font-size:11px;font-weight:600;
-  color:rgba(251,196,23,.6);text-decoration:none;align-self:flex-end;margin-top:-4px;
-  &:hover{color:#fbc417;text-decoration:underline;}
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(251,196,23,.55);
+  text-decoration: none;
+  align-self: flex-end;
+  margin-top: -4px;
+
+  &:hover { color: #fbc417; text-decoration: underline; }
 `;
 
 const Shine = styled.span`
-  position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
-  background-size:200% 100%;animation:${shimmer} 2.5s linear infinite;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+  background-size: 200% 100%;
+  animation: ${shimmer} 2.5s linear infinite;
 `;
+
 const SubmitBtn = styled.button`
-  position:relative;width:100%;height:46px;overflow:hidden;
-  border:none;border-radius:10px;cursor:pointer;
-  background:linear-gradient(135deg,#c24010,#9a3000);
-  color:#fff;font-family:'Cormorant Garamond', 'Times New Roman', serif;font-size:13px;font-weight:700;letter-spacing:.3px;
-  text-transform:none;
-  font-variant:normal;
-  font-variant-caps:normal;
-  font-feature-settings:'smcp' 0, 'c2sc' 0;
-  box-shadow:0 4px 16px rgba(194,64,12,.28);
-  transition:transform .15s,box-shadow .15s;
-  &:hover{transform:translateY(-2px);box-shadow:0 7px 22px rgba(194,64,12,.38);}
-  &:active{transform:translateY(1px);}
+  position: relative;
+  width: 100%;
+  height: 46px;
+  overflow: hidden;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #c24010, #9a3000);
+  color: #fff6eb;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-transform: none;
+  font-variant: normal;
+  font-variant-caps: normal;
+  font-feature-settings: 'smcp' 0, 'c2sc' 0;
+  box-shadow: 0 4px 18px rgba(194,64,12,.30);
+  transition: transform .15s, box-shadow .15s;
+
+  &:hover  { transform: translateY(-2px); box-shadow: 0 7px 24px rgba(194,64,12,.42); }
+  &:active { transform: translateY(1px); }
 `;
 
-const OrRow  = styled.div`display:flex;align-items:center;gap:8px;`;
-const OrLine = styled.div`flex:1;height:1px;background:rgba(251,196,23,.15);`;
-const OrText = styled.span`font-family:sans-serif;font-size:10px;color:rgba(255,246,235,.45);letter-spacing:.4px;`;
-
-const SocialRow = styled.div`display:flex;justify-content:center;gap:10px;`;
-const SocialBtn = styled.a`
-  width:42px;height:42px;border-radius:10px;
-  border:1.5px solid rgba(251,196,23,.25);background:rgba(42,16,4,.5);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;text-decoration:none;
-  transition:all .15s;
-  &:hover{border-color:rgba(251,196,23,.6);background:rgba(42,16,4,.8);transform:translateY(-2px);}
+const OrRow  = styled.div`display: flex; align-items: center; gap: 8px;`;
+const OrLine = styled.div`flex: 1; height: 1px; background: rgba(251,196,23,.14);`;
+const OrText = styled.span`
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgba(255,246,235,.38);
+  letter-spacing: .4px;
 `;
-const SIcon = styled.img`width:20px;height:20px;`;
 
 const Prompt = styled.p`
-  margin:0;text-align:center;
-  font-family:sans-serif;font-size:12px;color:rgba(255,246,235,.65);
+  margin: 0;
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 12px;
+  color: rgba(255,246,235,.60);
 `;
+
 const PromptLink = styled.span`
-  font-weight:700;color:#fbc417;cursor:pointer;
-  &:hover{text-decoration:underline;}
+  font-weight: 700;
+  color: #fbc417;
+  cursor: pointer;
+
+  &:hover { opacity: .8; text-decoration: underline; }
 `;
 
 const StyledToast = styled(ToastContainer)`
-  .Toastify__toast{font-family:sans-serif;font-size:12px;border-radius:10px;}
+  .Toastify__toast {
+    font-family: sans-serif;
+    font-size: 12px;
+    border-radius: 10px;
+    background: #2b1004;
+    color: #fff6eb;
+    border: 1px solid rgba(251,196,23,.22);
+  }
+  .Toastify__progress-bar { background: #fbc417; }
 `;
