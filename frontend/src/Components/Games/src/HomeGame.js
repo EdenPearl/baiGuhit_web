@@ -463,6 +463,8 @@ const HomeGame = () => {
         </RightControlSlot>
       )}
 
+      
+
       {/* ── Leaderboard ── */}
       {sequence.leaderboardIcon && (
         <LeftControlSlot>
@@ -490,27 +492,31 @@ const HomeGame = () => {
 
       {sequence.startGame && <ActionAura aria-hidden="true"/>}
 
-      {/* ── CTA buttons ── */}
-      {sequence.startGame && (
-        <StartGameWrapper>
-          <GoldButton onClick={()=>{
-            if (activePlate==='write') navigate('/write');
-            else if (activePlate==='plate2') openTranslateModal();
-            else if (activePlate==='plate3') navigate('/difficulty-tap');
-          }}>
-            <BtnGlow/><BtnInner><BtnIconSpan>▶</BtnIconSpan>Start Game</BtnInner>
-          </GoldButton>
-        </StartGameWrapper>
-      )}
+{/* ── CTA buttons ── */}
+{sequence.startGame && (
+  <StartGameWrapper>
+    <GoldButton onClick={()=>{
+      if (activePlate==='write') navigate('/write');
+      else if (activePlate==='plate2') openTranslateModal();
+      else if (activePlate==='plate3') navigate('/difficulty-tap');
+    }}>
+      <BtnGlow/><BtnInner><BtnIconSpan>▶</BtnIconSpan>Start Game</BtnInner>
+    </GoldButton>
 
-      {sequence.quit && (
-        <QuitWrapper>
-          <GhostButton onClick={()=>navigate('/')}>
-            <BtnInner><BtnIconSpan style={{opacity:0.7}}>←</BtnIconSpan>Quit</BtnInner>
-          </GhostButton>
-        </QuitWrapper>
-      )}
+    {/* NEW: Translator button below Start Game */}
+    <GhostButton onClick={() => navigate('/translator')}>
+      <BtnGlow/><BtnInner><BtnIconSpan></BtnIconSpan>Translator</BtnInner>
+    </GhostButton>
+  </StartGameWrapper>
+)}
 
+{sequence.quit && (
+  <QuitWrapper>
+    <GhostButton onClick={()=>navigate('/')}>
+      <BtnInner><BtnIconSpan style={{opacity:0.7}}>←</BtnIconSpan>Quit</BtnInner>
+    </GhostButton>
+  </QuitWrapper>
+)}
       {/* ═══════ SIDEBAR ═══════ */}
       <Overlay $isOpen={isSidebarOpen} onClick={closeSidebar}/>
       <Sidebar $isOpen={isSidebarOpen}>
@@ -942,14 +948,32 @@ const ActionAura = styled.div`
   @media(max-width:900px){top:63%;}@media(max-width:520px){top:68%;height:180px;}`;
 
 const StartGameWrapper = styled.div`
-  position:absolute;top:60%;left:50%;transform:translate(-50%,-50%);z-index:200;
+  position:absolute;
+  top:60%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  z-index:200;
+  display:flex;
+  flex-direction:column;           /* vertical stack */
+  align-items:center;
+  gap:14px;                        /* space between Start Game and Translator */
   animation:${bounceIn} 0.9s ease forwards;
-  @media(max-width:900px){top:58%;}@media(max-width:520px){top:62%;}`;
+
+  @media(max-width:900px){top:58%;}
+  @media(max-width:520px){top:62%; gap:12px;}
+`;
 
 const QuitWrapper = styled.div`
-  position:absolute;top:71%;left:50%;transform:translate(-50%,-50%);z-index:200;
+  position:absolute;
+  top:73%;                          /* moved down to avoid overlap */
+  left:50%;
+  transform:translate(-50%,-50%);
+  z-index:200;
   animation:${bounceIn} 0.9s 0.1s ease both;
-  @media(max-width:900px){top:69%;}@media(max-width:520px){top:74%;}`;
+
+  @media(max-width:900px){top:76%;}
+  @media(max-width:520px){top:80%;}
+`;
 
 const GoldButton = styled.button`
   position:relative;width:300px;height:58px;border:none;border-radius:14px;cursor:pointer;overflow:hidden;

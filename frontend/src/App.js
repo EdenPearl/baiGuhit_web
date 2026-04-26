@@ -19,6 +19,7 @@ import Multiple from './Components/Games/src/Multiple';
 import Typing from './Components/Games/src/Typing';
 import Drag from './Components/Games/src/Drag';
 import LeaderBoard from './Components/Games/src/LeaderBoard';
+import Translator from './Components/Games/src/Translator';
 
 import MultipleBoard from './Components/Games/src/MultipleBoard';
 import TypingBoard from './Components/Games/src/TypingBoard';
@@ -54,6 +55,7 @@ const App = () => {
           <Route path="/typing" element={<Typing />} />
           <Route path="/drag" element={<Drag />} />
           <Route path="/leaderboard" element={<LeaderBoard />} />
+          <Route path="/translator" element={<Translator />} />
           
           <Route path="/multiple-board" element={<MultipleBoard />} />
           <Route path="/typing-board" element={<TypingBoard />} />
