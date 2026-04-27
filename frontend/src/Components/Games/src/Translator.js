@@ -17,6 +17,12 @@ const CONSONANTS = {
   'g': 'ᜄ', 'h': 'ᜑ', 'l': 'ᜎ', 'm': 'ᜋ',
   'n': 'ᜈ', 'ng': 'ᜅ', 'p': 'ᜉ', 's': 'ᜐ',
   't': 'ᜆ', 'w': 'ᜏ', 'y': 'ᜌ',
+  // New mappings
+  'v': 'ᜊ',  // v = b
+  'f': 'ᜉ',  // f = p
+  'c': 'ᜃ',  // c = k
+  'q': 'ᜃ',  // q = k (same as c)
+  'x': 'ᜐ',  // x = s
 };
 
 const KUDLIT = {
@@ -44,39 +50,69 @@ function toBaybayin(text) {
       continue;
     }
 
+    // ── Special 2-char digraphs first ──────────────────────────────────────
+
+    // Handle 'ng' digraph
     if (char === 'n' && i + 1 < text.length && text[i + 1] === 'g') {
       char = 'ng';
       i++;
     }
 
-    if (i + 1 < text.length && 'aeiou'.includes(text[i + 1])) {
-      let nextVowel = text[i + 1];
+    // ── j and z → ᜇ᜔ᜌ base (da/ra + virama + ya) ──────────────────────────
+    if (char === 'j' || char === 'z') {
+      const nextChar = text[i + 1];
+      if (nextChar && 'aeiou'.includes(nextChar)) {
+        // j/z followed by a vowel
+        if (nextChar === 'a') {
+          // ja/za = ᜇ᜔ᜌ  (da-virama + ya, ya defaults to 'a' sound)
+          result.push('ᜇ' + VIRAMA + 'ᜌ');
+        } else {
+          // jo/ju/je/ji = ᜇ᜔ᜌ + kudlit
+          result.push('ᜇ' + VIRAMA + 'ᜌ' + KUDLIT[nextChar]);
+        }
+        i += 2;
+      } else {
+        // j/z with no following vowel (end of syllable) = ᜇ᜔ᜌ᜔
+        result.push('ᜇ' + VIRAMA + 'ᜌ' + VIRAMA);
+        i++;
+      }
+      continue;
+    }
 
-      if (char in CONSONANTS) {
-        let base = CONSONANTS[char];
-        if (nextVowel === 'a') {
+    // ── Standard consonant + vowel handling ────────────────────────────────
+    if (char in CONSONANTS) {
+      const nextChar = i + 1 < text.length ? text[i + 1] : null;
+      if (nextChar && 'aeiou'.includes(nextChar)) {
+        const base = CONSONANTS[char];
+        if (nextChar === 'a') {
           result.push(base);
         } else {
-          result.push(base + KUDLIT[nextVowel]);
+          result.push(base + KUDLIT[nextChar]);
         }
         i += 2;
         continue;
       }
+      // Consonant with no following vowel → add virama
+      result.push(CONSONANTS[char] + VIRAMA);
+      i++;
+      continue;
     }
 
+    // ── Standalone vowels ──────────────────────────────────────────────────
     if (char in VOWELS) {
       result.push(VOWELS[char]);
       i++;
       continue;
     }
 
-    if (char in CONSONANTS) {
-      result.push(CONSONANTS[char] + VIRAMA);
-      i++;
-      continue;
+    // ── Unknown/punctuation characters — pass through as-is ───────────────
+    // (digits, punctuation, etc. are silently dropped / passed through)
+    // We skip letters that have no mapping and non-alpha chars
+    if (/[a-z]/.test(char)) {
+      // unmapped latin letter — skip silently
+    } else {
+      result.push(char); // preserve spaces, punctuation
     }
-
-    result.push(char);
     i++;
   }
 
@@ -89,11 +125,11 @@ function toBaybayin(text) {
 
 const ALL_CHARS = [
   { l: 'a', b: 'ᜀ' }, { l: 'e/i', b: 'ᜁ' }, { l: 'o/u', b: 'ᜂ' },
-  { l: 'ba', b: 'ᜊ' }, { l: 'ka', b: 'ᜃ' }, { l: 'da/ra', b: 'ᜇ' },
+  { l: 'ba/va', b: 'ᜊ' }, { l: 'ka/ca/qa', b: 'ᜃ' }, { l: 'da/ra', b: 'ᜇ' },
   { l: 'ga', b: 'ᜄ' }, { l: 'ha', b: 'ᜑ' }, { l: 'la', b: 'ᜎ' },
   { l: 'ma', b: 'ᜋ' }, { l: 'na', b: 'ᜈ' }, { l: 'nga', b: 'ᜅ' },
-  { l: 'pa', b: 'ᜉ' }, { l: 'sa', b: 'ᜐ' }, { l: 'ta', b: 'ᜆ' },
-  { l: 'wa', b: 'ᜏ' }, { l: 'ya', b: 'ᜌ' },
+  { l: 'pa/fa', b: 'ᜉ' }, { l: 'sa/xa', b: 'ᜐ' }, { l: 'ta', b: 'ᜆ' },
+  { l: 'wa', b: 'ᜏ' }, { l: 'ya', b: 'ᜌ' }, { l: 'ja/za', b: 'ᜇ᜔ᜌ' },
 ];
 
 // ============================================
@@ -136,7 +172,6 @@ const styles = {
     pointerEvents: 'none',
     background: 'radial-gradient(circle, rgba(251,196,23,0.10) 0%, transparent 70%)',
   },
-  // BACK BUTTON — outside container, top left
   backBtn: {
     position: 'absolute',
     top: '16px',
@@ -225,7 +260,6 @@ const styles = {
     minWidth: 0,
     overflow: 'hidden',
   },
-  // OUTPUT BOX — styled like scripture stone panel
   outputGroup: {
     flexShrink: 0,
   },
@@ -276,7 +310,6 @@ const styles = {
     fontSize: '0.95em',
     fontStyle: 'italic',
   },
-  // INPUT BOX — at the bottom
   inputGroup: {
     flexShrink: 0,
     marginTop: '4px',
@@ -308,7 +341,6 @@ const styles = {
     borderColor: 'rgba(251, 196, 23, 0.65)',
     boxShadow: '0 0 15px rgba(251, 196, 23, 0.15), inset 0 2px 6px rgba(0,0,0,0.3)',
   },
-  // CHARACTER MAP
   charMap: {
     flex: 1,
     display: 'flex',
@@ -373,24 +405,20 @@ export default function Translator() {
 
   const outputText = inputText.trim() === '' ? '' : toBaybayin(inputText);
 
-  // Back navigation handler
   const goBack = () => {
     window.history.back();
   };
 
   return (
     <div style={styles.bodyWrapper}>
-      {/* Background texture layers matching HomeGame */}
       <div style={styles.bgTexture} />
       <div style={styles.bgRadial} />
 
-      {/* BACK BUTTON — outside container, top left */}
       <button style={styles.backBtn} onClick={goBack}>
         ← Back
       </button>
 
       <div style={styles.container}>
-        {/* Gold shimmer top bar */}
         <div style={styles.topBar} />
 
         <div style={styles.header}>
@@ -399,9 +427,8 @@ export default function Translator() {
         </div>
 
         <div style={styles.mainContent}>
-          {/* LEFT PANEL — Output on top, Input at bottom */}
+          {/* LEFT PANEL */}
           <div style={styles.leftPanel}>
-            {/* OUTPUT — at the top */}
             <div style={styles.outputGroup}>
               <label style={styles.outputLabel}>Baybayin Output:</label>
               <div style={styles.outputBox}>
@@ -416,7 +443,6 @@ export default function Translator() {
               </div>
             </div>
 
-            {/* INPUT — at the bottom */}
             <div style={styles.inputGroup}>
               <label style={styles.inputLabel}>Type in Latin script:</label>
               <input
@@ -449,7 +475,7 @@ export default function Translator() {
                     }}
                     onMouseEnter={() => setHoveredChar(index)}
                     onMouseLeave={() => setHoveredChar(null)}
-                    onClick={() => setInputText((prev) => prev + c.l.replace('/','').replace('a',''))}
+                    onClick={() => setInputText((prev) => prev + c.l.split('/')[0].replace('a', ''))}
                   >
                     <span style={styles.charBaybayin}>{c.b}</span>
                     <span style={styles.charLatin}>{c.l}</span>

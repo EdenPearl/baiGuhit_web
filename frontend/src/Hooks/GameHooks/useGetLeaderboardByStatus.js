@@ -5,10 +5,10 @@ const DEFAULT_GET_BY_STATUS_ENDPOINT = (status, limit = 10) => {
   const isAllStatuses = !rawStatus || rawStatus.toLowerCase() === "all";
 
   if (isAllStatuses) {
-    return `https://ebaybaymo-server.onrender.com/game/leaderboard?limit=${limit}`;
+    return `http://localhost:8000/game/leaderboard?limit=${limit}`;
   }
 
-  return `https://ebaybaymo-server.onrender.com/game/leaderboard/${encodeURIComponent(
+  return `http://localhost:8000/game/leaderboard/${encodeURIComponent(
     rawStatus
   )}?limit=${limit}`;
 };

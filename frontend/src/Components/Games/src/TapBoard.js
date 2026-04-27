@@ -36,7 +36,7 @@ const TapBoard = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch("https://ebaybaymo-server.onrender.com/tap/top10");
+            const response = await fetch("http://localhost:8000/tap/top10");
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const json = await response.json();
             if (json.success) {

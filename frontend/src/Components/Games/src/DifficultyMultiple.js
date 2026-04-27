@@ -241,7 +241,7 @@ export default function DifficultyMultiple() {
     // ...existing code...
 
     try {
-      const response = await fetch("https://ebaybaymo-server.onrender.com/multiple/insert-multiple", {
+      const response = await fetch("http://localhost:8000/multiple/insert-multiple", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,7 +4,7 @@ module.exports = function (app) {
   app.use(
     "/heroku-proxy",
     createProxyMiddleware({
-      target: "https://ebaybaymo-api.herokuapp.com",
+      target: "http://localhost:8000",
       changeOrigin: true,
       pathRewrite: { "^/heroku-proxy": "" },
     })
@@ -13,7 +13,7 @@ module.exports = function (app) {
   app.use(
     "/auth-proxy",
     createProxyMiddleware({
-      target: "https://ebaybaymo-server-b084d082cda7.herokuapp.com",
+      target: "http://localhost:8000",
       changeOrigin: true,
       pathRewrite: { "^/auth-proxy": "" },
     })

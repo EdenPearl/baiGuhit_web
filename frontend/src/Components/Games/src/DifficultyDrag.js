@@ -241,7 +241,7 @@ export default function DifficultyDrag() {
     // ...existing code...
 
     try {
-      const response = await fetch("https://ebaybaymo-server.onrender.com/drag/insert-drag", {
+      const response = await fetch("http://localhost:8000/drag/insert-drag", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

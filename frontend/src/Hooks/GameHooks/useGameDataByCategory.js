@@ -15,7 +15,7 @@ const useGameDataByCategory = (category) => {
       setError(null);
 
       const response = await fetch(
-        `https://ebaybaymo-server.onrender.com/game/game/category/${category}`
+        `http://localhost:8000/game/game/category/${category}`
       );
 
       if (!response.ok) {

@@ -148,7 +148,7 @@ const Multiple = ({ difficulty = "Easy", startGame = false, gameMode = "Multiple
 
   // ---------------- FETCH QUESTIONS ----------------
   useEffect(() => {
-    fetch("https://ebaybaymo-server.onrender.com/game/questions/baybayin")
+    fetch("http://localhost:8000/game/questions/baybayin")
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter((q) => q.difficulty === difficulty);

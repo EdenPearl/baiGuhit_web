@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 const DEFAULT_WRITE_SUBMIT_ENDPOINTS = [
-  "https://ebaybaymo-server.onrender.com/game/write/submit",
+  "http://localhost:8000/game/write/submit",
 ];
 
 const parseStoredUserId = () => {
